@@ -215,7 +215,7 @@ export default function App() {
   }, []);
 
   // Real-time Homepage Hero customization state
-  const [heroImage, setHeroImage] = useState('https://images.unsplash.com/photo-1597983073493-88cd35cf93b0?auto=format&fit=crop&w=1600&q=80');
+  const [heroImage, setHeroImage] = useState('https://img.youtube.com/vi/HmOWSHSZNtM/maxresdefault.jpg');
   const [heroBadge, setHeroBadge] = useState('Royal Wedding Collection 2026');
   const [heroTitle, setHeroTitle] = useState('The Designer Sherwani House');
   const [heroSubtitle, setHeroSubtitle] = useState('Warangal’s premier destination for bespoke groom sherwanis, sequence kurtas, and Arabic thoobs. Opp. Madras Masjid, Mandi Bazar.');
@@ -636,6 +636,16 @@ export default function App() {
                 <div className="space-y-4 font-sans text-stone-700">
                   <span className="text-[10px] font-sans font-bold uppercase tracking-widest text-stone-400">HERITAGE & CRAFTSMANSHIP</span>
                   <h3 className="font-serif text-2xl font-semibold text-stone-900">Our Heritage Story</h3>
+                  <div className="rounded-xl overflow-hidden shadow-xs border border-stone-200 aspect-video relative group">
+                    <img 
+                      src="https://img.youtube.com/vi/HmOWSHSZNtM/maxresdefault.jpg" 
+                      alt="Nomaan Brothers Grooms Gallery Showroom, Warangal" 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                    />
+                    <div className="absolute bottom-2 left-2 bg-black/75 backdrop-blur-xs text-white text-[11px] px-2.5 py-1 rounded-md font-medium">
+                      📍 Mandi Bazar Showroom, Warangal
+                    </div>
+                  </div>
                   <p className="text-sm leading-relaxed">{STORIES_INFO.about}</p>
                   <div className="p-3 bg-stone-50 border border-stone-150 rounded-xl text-xs space-y-1">
                     <p>📍 **Showroom**: Opp. Madras Masjid, Mandi Bazar, JPN Road, Warangal</p>
@@ -992,10 +1002,10 @@ export default function App() {
                       </span>
                     )}
                     <h2 className="font-serif text-3xl md:text-5xl lg:text-6xl font-semibold leading-tight tracking-wide text-white drop-shadow-sm">
-                      {heroTitle || 'Everyday Elegance Handcrafted Detail'}
+                      {heroTitle || 'The Designer Sherwani House'}
                     </h2>
                     <p className="font-sans text-xs md:text-sm text-stone-200 tracking-wider max-w-lg leading-relaxed font-light">
-                      {heroSubtitle || 'Loved by 50,000+ women. Premium rayon kurtis, sets, and Chanderi dress materials.'}
+                      {heroSubtitle || 'Warangal’s premier destination for bespoke groom sherwanis, sequence kurtas, and Arabic thoobs. Opp. Madras Masjid, Mandi Bazar.'}
                     </p>
                     
                     <div className="flex flex-wrap gap-3 pt-3 justify-center">
@@ -1008,10 +1018,10 @@ export default function App() {
                       </button>
                       <button
                         id="hero-shop-sets"
-                        onClick={() => handleSelectCategory('bottom-sets')}
+                        onClick={() => handleSelectCategory('sherwanis')}
                         className="px-6 py-3.5 bg-transparent text-stone-100 border border-stone-300 font-sans text-xs font-bold uppercase tracking-wider rounded-lg hover:bg-white/10 hover:scale-102 transition-all focus:outline-none"
                       >
-                        Explore Bottom Sets
+                        Explore Royal Sherwanis
                       </button>
                     </div>
                   </div>
@@ -1025,10 +1035,10 @@ export default function App() {
                   <div className="flex gap-4 md:gap-8 overflow-x-auto justify-start md:justify-center py-2 px-1 scrollbar-hide">
                     {[
                       { id: 'sherwanis', name: 'Royal Sherwanis', img: 'https://images.unsplash.com/photo-1597983073493-88cd35cf93b0?auto=format&fit=crop&w=150&q=80' },
-                      { id: 'kurtas', name: 'Sequence Kurtas', img: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=150&q=80' },
-                      { id: 'thoobs', name: 'Arabic Thoobs', img: 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=150&q=80' },
-                      { id: 'indo-western', name: 'Indo-Western', img: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=150&q=80' },
-                      { id: 'accessories', name: 'Safas & Accessories', img: 'https://images.unsplash.com/photo-1597983073493-88cd35cf93b0?auto=format&fit=crop&w=150&q=80' }
+                      { id: 'kurtas', name: 'Sequence Kurtas', img: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=300&q=80' },
+                      { id: 'thoobs', name: 'Arabic Thoobs', img: 'https://images.unsplash.com/photo-1584441405886-bc91be61e56a?auto=format&fit=crop&w=300&q=80' },
+                      { id: 'indo-western', name: 'Indo-Western', img: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=300&q=80' },
+                      { id: 'accessories', name: 'Safas & Accessories', img: 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=300&q=80' }
                     ].map((cat) => (
                       <button
                         id={`home-cat-bubble-${cat.id}`}

@@ -390,7 +390,7 @@ export default function CartDrawer({
                     <div className="text-center py-16 space-y-4">
                       <ShoppingBag className="w-12 h-12 text-stone-200 mx-auto" />
                       <p className="font-serif text-stone-700 text-base">Your shopping basket is empty</p>
-                      <p className="text-xs text-stone-400">Discover handpicked, Pinterest-worthy kurtis & bottoms now.</p>
+                      <p className="text-xs text-stone-400">Discover imperial groom sherwanis, sequence kurtas & Arabic thoobs now.</p>
                       <button
                         id="cart-empty-browse-btn"
                         onClick={onClose}

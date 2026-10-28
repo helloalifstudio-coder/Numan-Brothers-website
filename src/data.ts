@@ -38,8 +38,8 @@ export const PRODUCTS: Product[] = [
     price: 14999,
     mrp: 24999,
     images: [
+      'https://img.youtube.com/vi/HmOWSHSZNtM/maxresdefault.jpg',
       'https://images.unsplash.com/photo-1597983073493-88cd35cf93b0?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=800&q=80',
       'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=800&q=80'
     ],
     category: 'sherwanis',
@@ -90,7 +90,8 @@ export const PRODUCTS: Product[] = [
     mrp: 28999,
     images: [
       'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1597983073493-88cd35cf93b0?auto=format&fit=crop&w=800&q=80'
+      'https://images.unsplash.com/photo-1597983073493-88cd35cf93b0?auto=format&fit=crop&w=800&q=80',
+      'https://content.jdmagicbox.com/v2/comp/warangal/l1/9999px870.x870.231109200012.z2l1/catalogue/nomaan-brothers-dresses-sherpura-warangal-costume-dealers-z9jc7cr190-250.jpg'
     ],
     category: 'sherwanis',
     fabric: 'Micro Velvet & Zari',
@@ -139,7 +140,7 @@ export const PRODUCTS: Product[] = [
     price: 2499,
     mrp: 4499,
     images: [
-      'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80',
       'https://images.unsplash.com/photo-1608748010899-18f300247112?auto=format&fit=crop&w=800&q=80'
     ],
     category: 'kurtas',
@@ -191,8 +192,8 @@ export const PRODUCTS: Product[] = [
     price: 1799,
     mrp: 3299,
     images: [
-      'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=800&q=80'
+      'https://images.unsplash.com/photo-1608748010899-18f300247112?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1597983073493-88cd35cf93b0?auto=format&fit=crop&w=800&q=80'
     ],
     category: 'kurtas',
     fabric: 'Pure Cotton Chikan',
@@ -234,8 +235,8 @@ export const PRODUCTS: Product[] = [
     price: 2199,
     mrp: 3999,
     images: [
-      'https://images.unsplash.com/photo-1597983073493-88cd35cf93b0?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=800&q=80'
+      'https://images.unsplash.com/photo-1584441405886-bc91be61e56a?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1564769625905-50e93615e769?auto=format&fit=crop&w=800&q=80'
     ],
     category: 'thoobs',
     fabric: 'Saudi Twill Matte Spun',
@@ -278,8 +279,8 @@ export const PRODUCTS: Product[] = [
     price: 2499,
     mrp: 4299,
     images: [
-      'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1597983073493-88cd35cf93b0?auto=format&fit=crop&w=800&q=80'
+      'https://images.unsplash.com/photo-1564769625905-50e93615e769?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1584441405886-bc91be61e56a?auto=format&fit=crop&w=800&q=80'
     ],
     category: 'thoobs',
     fabric: 'Luxury Japanese Poly-Viscose',
@@ -321,7 +322,7 @@ export const PRODUCTS: Product[] = [
     mrp: 13999,
     images: [
       'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=800&q=80'
+      'https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?auto=format&fit=crop&w=800&q=80'
     ],
     category: 'indo-western',
     fabric: 'Italian Suiting Fabric',
@@ -369,8 +370,8 @@ export const PRODUCTS: Product[] = [
     price: 5499,
     mrp: 9999,
     images: [
-      'https://images.unsplash.com/photo-1597983073493-88cd35cf93b0?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=800&q=80'
+      'https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1597983073493-88cd35cf93b0?auto=format&fit=crop&w=800&q=80'
     ],
     category: 'indo-western',
     fabric: 'Jacquard Brocade Silk',
@@ -417,8 +418,8 @@ export const PRODUCTS: Product[] = [
     price: 1999,
     mrp: 3499,
     images: [
-      'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1597983073493-88cd35cf93b0?auto=format&fit=crop&w=800&q=80'
+      'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=800&q=80'
     ],
     category: 'accessories',
     fabric: 'Chanderi Silk & Kundan',
@@ -457,8 +458,8 @@ export const PRODUCTS: Product[] = [
     price: 1299,
     mrp: 2199,
     images: [
-      'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=800&q=80'
+      'https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=800&q=80'
     ],
     category: 'accessories',
     fabric: 'Genuine Leather & Zardozi',
@@ -499,8 +500,8 @@ export const PRODUCTS: Product[] = [
     price: 3499,
     mrp: 5999,
     images: [
-      'https://images.unsplash.com/photo-1597983073493-88cd35cf93b0?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=800&q=80'
+      'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1597983073493-88cd35cf93b0?auto=format&fit=crop&w=800&q=80'
     ],
     category: 'unstitched',
     fabric: 'Jacquard Brocade Silk',

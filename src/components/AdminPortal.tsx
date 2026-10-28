@@ -74,10 +74,10 @@ export default function AdminPortal({
   const [activeTab, setActiveTab] = useState<'metrics' | 'products' | 'orders' | 'returns' | 'customization'>('metrics');
   
   // Homepage Hero customization state
-  const [heroImage, setHeroImage] = useState('https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=1600&q=80');
-  const [heroBadge, setHeroBadge] = useState('Festive Collection 2026');
-  const [heroTitle, setHeroTitle] = useState('Everyday Elegance Handcrafted Detail');
-  const [heroSubtitle, setHeroSubtitle] = useState('Loved by 50,000+ women. Premium rayon kurtis, sets, and Chanderi dress materials.');
+  const [heroImage, setHeroImage] = useState('https://img.youtube.com/vi/HmOWSHSZNtM/maxresdefault.jpg');
+  const [heroBadge, setHeroBadge] = useState('Royal Wedding Collection 2026');
+  const [heroTitle, setHeroTitle] = useState('The Designer Sherwani House');
+  const [heroSubtitle, setHeroSubtitle] = useState('Warangal’s premier destination for bespoke groom sherwanis, sequence kurtas, and Arabic thoobs. Opp. Madras Masjid, Mandi Bazar.');
   const [isSavingHero, setIsSavingHero] = useState(false);
 
   // Return request states
@@ -117,16 +117,16 @@ export default function AdminPortal({
   const [formTitle, setFormTitle] = useState('');
   const [formPrice, setFormPrice] = useState(0);
   const [formMrp, setFormMrp] = useState(0);
-  const [formCategory, setFormCategory] = useState('kurtis');
-  const [formFabric, setFormFabric] = useState('Premium Rayon');
+  const [formCategory, setFormCategory] = useState('sherwanis');
+  const [formFabric, setFormFabric] = useState('Raw Silk & Zardozi');
   const [formLength, setFormLength] = useState('44 inches');
   const [formDescription, setFormDescription] = useState('');
-  const [formSizes, setFormSizes] = useState<string[]>(['M', 'L', 'XL']);
+  const [formSizes, setFormSizes] = useState<string[]>(['38 (M)', '40 (L)', '42 (XL)', '44 (XXL)']);
   const [formType, setFormType] = useState<'Set' | 'Top Only' | 'Unstitched'>('Set');
   const [formBadges, setFormBadges] = useState<string[]>(['New']);
-  const [formImages, setFormImages] = useState<string[]>(['https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=600&q=80']);
+  const [formImages, setFormImages] = useState<string[]>(['https://images.unsplash.com/photo-1597983073493-88cd35cf93b0?auto=format&fit=crop&w=800&q=80']);
   const [formColors, setFormColors] = useState<{ name: string; hex: string }[]>([
-    { name: 'Indigo Blue', hex: '#1e3a8a' }
+    { name: 'Royal Ivory Gold', hex: '#FFF8DC' }
   ]);
 
 
@@ -203,21 +203,21 @@ export default function AdminPortal({
 
   // Open Form for Adding
   const handleOpenAddForm = () => {
-    const randomSKU = 'SC-' + Math.floor(100000 + Math.random() * 900000);
+    const randomSKU = 'NB-' + Math.floor(100000 + Math.random() * 900000);
     setEditingProduct(null);
     setFormId(randomSKU);
     setFormTitle('');
-    setFormPrice(1299);
-    setFormMrp(1999);
-    setFormCategory('kurtis');
-    setFormFabric('Rayon Liva Certified');
+    setFormPrice(4999);
+    setFormMrp(8999);
+    setFormCategory('sherwanis');
+    setFormFabric('Raw Silk & Zardozi');
     setFormLength('44 inches');
-    setFormDescription('Crafted in beautiful fabrics, designed for regular wear and small festivities.');
-    setFormSizes(['M', 'L', 'XL']);
+    setFormDescription('Handcrafted designer groom wear from Nomaan Brothers Warangal atelier.');
+    setFormSizes(['38 (M)', '40 (L)', '42 (XL)', '44 (XXL)']);
     setFormType('Set');
     setFormBadges(['New']);
-    setFormImages(['https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=600&q=80']);
-    setFormColors([{ name: 'Navy Blue', hex: '#1e3a8a' }]);
+    setFormImages(['https://images.unsplash.com/photo-1597983073493-88cd35cf93b0?auto=format&fit=crop&w=800&q=80']);
+    setFormColors([{ name: 'Royal Ivory Gold', hex: '#FFF8DC' }]);
     setIsFormOpen(true);
   };
 
@@ -959,7 +959,7 @@ export default function AdminPortal({
                             <textarea
                               value={heroSubtitle}
                               onChange={(e) => setHeroSubtitle(e.target.value)}
-                              placeholder="e.g. Premium rayon kurtis, sets, and unstitched fabrics loved by women."
+                              placeholder="e.g. Warangal's premier destination for bespoke groom sherwanis, sequence kurtas, and Arabic thoobs."
                               rows={3}
                               className="w-full bg-stone-50 border border-stone-200 rounded-lg p-2.5 text-xs focus:outline-none focus:border-stone-800 resize-none font-sans"
                             />
@@ -982,10 +982,10 @@ export default function AdminPortal({
                           <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 block font-sans">Or Select Premium Suggested Image Preset:</span>
                           <div className="grid grid-cols-2 gap-2 font-sans">
                             {[
-                              { label: 'Classic Kurti Indigo', url: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=1600&q=80' },
-                              { label: 'Elegant Crimson Kurti', url: 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=1600&q=80' },
-                              { label: 'Printed Cotton Fusion', url: 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=1600&q=80' },
-                              { label: 'Silk Handloom Weaves', url: 'https://images.unsplash.com/photo-1561414927-6d86591d0c4f?auto=format&fit=crop&w=1600&q=80' }
+                              { label: 'Nomaan Showroom Grand Opening', url: 'https://img.youtube.com/vi/HmOWSHSZNtM/maxresdefault.jpg' },
+                              { label: 'Royal Zardozi Groom Sherwani', url: 'https://images.unsplash.com/photo-1597983073493-88cd35cf93b0?auto=format&fit=crop&w=1600&q=80' },
+                              { label: 'Velvet Heritage Embroidered Set', url: 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=1600&q=80' },
+                              { label: 'Haldi Sequence Mirror Kurta', url: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=1600&q=80' }
                             ].map((preset, idx) => (
                               <button
                                 key={idx}
@@ -1166,10 +1166,11 @@ export default function AdminPortal({
                       onChange={(e) => setFormCategory(e.target.value)}
                       className="w-full bg-stone-50 border border-stone-200 rounded-lg p-2.5 text-xs focus:outline-none focus:border-stone-800 font-sans"
                     >
-                      <option value="kurtis">Kurtis & Sets</option>
-                      <option value="tops">Fusion Tops</option>
-                      <option value="maxi-dresses">Maxi Dresses</option>
-                      <option value="bottom-sets">Plazzo Sets</option>
+                      <option value="sherwanis">Royal Sherwanis</option>
+                      <option value="kurtas">Designer Kurtas</option>
+                      <option value="thoobs">Arabic Thoobs</option>
+                      <option value="indo-western">Indo-Western Suits</option>
+                      <option value="accessories">Safas & Accessories</option>
                       <option value="unstitched">Unstitched Weaves</option>
                     </select>
                   </div>
@@ -1200,7 +1201,7 @@ export default function AdminPortal({
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-stone-500">Kurti Length</label>
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-stone-500">Garment Length</label>
                     <input
                       type="text"
                       value={formLength}

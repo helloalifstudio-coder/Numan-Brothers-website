@@ -539,7 +539,7 @@ export default function ReturnsPortal({
                       const itemDetails = selectedItems[itemId];
                       const productTitle = item.product?.title || item.title || 'Product Item';
                       const productPrice = item.product?.price || item.price || 0;
-                      const productImg = item.product?.images?.[0] || 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=150&q=80';
+                      const productImg = item.product?.images?.[0] || 'https://images.unsplash.com/photo-1597983073493-88cd35cf93b0?auto=format&fit=crop&w=150&q=80';
 
                       return (
                         <div 
