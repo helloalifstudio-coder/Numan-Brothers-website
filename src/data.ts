@@ -39,8 +39,8 @@ export const PRODUCTS: Product[] = [
     mrp: 24999,
     images: [
       'https://img.youtube.com/vi/HmOWSHSZNtM/maxresdefault.jpg',
-      'https://images.unsplash.com/photo-1597983073493-88cd35cf93b0?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=800&q=80'
+      'https://images.unsplash.com/photo-1755931450169-513db8303ccf?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1597983073493-88cd35cf93b0?auto=format&fit=crop&w=800&q=80'
     ],
     category: 'sherwanis',
     fabric: 'Raw Silk & Zardozi',
@@ -89,7 +89,7 @@ export const PRODUCTS: Product[] = [
     price: 18499,
     mrp: 28999,
     images: [
-      'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1762709413447-15781dbc08f7?auto=format&fit=crop&w=800&q=80',
       'https://images.unsplash.com/photo-1597983073493-88cd35cf93b0?auto=format&fit=crop&w=800&q=80',
       'https://content.jdmagicbox.com/v2/comp/warangal/l1/9999px870.x870.231109200012.z2l1/catalogue/nomaan-brothers-dresses-sherpura-warangal-costume-dealers-z9jc7cr190-250.jpg'
     ],

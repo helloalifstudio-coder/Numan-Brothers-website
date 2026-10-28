@@ -113,7 +113,9 @@ export const subscribeProducts = (callback: (products: any[]) => void) => {
     (snapshot) => {
       const products: any[] = [];
       snapshot.forEach((doc) => {
-        products.push({ id: doc.id, ...doc.data() });
+        if (!doc.id.toLowerCase().startsWith('sc-')) {
+          products.push({ id: doc.id, ...doc.data() });
+        }
       });
       callback(products);
     },
@@ -184,7 +186,19 @@ export const seedProducts = async (defaultProducts: any[]) => {
   try {
     const colRef = collection(db, 'products');
     const snapshot = await getDocs(colRef);
-    if (snapshot.empty) {
+    for (const d of snapshot.docs) {
+      if (d.id.toLowerCase().startsWith('sc-')) {
+        await deleteDoc(doc(db, 'products', d.id));
+      }
+    }
+    const existingIds = new Set(snapshot.docs.map(d => d.id));
+    for (const prod of defaultProducts) {
+      if (!existingIds.has(prod.id)) {
+        const docRef = doc(db, 'products', prod.id);
+        await setDoc(docRef, { ...prod, adminPin: '990859' });
+      }
+    }
+    if (false) {
       console.log('Seeding products collection in Firestore...');
       for (const prod of defaultProducts) {
         const docRef = doc(db, 'products', prod.id);
@@ -283,7 +297,7 @@ export const subscribeHeroSettings = (callback: (settings: any) => void) => {
     docRef,
     (snapshot) => {
       if (snapshot.exists()) {
-        callback(snapshot.data());
+        const data = snapshot.data(); if (data?.heroSubtitle && data.heroSubtitle.toLowerCase().includes('women')) { callback(null); } else { callback(data); }
       } else {
         callback(null);
       }
