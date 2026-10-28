@@ -309,7 +309,7 @@ export default function PDP({
             <div className="flex flex-col items-center p-3 bg-stone-50 rounded-xl border border-stone-200/50">
               <Sparkles className="w-5 h-5 text-stone-700 mb-1" />
               <span className="text-[10px] font-bold uppercase tracking-wider text-stone-800">100% Premium</span>
-              <p className="text-[10px] text-stone-400 mt-0.5">Heavy Rayon / Silk</p>
+              <p className="text-[10px] text-stone-400 mt-0.5">Raw Silk & Zardozi</p>
             </div>
           </div>
         </div>
@@ -317,7 +317,7 @@ export default function PDP({
         {/* Right Column: Order Selection & Details (Span 5) */}
         <div className="lg:col-span-5 space-y-6">
           <div className="space-y-2">
-            <p className="text-xs font-bold text-stone-400 uppercase tracking-widest">Sumera Collections</p>
+            <p className="text-xs font-bold text-stone-400 uppercase tracking-widest">Nomaan Brothers — The Designer Sherwani House</p>
             <h1 className="font-serif text-2xl md:text-3xl font-semibold text-stone-900 leading-tight">
               {product.title}
             </h1>
@@ -499,7 +499,7 @@ export default function PDP({
                   </div>
 
                   <p className="text-[10px] text-stone-400 italic">
-                    *Tip: Choose 1 size larger than your exact body bust measurement for regular comfort fit.
+                    *Tip: For sherwanis and kurtas, allow 2-3 inches ease over exact body chest measurement for royal drape and comfort.
                   </p>
                 </div>
               </motion.div>
@@ -560,7 +560,7 @@ export default function PDP({
               onClick={() => {
                 const sizeText = selectedSize || '(Size not selected yet)';
                 const colorText = selectedColor || '(Color not selected yet)';
-                const message = `Hello Sumera Collections!\n\nI am interested in buying / inquiring about this product:\n\n*Product:* ${product.title}\n*Price:* ₹${product.price}\n*Color:* ${colorText}\n*Size:* ${sizeText}\n*Quantity:* ${quantity}\n\n*Product Link:* ${window.location.origin}/?product=${product.id}\n\nPlease let me know if it is available! Thank you.`;
+                const message = `Hello Nomaan Brothers (The Designer Sherwani House, Warangal)!\n\nI am interested in buying / inquiring about this designer piece:\n\n*Product:* ${product.title}\n*Price:* ₹${product.price}\n*Color:* ${colorText}\n*Size:* ${sizeText}\n*Quantity:* ${quantity}\n\n*Product Link:* ${window.location.origin}/?product=${product.id}\n\nPlease let me know if it is available or if I can visit your Mandi Bazar showroom for trial! Thank you.`;
                 const whatsappUrl = `https://wa.me/919908597337?text=${encodeURIComponent(message)}`;
                 window.open(whatsappUrl, '_blank');
                 if (onShowToast) {
@@ -768,7 +768,7 @@ export default function PDP({
             className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-stone-200 p-3 md:hidden flex items-center justify-between gap-3 shadow-lg"
           >
             <div className="flex-1 min-w-0">
-              <p className="text-[10px] uppercase font-bold text-stone-400 tracking-wider truncate">Sumera Collections</p>
+              <p className="text-[10px] uppercase font-bold text-stone-400 tracking-wider truncate">Nomaan Brothers</p>
               <div className="flex items-baseline gap-1.5">
                 <span className="text-sm font-bold font-sans text-stone-950">₹{product.price}</span>
                 {product.mrp > product.price && (

@@ -7,99 +7,475 @@ import { Product } from './types';
 
 export const CATEGORIES = [
   { id: 'all', name: 'All Collections' },
-  { id: 'new-arrivals', name: 'New Arrivals' },
-  { id: 'kurtis', name: 'Kurtis & Sets' },
-  { id: 'tops', name: 'Printed & Embroidered Tops' },
-  { id: 'maxi-dresses', name: 'Maxi Dresses' },
-  { id: 'bottom-sets', name: 'Plazzo & Bottom Sets' },
-  { id: 'unstitched', name: 'Unstitched Dress Materials' },
-  { id: 'best-sellers', name: 'Best Sellers' },
-  { id: 'sale', name: 'Clearance Sale' }
+  { id: 'new-arrivals', name: 'New Arrivals 2026' },
+  { id: 'sherwanis', name: 'Royal Groom Sherwanis' },
+  { id: 'kurtas', name: 'Sequence & Festive Kurtas' },
+  { id: 'thoobs', name: 'Arabic Thoobs & Jubbas' },
+  { id: 'indo-western', name: 'Indo-Western & Jodhpuris' },
+  { id: 'accessories', name: 'Safas, Malas & Mojaris' },
+  { id: 'unstitched', name: 'Sherwani Fabrics' },
+  { id: 'best-sellers', name: 'Wedding Best Sellers' },
+  { id: 'sale', name: 'Special Festive Offers' }
 ];
 
-export const FABRICS = ['Rayon', 'Georgette', 'Cotton', 'Printed Silk', 'Chanderi/Silk', 'Organdy Cotton'];
-export const SIZES = ['M', 'L', 'XL', 'XXL'];
-export const OCCASIONS = ['Daily Wear', 'Office Wear', 'Vacation/Casual', 'Festive'];
+export const FABRICS = [
+  'Raw Silk & Zardozi',
+  'Micro Velvet & Zari',
+  'Georgette Sequence',
+  'Pure Cotton Chikan',
+  'Saudi Twill Matte Spun',
+  'Italian Suiting Fabric',
+  'Jacquard Brocade Silk'
+];
+
+export const SIZES = ['38 (M)', '40 (L)', '42 (XL)', '44 (XXL)'];
+export const OCCASIONS = ['Wedding / Groom', 'Reception & Sangeet', 'Festive / Eid', 'Jumma & Casual'];
 
 export const PRODUCTS: Product[] = [
   {
-    id: 'sc-001',
-    title: 'Embroidery Work Short Top with Plazzo Set',
-    price: 1299,
-    mrp: 2499,
+    id: 'nb-001',
+    title: 'Royal Zardozi Hand-Embroidered Groom Sherwani Set',
+    price: 14999,
+    mrp: 24999,
     images: [
-      'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1608748010899-18f300247112?auto=format&fit=crop&w=800&q=80'
+      'https://images.unsplash.com/photo-1597983073493-88cd35cf93b0?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=800&q=80'
     ],
-    category: 'bottom-sets',
-    fabric: 'Rayon & Cotton',
-    length: 'Top: 32", Plazzo: 38"',
-    sizes: ['M', 'L', 'XL', 'XXL'],
-    description: 'Elevate your everyday wardrobe with our best-selling Short Top & Plazzo Set. Crafted from heavy rayon with intricate neckline embroidery, paired with highly breathable flex cotton plazzos featuring a convenient one-side pocket.',
+    category: 'sherwanis',
+    fabric: 'Raw Silk & Zardozi',
+    length: 'Top: 43", Churidar: 42"',
+    sizes: ['38 (M)', '40 (L)', '42 (XL)', '44 (XXL)'],
+    description: 'Nomaan Brothers signature groom masterpiece. Handcrafted in pure raw silk with intricate gold dabka, cutdana, and zardozi embroidery across the royal mandarin collar, cuffs, and chest placket. Accompanied by premium matching churidar and brocade stole.',
     specs: [
-      { label: 'Top Fabric', value: 'Heavy Rayon with Heavy Embroidery Work' },
-      { label: 'Plazzo Fabric', value: 'Premium Flex Cotton with One Side Pocket' },
-      { label: 'Length', value: 'Top 32" | Plazzo 38"' },
-      { label: 'Work', value: 'Intricate Resham Thread embroidery' },
-      { label: 'Style', value: 'Short top with straight-leg comfort plazzo' },
-      { label: 'Occasion', value: 'Daily Wear, Festive, Office Wear' }
+      { label: 'Sherwani Fabric', value: 'Pure Raw Silk with Hand Zardozi Embroidery' },
+      { label: 'Bottom Fabric', value: 'Stretch Chanderi Silk Churidar' },
+      { label: 'Set Inclusions', value: 'Designer Sherwani, Chudidar Bottom, Royal Stole' },
+      { label: 'Embroidery', value: 'Handmade Zardozi, Cutdana, Resham & Zari Work' },
+      { label: 'Origin', value: 'Nomaan Brothers Exclusive Atelier, Warangal' },
+      { label: 'Occasion', value: 'Wedding Day, Nikah, Grand Reception' }
     ],
-    badges: ['Set', 'Best Seller', '2 Colours'],
+    badges: ['Set', 'Best Seller', 'Groom Special'],
     colors: [
-      { name: 'Mustard Yellow', hex: '#E1AD01' },
-      { name: 'Coral Peach', hex: '#F88379' }
+      { name: 'Royal Ivory Gold', hex: '#FFF8DC' },
+      { name: 'Imperial Maroon', hex: '#800000' }
     ],
-    rating: 4.8,
-    reviewsCount: 142,
+    rating: 5.0,
+    reviewsCount: 168,
     type: 'Set',
     hasBottom: true,
     sizeChart: {
       top: [
-        { size: 'M (38)', chestOrWaist: '38"', length: '32"', extra: '15" Shoulder' },
-        { size: 'L (40)', chestOrWaist: '40"', length: '32"', extra: '15.5" Shoulder' },
-        { size: 'XL (42)', chestOrWaist: '42"', length: '32"', extra: '16" Shoulder' },
-        { size: 'XXL (44)', chestOrWaist: '44"', length: '32"', extra: '16.5" Shoulder' }
+        { size: '38 (M)', chestOrWaist: '40" Chest', length: '42"', extra: '17.5" Shoulder' },
+        { size: '40 (L)', chestOrWaist: '42" Chest', length: '43"', extra: '18" Shoulder' },
+        { size: '42 (XL)', chestOrWaist: '44" Chest', length: '44"', extra: '18.5" Shoulder' },
+        { size: '44 (XXL)', chestOrWaist: '46" Chest', length: '44"', extra: '19" Shoulder' }
       ],
       bottom: [
-        { size: 'M (38)', chestOrWaist: '28" - 34" (Elastic)', length: '38"', extra: '24" Thigh' },
-        { size: 'L (40)', chestOrWaist: '30" - 36" (Elastic)', length: '38"', extra: '25" Thigh' },
-        { size: 'XL (42)', chestOrWaist: '32" - 38" (Elastic)', length: '38"', extra: '26" Thigh' },
-        { size: 'XXL (44)', chestOrWaist: '34" - 40" (Elastic)', length: '38"', extra: '27" Thigh' }
+        { size: '38 (M)', chestOrWaist: '32" - 36" (Elastic/Drawstring)', length: '42"', extra: 'Comfort Knee Stretch' },
+        { size: '40 (L)', chestOrWaist: '34" - 38" (Elastic/Drawstring)', length: '42"', extra: 'Comfort Knee Stretch' },
+        { size: '42 (XL)', chestOrWaist: '36" - 40" (Elastic/Drawstring)', length: '43"', extra: 'Comfort Knee Stretch' },
+        { size: '44 (XXL)', chestOrWaist: '38" - 42" (Elastic/Drawstring)', length: '43"', extra: 'Comfort Knee Stretch' }
       ]
     },
     reviews: [
-      { id: 'r1', name: 'Priya Sharma', rating: 5, date: '2026-06-15', comment: 'The embroidery is so neat and the rayon top is super soft! Plazzo has pockets too which is a massive win.', verified: true },
-      { id: 'r2', name: 'Meenakshi Iyer', rating: 4, date: '2026-06-10', comment: 'Loved the fit, very accurate sizing. The mustard yellow color is exactly as shown in the picture.', verified: true }
+      { id: 'r1', name: 'Mohammed Rizwan (Warangal)', rating: 5, date: '2026-08-14', comment: 'Bought this for my Nikah at Mandi Bazar showroom. The zardozi work is majestic and fitting was completed in just 1 hour. Highly recommended for every groom!', verified: true },
+      { id: 'r2', name: 'Syed Farhan (Hanamkonda)', rating: 5, date: '2026-07-28', comment: 'Pure royal look! Everyone in my wedding reception was complimenting the fabric shine and neck work. Nomaan Brothers is truly the best in Warangal.', verified: true }
     ]
   },
   {
-    id: 'sc-002',
-    title: 'Full Flair Long Printed Maxi with Fancy Sleeves',
-    price: 1599,
-    mrp: 2999,
+    id: 'nb-002',
+    title: 'Regal Velvet Heritage Embroidered Sherwani Set',
+    price: 18499,
+    mrp: 28999,
     images: [
-      'https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1561414927-6d86591d0c4f?auto=format&fit=crop&w=800&q=80'
+      'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1597983073493-88cd35cf93b0?auto=format&fit=crop&w=800&q=80'
     ],
-    category: 'maxi-dresses',
-    fabric: 'Georgette',
-    length: '48"',
-    sizes: ['M', 'L', 'XL', 'XXL'],
-    description: 'Perfect for your upcoming vacation or festive outings, this full-flair long maxi dress features premium floral Georgette print with fancy sleeves and a comfortable inner crepe lining.',
+    category: 'sherwanis',
+    fabric: 'Micro Velvet & Zari',
+    length: 'Top: 44", Churidar: 42"',
+    sizes: ['38 (M)', '40 (L)', '42 (XL)', '44 (XXL)'],
+    description: 'A stately velvet sherwani designed for high-profile winter weddings and royal celebrations. Tailored from imported micro-velvet, embellished with golden floral zardozi motifs and antique metal buttons.',
     specs: [
-      { label: 'Fabric', value: 'Heavy Georgette Print with Inner Crepe Lining' },
-      { label: 'Length', value: '48 inches' },
-      { label: 'Sleeve Style', value: 'Fancy flared style' },
-      { label: 'Neckline', value: 'Elegant Round Neck' },
-      { label: 'Flare', value: '3.5 meters full circular sweep' },
-      { label: 'Occasion', value: 'Vacation/Casual, Daily Wear' }
+      { label: 'Sherwani Fabric', value: 'High GSM Micro Velvet with Inner Satin Lining' },
+      { label: 'Bottom Fabric', value: 'Raw Silk Cream Churidar' },
+      { label: 'Work', value: 'Antique Gold Zari & Zardozi Threadwork' },
+      { label: 'Length', value: 'Top 44" | Chudidar 42"' },
+      { label: 'Buttons', value: 'Handcrafted Antique Royal Brass Buttons' },
+      { label: 'Occasion', value: 'Wedding, Baraat, Royal Reception' }
     ],
-    badges: ['Top Only', 'New', '2 Colours'],
+    badges: ['Set', 'Premium', 'Royal Velvet'],
     colors: [
-      { name: 'Indigo Blue', hex: '#00416A' },
-      { name: 'Ruby Red', hex: '#9B111E' }
+      { name: 'Royal Emerald Velvet', hex: '#004B49' },
+      { name: 'Midnight Navy Velvet', hex: '#0A1172' },
+      { name: 'Deep Wine Velvet', hex: '#58111A' }
+    ],
+    rating: 4.9,
+    reviewsCount: 94,
+    type: 'Set',
+    hasBottom: true,
+    sizeChart: {
+      top: [
+        { size: '38 (M)', chestOrWaist: '40" Chest', length: '44"', extra: '17.5" Shoulder' },
+        { size: '40 (L)', chestOrWaist: '42" Chest', length: '44"', extra: '18" Shoulder' },
+        { size: '42 (XL)', chestOrWaist: '44" Chest', length: '45"', extra: '18.5" Shoulder' },
+        { size: '44 (XXL)', chestOrWaist: '46" Chest', length: '45"', extra: '19" Shoulder' }
+      ],
+      bottom: [
+        { size: '38 (M)', chestOrWaist: '32" - 36" (Elastic/Drawstring)', length: '42"', extra: 'Comfort Knee Stretch' },
+        { size: '40 (L)', chestOrWaist: '34" - 38" (Elastic/Drawstring)', length: '42"', extra: 'Comfort Knee Stretch' },
+        { size: '42 (XL)', chestOrWaist: '36" - 40" (Elastic/Drawstring)', length: '43"', extra: 'Comfort Knee Stretch' },
+        { size: '44 (XXL)', chestOrWaist: '38" - 42" (Elastic/Drawstring)', length: '43"', extra: 'Comfort Knee Stretch' }
+      ]
+    },
+    reviews: [
+      { id: 'r3', name: 'Abdul Majeed', rating: 5, date: '2026-06-19', comment: 'The velvet quality is ultra heavy and luxurious. Got the emerald green shade, looks 10x better in person than photos.', verified: true }
+    ]
+  },
+  {
+    id: 'nb-003',
+    title: 'Designer Sequence Mirror-Work Festive Kurta Pajama Set',
+    price: 2499,
+    mrp: 4499,
+    images: [
+      'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1608748010899-18f300247112?auto=format&fit=crop&w=800&q=80'
+    ],
+    category: 'kurtas',
+    fabric: 'Georgette Sequence',
+    length: 'Kurta: 40", Pajama: 40"',
+    sizes: ['38 (M)', '40 (L)', '42 (XL)', '44 (XXL)'],
+    description: 'The viral Sangeet and Haldi kurta of 2026! Features thousands of micro-sequence embroidery stitches that catch the stage lighting gracefully, paired with comfortable cotton silk pajamas.',
+    specs: [
+      { label: 'Kurta Fabric', value: 'Georgette with Heavy Micro-Sequence & Mirror Work' },
+      { label: 'Inner Lining', value: 'Soft Breathable Malmal Cotton' },
+      { label: 'Pajama', value: 'Pure Cotton Silk Straight Fit Pajama' },
+      { label: 'Collar Style', value: 'Embroidered Mandarin Collar' },
+      { label: 'Occasion', value: 'Sangeet, Haldi, Eid, Engagement' }
+    ],
+    badges: ['Set', 'Trending', '5 Colours'],
+    colors: [
+      { name: 'Mustard Gold (Haldi)', hex: '#E1AD01' },
+      { name: 'Sky Ice Blue', hex: '#87CEEB' },
+      { name: 'Powder Rose Pink', hex: '#FFB6C1' },
+      { name: 'Olive Sage', hex: '#808000' },
+      { name: 'Jet Black Sparkle', hex: '#1C1C1C' }
+    ],
+    rating: 4.9,
+    reviewsCount: 312,
+    type: 'Set',
+    hasBottom: true,
+    sizeChart: {
+      top: [
+        { size: '38 (M)', chestOrWaist: '40" Chest', length: '40"', extra: '17.5" Shoulder' },
+        { size: '40 (L)', chestOrWaist: '42" Chest', length: '40"', extra: '18" Shoulder' },
+        { size: '42 (XL)', chestOrWaist: '44" Chest', length: '41"', extra: '18.5" Shoulder' },
+        { size: '44 (XXL)', chestOrWaist: '46" Chest', length: '41"', extra: '19" Shoulder' }
+      ],
+      bottom: [
+        { size: '38 (M)', chestOrWaist: '30" - 36" (Elastic Waist)', length: '40"', extra: 'Straight Leg' },
+        { size: '40 (L)', chestOrWaist: '32" - 38" (Elastic Waist)', length: '40"', extra: 'Straight Leg' },
+        { size: '42 (XL)', chestOrWaist: '34" - 40" (Elastic Waist)', length: '41"', extra: 'Straight Leg' },
+        { size: '44 (XXL)', chestOrWaist: '36" - 42" (Elastic Waist)', length: '41"', extra: 'Straight Leg' }
+      ]
+    },
+    reviews: [
+      { id: 'r4', name: 'Imran Pasha', rating: 5, date: '2026-07-09', comment: 'Wore the mustard yellow one for my brother’s Haldi function. Super comfortable inside cotton lining, does not poke the skin at all!', verified: true },
+      { id: 'r5', name: 'Zeeshan Ali', rating: 5, date: '2026-06-30', comment: 'Quality is unmatched at ₹2,499. The sequence shines so well in night events. Delivery was lightning fast.', verified: true }
+    ]
+  },
+  {
+    id: 'nb-004',
+    title: 'Pure Lucknowi Chikan Threadwork Royal Kurta',
+    price: 1799,
+    mrp: 3299,
+    images: [
+      'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=800&q=80'
+    ],
+    category: 'kurtas',
+    fabric: 'Pure Cotton Chikan',
+    length: '41"',
+    sizes: ['38 (M)', '40 (L)', '42 (XL)', '44 (XXL)'],
+    description: 'An elegant hand-embroidered Lucknowi Chikan kurta tailored from pure 60s count breathable cotton. Featuring classic Bakhiya and Phanda needle stitches with pearl buttons.',
+    specs: [
+      { label: 'Fabric', value: '100% Pure Superfine Cotton' },
+      { label: 'Embroidery', value: 'Authentic Lucknowi Chikan Threadwork' },
+      { label: 'Length', value: '41 inches' },
+      { label: 'Buttons', value: 'Mother-of-Pearl Hand Stitched Buttons' },
+      { label: 'Occasion', value: 'Festive, Jumma Prayers, Family Get-togethers' }
+    ],
+    badges: ['Top Only', 'Handcrafted', '3 Colours'],
+    colors: [
+      { name: 'Pristine White', hex: '#FFFFFF' },
+      { name: 'Soft Mint Green', hex: '#98FF98' },
+      { name: 'Peach Cream', hex: '#FFE5B4' }
+    ],
+    rating: 4.8,
+    reviewsCount: 145,
+    type: 'Top Only',
+    hasBottom: false,
+    sizeChart: {
+      top: [
+        { size: '38 (M)', chestOrWaist: '40" Chest', length: '41"', extra: '17.5" Shoulder' },
+        { size: '40 (L)', chestOrWaist: '42" Chest', length: '41"', extra: '18" Shoulder' },
+        { size: '42 (XL)', chestOrWaist: '44" Chest', length: '42"', extra: '18.5" Shoulder' },
+        { size: '44 (XXL)', chestOrWaist: '46" Chest', length: '42"', extra: '19" Shoulder' }
+      ]
+    },
+    reviews: [
+      { id: 'r6', name: 'Dr. Tariq Anwar', rating: 5, date: '2026-07-02', comment: 'Pure cotton and very soft. Ideal for Warangal summers and Eid prayer. Stitching quality is 10/10.', verified: true }
+    ]
+  },
+  {
+    id: 'nb-005',
+    title: 'Emirati Royal Cut Arabic Thoob / Jubba',
+    price: 2199,
+    mrp: 3999,
+    images: [
+      'https://images.unsplash.com/photo-1597983073493-88cd35cf93b0?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=800&q=80'
+    ],
+    category: 'thoobs',
+    fabric: 'Saudi Twill Matte Spun',
+    length: '56", 58", 60"',
+    sizes: ['38 (M)', '40 (L)', '42 (XL)', '44 (XXL)'],
+    description: 'Imported Gulf-standard Arabic Thoob (Jubba) tailored in authentic Emirati silhouette. Crafted from wrinkle-resistant Saudi twill fabric with collarless V-neck, detachable royal tarboosh tassel, and dual concealed side pockets.',
+    specs: [
+      { label: 'Fabric Quality', value: 'High-Density Saudi Twill Matte Poly-Cotton' },
+      { label: 'Cut & Style', value: 'Traditional UAE Emirati Cut with Flowing Flare' },
+      { label: 'Pockets', value: '2 Deep Side Pockets + 1 Internal Mobile Phone Pocket' },
+      { label: 'Tassel', value: 'Removable Handcrafted Tarboosh Tassel' },
+      { label: 'Occasion', value: 'Eid, Jumma, Nikah, Umrah & Daily Modest Elegance' }
+    ],
+    badges: ['Top Only', 'Gulf Import', 'Wrinkle-Free'],
+    colors: [
+      { name: 'Saudi Pure White', hex: '#FAFAFA' },
+      { name: 'Desert Camel Khaki', hex: '#C19A6B' },
+      { name: 'Onyx Black', hex: '#1C1C1C' },
+      { name: 'Steel Slate Grey', hex: '#708090' }
+    ],
+    rating: 5.0,
+    reviewsCount: 228,
+    type: 'Top Only',
+    hasBottom: false,
+    sizeChart: {
+      top: [
+        { size: '38 (M)', chestOrWaist: '40" Chest', length: '56"', extra: 'Height 5ft 6in - 5ft 8in' },
+        { size: '40 (L)', chestOrWaist: '42" Chest', length: '58"', extra: 'Height 5ft 8in - 5ft 10in' },
+        { size: '42 (XL)', chestOrWaist: '44" Chest', length: '60"', extra: 'Height 5ft 10in - 6ft 1in' },
+        { size: '44 (XXL)', chestOrWaist: '46" Chest', length: '60"', extra: 'Height 6ft + / Broad' }
+      ]
+    },
+    reviews: [
+      { id: 'r7', name: 'Hafeez Ur Rahman', rating: 5, date: '2026-06-25', comment: 'Authentic Gulf quality right here in Warangal! Fabric has weight, does not wrinkle after sitting, and the tassel is high grade.', verified: true }
+    ]
+  },
+  {
+    id: 'nb-006',
+    title: 'Omani Embroidered Luxury Arabic Jubba',
+    price: 2499,
+    mrp: 4299,
+    images: [
+      'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1597983073493-88cd35cf93b0?auto=format&fit=crop&w=800&q=80'
+    ],
+    category: 'thoobs',
+    fabric: 'Luxury Japanese Poly-Viscose',
+    length: '56", 58", 60"',
+    sizes: ['38 (M)', '40 (L)', '42 (XL)', '44 (XXL)'],
+    description: 'Traditional Sultanate of Oman styled Jubba featuring intricate neck and chest cord embroidery. Silky soft hand-feel, structured drape, and premium stitching.',
+    specs: [
+      { label: 'Fabric', value: 'Japanese Poly-Viscose with Breathable Weave' },
+      { label: 'Work', value: 'Omani Heritage Cord Embroidery along Collar & Chest' },
+      { label: 'Fit', value: 'Classic Regular Flowing Cut' },
+      { label: 'Occasion', value: 'Eid Celebration, Family Functions, Friday Prayers' }
+    ],
+    badges: ['Top Only', 'New Arrival', '3 Colours'],
+    colors: [
+      { name: 'Pearl White', hex: '#FDFBF7' },
+      { name: 'Olive Tan', hex: '#6B8E23' },
+      { name: 'Navy Blue', hex: '#000080' }
+    ],
+    rating: 4.8,
+    reviewsCount: 86,
+    type: 'Top Only',
+    hasBottom: false,
+    sizeChart: {
+      top: [
+        { size: '38 (M)', chestOrWaist: '40" Chest', length: '56"', extra: '17.5" Shoulder' },
+        { size: '40 (L)', chestOrWaist: '42" Chest', length: '58"', extra: '18" Shoulder' },
+        { size: '42 (XL)', chestOrWaist: '44" Chest', length: '60"', extra: '18.5" Shoulder' },
+        { size: '44 (XXL)', chestOrWaist: '46" Chest', length: '60"', extra: '19" Shoulder' }
+      ]
+    },
+    reviews: [
+      { id: 'r8', name: 'Mustafa Khan', rating: 5, date: '2026-06-12', comment: 'The neck cord embroidery gives it an authentic Arab prince look. Ordered via WhatsApp and got it delivered next day.', verified: true }
+    ]
+  },
+  {
+    id: 'nb-007',
+    title: 'Royal Jodhpuri Bandhgala Suit Set',
+    price: 7999,
+    mrp: 13999,
+    images: [
+      'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=800&q=80'
+    ],
+    category: 'indo-western',
+    fabric: 'Italian Suiting Fabric',
+    length: 'Coat: 30", Trousers: 41"',
+    sizes: ['38 (M)', '40 (L)', '42 (XL)', '44 (XXL)'],
+    description: 'Sophisticated royal Bandhgala suit handcrafted from premium Italian suiting blend. Structured shoulder pads, satin bound pockets, and tailored formal trousers suitable for receptions and cocktail evenings.',
+    specs: [
+      { label: 'Suit Fabric', value: 'Imported Italian Poly-Wool Blend' },
+      { label: 'Trousers', value: 'Slim-Tapered Tailored Formal Trousers' },
+      { label: 'Collar', value: 'Structured Mandarin Royal Stand Bandhgala' },
+      { label: 'Lining', value: 'Full Jacquard Paisley Lining' },
+      { label: 'Occasion', value: 'Reception, Engagement, Formal Wedding Dinners' }
+    ],
+    badges: ['Set', 'Premium', 'Royal Cut'],
+    colors: [
+      { name: 'Imperial Black', hex: '#111111' },
+      { name: 'Royal Navy Blue', hex: '#1B263B' },
+      { name: 'Wine Velvet Accent', hex: '#4A1525' }
+    ],
+    rating: 4.9,
+    reviewsCount: 112,
+    type: 'Set',
+    hasBottom: true,
+    sizeChart: {
+      top: [
+        { size: '38 (M)', chestOrWaist: '39" Chest', length: '29.5"', extra: '17.5" Shoulder' },
+        { size: '40 (L)', chestOrWaist: '41" Chest', length: '30"', extra: '18" Shoulder' },
+        { size: '42 (XL)', chestOrWaist: '43" Chest', length: '30.5"', extra: '18.5" Shoulder' },
+        { size: '44 (XXL)', chestOrWaist: '45" Chest', length: '31"', extra: '19" Shoulder' }
+      ],
+      bottom: [
+        { size: '38 (M)', chestOrWaist: '32" Waist', length: '40"', extra: '24" Thigh' },
+        { size: '40 (L)', chestOrWaist: '34" Waist', length: '40.5"', extra: '25" Thigh' },
+        { size: '42 (XL)', chestOrWaist: '36" Waist', length: '41"', extra: '26" Thigh' },
+        { size: '44 (XXL)', chestOrWaist: '38" Waist', length: '41.5"', extra: '27" Thigh' }
+      ]
+    },
+    reviews: [
+      { id: 'r9', name: 'Karthik Rao', rating: 5, date: '2026-07-15', comment: 'Fitting was spot-on. Looks like a bespoke ₹25k Raymond made suit. Nomaan Brothers master tailors did fantastic work.', verified: true }
+    ]
+  },
+  {
+    id: 'nb-008',
+    title: 'Asymmetric Indo-Western Groom Sherwani Kurta',
+    price: 5499,
+    mrp: 9999,
+    images: [
+      'https://images.unsplash.com/photo-1597983073493-88cd35cf93b0?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=800&q=80'
+    ],
+    category: 'indo-western',
+    fabric: 'Jacquard Brocade Silk',
+    length: 'Top: 42", Dhoti/Pajama: 40"',
+    sizes: ['38 (M)', '40 (L)', '42 (XL)', '44 (XXL)'],
+    description: 'Modern asymmetric overlapping front silhouette with antique metal brooches and subtle woven Jacquard gold motifs. Perfect for grooms who want a stylish blend of tradition and modernity.',
+    specs: [
+      { label: 'Fabric', value: 'Woven Jacquard Brocade Silk' },
+      { label: 'Cut', value: 'Asymmetric Overlapping Angrakha Hem' },
+      { label: 'Bottom', value: 'Ready-to-wear Silk Dhoti or Churidar' },
+      { label: 'Occasion', value: 'Sangeet, Reception, Cocktail Night' }
+    ],
+    badges: ['Set', 'Designer Cut', 'Trending'],
+    colors: [
+      { name: 'Rose Gold Peach', hex: '#ECC5C0' },
+      { name: 'Pistachio Sage', hex: '#9CAF88' },
+      { name: 'Royal Ivory', hex: '#FFFFF0' }
+    ],
+    rating: 4.7,
+    reviewsCount: 78,
+    type: 'Set',
+    hasBottom: true,
+    sizeChart: {
+      top: [
+        { size: '38 (M)', chestOrWaist: '40" Chest', length: '42"', extra: '17.5" Shoulder' },
+        { size: '40 (L)', chestOrWaist: '42" Chest', length: '42"', extra: '18" Shoulder' },
+        { size: '42 (XL)', chestOrWaist: '44" Chest', length: '43"', extra: '18.5" Shoulder' },
+        { size: '44 (XXL)', chestOrWaist: '46" Chest', length: '43"', extra: '19" Shoulder' }
+      ],
+      bottom: [
+        { size: '38 (M)', chestOrWaist: '30" - 36" (Elastic)', length: '40"', extra: 'Comfort Drape' },
+        { size: '40 (L)', chestOrWaist: '32" - 38" (Elastic)', length: '40"', extra: 'Comfort Drape' },
+        { size: '42 (XL)', chestOrWaist: '34" - 40" (Elastic)', length: '41"', extra: 'Comfort Drape' },
+        { size: '44 (XXL)', chestOrWaist: '36" - 42" (Elastic)', length: '41"', extra: 'Comfort Drape' }
+      ]
+    },
+    reviews: [
+      { id: 'r10', name: 'Naveen Kumar', rating: 5, date: '2026-06-18', comment: 'The angrakha overlap style received huge praise during my sangeet. Light on body and very rich look.', verified: true }
+    ]
+  },
+  {
+    id: 'nb-009',
+    title: 'Groom Maharaja Safa Turban with Pearl Mala & Kalgi Set',
+    price: 1999,
+    mrp: 3499,
+    images: [
+      'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1597983073493-88cd35cf93b0?auto=format&fit=crop&w=800&q=80'
+    ],
+    category: 'accessories',
+    fabric: 'Chanderi Silk & Kundan',
+    length: 'Pre-Tied Standard Fits All',
+    sizes: ['Free Size (Adjustable)'],
+    description: 'Complete the royal groom ensemble with our handcrafted Chanderi Silk pre-tied Maharaja Pagdi (Safa). Accompained by a 3-layer royal pearl necklace (Groom Mala) and dazzling Kundan Kalgi feather brooch.',
+    specs: [
+      { label: 'Safa Fabric', value: 'Chanderi Brocade Silk (Ready to Wear Pre-Tied)' },
+      { label: 'Kalgi Brooch', value: 'Gold Plated Kundan & Emerald Stone Work' },
+      { label: 'Groom Mala', value: 'Multi-Strand Shell Pearl Mala with Antique Brooch' },
+      { label: 'Size', value: 'Free Size with Elastic Adjustment (21" to 23.5" head circumference)' },
+      { label: 'Occasion', value: 'Baraat, Nikah, Wedding Mandap' }
+    ],
+    badges: ['Set', 'Wedding Essential', 'Ready to Wear'],
+    colors: [
+      { name: 'Royal Maroon & Gold', hex: '#800020' },
+      { name: 'Peach & Cream Gold', hex: '#FFE5B4' },
+      { name: 'Rose Gold', hex: '#B76E79' }
+    ],
+    rating: 5.0,
+    reviewsCount: 194,
+    type: 'Top Only',
+    hasBottom: false,
+    sizeChart: {
+      top: [
+        { size: 'Free Size (Adjustable)', chestOrWaist: 'Head Circumference 21" - 24"', length: 'Pre-tied Safa', extra: 'Comfort inner cushion lining' }
+      ]
+    },
+    reviews: [
+      { id: 'r11', name: 'Shabbir Hussain', rating: 5, date: '2026-07-04', comment: 'Pre-tied safa saved us so much time on the wedding morning! Fits snugly and kalgi is very grand.', verified: true }
+    ]
+  },
+  {
+    id: 'nb-010',
+    title: 'Handcrafted Zardozi Embroidered Royal Groom Mojaris',
+    price: 1299,
+    mrp: 2199,
+    images: [
+      'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=800&q=80'
+    ],
+    category: 'accessories',
+    fabric: 'Genuine Leather & Zardozi',
+    length: 'Ind Size 7, 8, 9, 10, 11',
+    sizes: ['38 (M)', '40 (L)', '42 (XL)', '44 (XXL)'],
+    description: 'Traditional Jodhpur-style royal sherwani juttis / mojaris with curved toe, padded leather insole, and authentic zardozi gold thread embroidery. Designed for zero bite and day-long wedding comfort.',
+    specs: [
+      { label: 'Upper', value: 'Silk Velvet with Zardozi Hand Embroidery' },
+      { label: 'Sole', value: '100% Genuine Soft Buff Leather Sole' },
+      { label: 'Insole', value: 'Extra Cushion Padded Anti-Bite Insole' },
+      { label: 'Occasion', value: 'Groom Wedding Wear, Festive Celebrations' }
+    ],
+    badges: ['Handcrafted', 'Pure Leather', 'Best Seller'],
+    colors: [
+      { name: 'Antique Gold', hex: '#D4AF37' },
+      { name: 'Royal Maroon', hex: '#800000' },
+      { name: 'Jet Black Zari', hex: '#1C1C1C' }
     ],
     rating: 4.9,
     reviewsCount: 88,
@@ -107,425 +483,71 @@ export const PRODUCTS: Product[] = [
     hasBottom: false,
     sizeChart: {
       top: [
-        { size: 'M (38)', chestOrWaist: '38"', length: '48"', extra: '15" Shoulder' },
-        { size: 'L (40)', chestOrWaist: '40"', length: '48"', extra: '15.5" Shoulder' },
-        { size: 'XL (42)', chestOrWaist: '42"', length: '48"', extra: '16" Shoulder' },
-        { size: 'XXL (44)', chestOrWaist: '44"', length: '48"', extra: '16.5" Shoulder' }
+        { size: '38 (M)', chestOrWaist: 'Ind / UK Size 7', length: '26 cm Foot', extra: 'Cushioned' },
+        { size: '40 (L)', chestOrWaist: 'Ind / UK Size 8', length: '27 cm Foot', extra: 'Cushioned' },
+        { size: '42 (XL)', chestOrWaist: 'Ind / UK Size 9', length: '28 cm Foot', extra: 'Cushioned' },
+        { size: '44 (XXL)', chestOrWaist: 'Ind / UK Size 10', length: '29 cm Foot', extra: 'Cushioned' }
       ]
     },
     reviews: [
-      { id: 'r3', name: 'Ayesha Khan', rating: 5, date: '2026-07-02', comment: 'Beautiful flowy material. Received so many compliments when I wore it for my beach vacation!', verified: true }
+      { id: 'r12', name: 'Arif Ahmed', rating: 5, date: '2026-06-22', comment: 'Extremely soft inside leather, no shoe bite throughout 8 hours of wedding ceremony! Matched my sherwani perfectly.', verified: true }
     ]
   },
   {
-    id: 'sc-003',
-    title: 'Short Kurti Top with Neck & Sleeve Pattern',
-    price: 899,
-    mrp: 1799,
+    id: 'nb-011',
+    title: 'Unstitched Banarasi Brocade Sherwani & Achkan Fabric Material',
+    price: 3499,
+    mrp: 5999,
     images: [
-      'https://images.unsplash.com/photo-1608748010899-18f300247112?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=800&q=80'
-    ],
-    category: 'kurtis',
-    fabric: 'Printed Silk',
-    length: '35"',
-    sizes: ['M', 'L', 'XL', 'XXL'],
-    description: 'A contemporary printed silk kurti featuring elegant custom neck and cuff patterns. Fully lined with breathable crepe for all-day comfort and luxury texture.',
-    specs: [
-      { label: 'Fabric', value: 'Printed Silk with Crepe Lining' },
-      { label: 'Length', value: '35 inches' },
-      { label: 'Sleeve', value: '3/4 Sleeves with Border Trim' },
-      { label: 'Neck Design', value: 'V-neck with Contrast Piping' },
-      { label: 'Occasion', value: 'Office Wear, Daily Wear' }
-    ],
-    badges: ['Top Only', '2 Colours'],
-    colors: [
-      { name: 'Olive Green', hex: '#808000' },
-      { name: 'Mustard Yellow', hex: '#E1AD01' }
-    ],
-    rating: 4.6,
-    reviewsCount: 54,
-    type: 'Top Only',
-    hasBottom: false,
-    sizeChart: {
-      top: [
-        { size: 'M (38)', chestOrWaist: '38"', length: '35"', extra: '15" Shoulder' },
-        { size: 'L (40)', chestOrWaist: '40"', length: '35"', extra: '15.5" Shoulder' },
-        { size: 'XL (42)', chestOrWaist: '42"', length: '35"', extra: '16" Shoulder' },
-        { size: 'XXL (44)', chestOrWaist: '44"', length: '35"', extra: '16.5" Shoulder' }
-      ]
-    },
-    reviews: [
-      { id: 'r4', name: 'Ritika Patel', rating: 4, date: '2026-06-25', comment: 'Very professional look. Perfect for office wear during summers. Silk material has a beautiful subtle shine.', verified: true }
-    ]
-  },
-  {
-    id: 'sc-004',
-    title: 'Cotton Printed Tops',
-    price: 699,
-    mrp: 1299,
-    images: [
-      'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=800&q=80'
-    ],
-    category: 'tops',
-    fabric: 'Cotton',
-    length: '30"',
-    sizes: ['M', 'L', 'XL', 'XXL'],
-    description: 'A collection of ultra-breathable pure cotton printed tops designed for comfort and everyday grace. Pair them effortlessly with jeans, leggings, or plazzos.',
-    specs: [
-      { label: 'Fabric', value: '100% Pure Printed Jaipur Cotton' },
-      { label: 'Length', value: '30 inches' },
-      { label: 'Sleeve', value: '3/4 Sleeves' },
-      { label: 'Wash Care', value: 'Gentle Hand Wash Separately' },
-      { label: 'Occasion', value: 'Daily Wear, Office Wear' }
-    ],
-    badges: ['Top Only', '3 Colours'],
-    colors: [
-      { name: 'Indigo Blue', hex: '#00416A' },
-      { name: 'Terracotta', hex: '#C04D30' },
-      { name: 'Sage Green', hex: '#9CAF88' }
-    ],
-    rating: 4.7,
-    reviewsCount: 210,
-    type: 'Top Only',
-    hasBottom: false,
-    sizeChart: {
-      top: [
-        { size: 'M (38)', chestOrWaist: '38"', length: '30"', extra: '14.5" Shoulder' },
-        { size: 'L (40)', chestOrWaist: '40"', length: '30"', extra: '15" Shoulder' },
-        { size: 'XL (42)', chestOrWaist: '42"', length: '30"', extra: '15.5" Shoulder' },
-        { size: 'XXL (44)', chestOrWaist: '44"', length: '30"', extra: '16" Shoulder' }
-      ]
-    },
-    reviews: [
-      { id: 'r5', name: 'Anjali Desai', rating: 5, date: '2026-07-04', comment: 'Pure cotton material. Perfect for hot summers. Got the terracotta one and the print is very elegant.', verified: true }
-    ]
-  },
-  {
-    id: 'sc-005',
-    title: 'Cotton Sleeveless Ruffle Maxi Dress',
-    price: 1499,
-    mrp: 2799,
-    images: [
-      'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=800&q=80'
-    ],
-    category: 'maxi-dresses',
-    fabric: 'Cotton',
-    length: '52"',
-    sizes: ['M', 'L', 'XL', 'XXL'],
-    description: 'This gorgeous sleeveless maxi features a 3-tier ruffle flare, crafted in soft, printed Jaipur cotton. Lightweight and breezy, perfect for hot days and beach vacations.',
-    specs: [
-      { label: 'Fabric', value: '100% Cotton Print' },
-      { label: 'Design', value: 'Sleeveless with a 3-tier flare design' },
-      { label: 'Length', value: '52 inches' },
-      { label: 'Lining', value: 'None (Completely opaque premium cotton)' },
-      { label: 'Occasion', value: 'Vacation/Casual, Daily Wear' }
-    ],
-    badges: ['Top Only', '2 Colours'],
-    colors: [
-      { name: 'Ivory Teal', hex: '#2E8B57' },
-      { name: 'Lavender Blush', hex: '#FFF0F5' }
-    ],
-    rating: 4.5,
-    reviewsCount: 39,
-    type: 'Top Only',
-    hasBottom: false,
-    sizeChart: {
-      top: [
-        { size: 'M (38)', chestOrWaist: '38"', length: '52"', extra: '14" Shoulder' },
-        { size: 'L (40)', chestOrWaist: '40"', length: '52"', extra: '14.5" Shoulder' },
-        { size: 'XL (42)', chestOrWaist: '42"', length: '52"', extra: '15" Shoulder' },
-        { size: 'XXL (44)', chestOrWaist: '44"', length: '52"', extra: '15.5" Shoulder' }
-      ]
-    },
-    reviews: [
-      { id: 'r6', name: 'Surbhi Goel', rating: 5, date: '2026-05-30', comment: 'The tier flare is huge! Perfect dress for summer photoshoots. Fabric is extremely comfortable.', verified: true }
-    ]
-  },
-  {
-    id: 'sc-006',
-    title: 'Trending Short Top with Fancy Sleeves',
-    price: 799,
-    mrp: 1499,
-    images: [
-      'https://images.unsplash.com/photo-1561414927-6d86591d0c4f?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80'
-    ],
-    category: 'tops',
-    fabric: 'Rayon',
-    length: '31"',
-    sizes: ['M', 'L', 'XL', 'XXL'],
-    description: 'An absolute Pinterest favorite! This heavy rayon short top features gorgeous embroidery thread work, fancy designer sleeves, and a flattering fit suitable for office or college wear.',
-    specs: [
-      { label: 'Fabric', value: 'Heavy Rayon with Fine Thread Embroidery' },
-      { label: 'Length', value: '31 inches' },
-      { label: 'Sleeve', value: 'Fancy Bell Sleeves with Work' },
-      { label: 'Occasion', value: 'Office Wear, Casual, Daily Wear' }
-    ],
-    badges: ['Top Only', '5 Colours', 'Trending'],
-    colors: [
-      { name: 'Maroon', hex: '#800000' },
-      { name: 'Emerald Green', hex: '#004B49' },
-      { name: 'Navy Blue', hex: '#000080' },
-      { name: 'Rust Orange', hex: '#B7410E' },
-      { name: 'Mustard Yellow', hex: '#E1AD01' }
-    ],
-    rating: 4.8,
-    reviewsCount: 167,
-    type: 'Top Only',
-    hasBottom: false,
-    sizeChart: {
-      top: [
-        { size: 'M (38)', chestOrWaist: '38"', length: '31"', extra: '15" Shoulder' },
-        { size: 'L (40)', chestOrWaist: '40"', length: '31"', extra: '15.5" Shoulder' },
-        { size: 'XL (42)', chestOrWaist: '42"', length: '31"', extra: '16" Shoulder' },
-        { size: 'XXL (44)', chestOrWaist: '44"', length: '31"', extra: '16.5" Shoulder' }
-      ]
-    },
-    reviews: [
-      { id: 'r7', name: 'Nisha Verma', rating: 5, date: '2026-07-01', comment: 'The rust orange shade is stunning. Bell sleeves look so unique. Highly recommend!', verified: true }
-    ]
-  },
-  {
-    id: 'sc-007',
-    title: '"Charmi Vol 3" (AI Fashion Collection)',
-    price: 849,
-    mrp: 1599,
-    images: [
-      'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1608748010899-18f300247112?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=800&q=80'
-    ],
-    category: 'new-arrivals',
-    fabric: 'Rayon',
-    length: '31"',
-    sizes: ['M', 'L', 'XL', 'XXL'],
-    description: 'Our most viral Instagram and Pinterest-style collection: "Charmi Vol 3". Combining premium heavy Rayon with gorgeous multi-colored neck embroidery and structured statement sleeves. Available in 9 breathtaking colors.',
-    specs: [
-      { label: 'Collection Name', value: 'Charmi Vol 3' },
-      { label: 'Fabric', value: 'Premium Heavy Liva Rayon' },
-      { label: 'Work Type', value: 'Detailed Embroidery Thread Work on Neck' },
-      { label: 'Length', value: '31 inches' },
-      { label: 'Colourways Available', value: '9 Designer Shades' },
-      { label: 'Occasion', value: 'Daily Wear, Festive, Office Wear' }
-    ],
-    badges: ['Top Only', '9 Colours', 'Pinterest Pick'],
-    colors: [
-      { name: 'Deep Teal', hex: '#008080' },
-      { name: 'Wine Red', hex: '#722F37' },
-      { name: 'Sage Green', hex: '#9CAF88' },
-      { name: 'Coral Pink', hex: '#F88379' },
-      { name: 'Slate Blue', hex: '#4682B4' },
-      { name: 'Amber', hex: '#FFBF00' },
-      { name: 'Plum', hex: '#8E4585' },
-      { name: 'Forest Green', hex: '#228B22' },
-      { name: 'Ivory White', hex: '#FFFFF0' }
-    ],
-    rating: 4.9,
-    reviewsCount: 345,
-    type: 'Top Only',
-    hasBottom: false,
-    sizeChart: {
-      top: [
-        { size: 'M (38)', chestOrWaist: '38"', length: '31"', extra: '15" Shoulder' },
-        { size: 'L (40)', chestOrWaist: '40"', length: '31"', extra: '15.5" Shoulder' },
-        { size: 'XL (42)', chestOrWaist: '42"', length: '31"', extra: '16" Shoulder' },
-        { size: 'XXL (44)', chestOrWaist: '44"', length: '31"', extra: '16.5" Shoulder' }
-      ]
-    },
-    reviews: [
-      { id: 'r8', name: 'Tanvi Shah', rating: 5, date: '2026-06-20', comment: 'Unbelievably rich rayon. I ordered the deep teal and wine red. Absolute value for money.', verified: true },
-      { id: 'r9', name: 'Kritika M.', rating: 5, date: '2026-06-18', comment: 'I saw this on Instagram and bought immediately. The embroidery looks handmade. Love the sleeves!', verified: true }
-    ]
-  },
-  {
-    id: 'sc-008',
-    title: 'Short Tops, Heavy Embroidery Multi-Colour',
-    price: 749,
-    mrp: 1399,
-    images: [
-      'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1561414927-6d86591d0c4f?auto=format&fit=crop&w=800&q=80'
-    ],
-    category: 'tops',
-    fabric: 'Rayon',
-    length: '33"',
-    sizes: ['M', 'L', 'XL', 'XXL'],
-    description: 'Brighten up your days with our multi-colored thread embroidery rayon short tops. A beautiful traditional twist on modern short kurtas.',
-    specs: [
-      { label: 'Fabric', value: 'Liva Soft Rayon' },
-      { label: 'Embroidery', value: 'Multi-color Bohemian Thread Work' },
-      { label: 'Length', value: '33 inches' },
-      { label: 'Occasion', value: 'Daily Wear, Casual, College Wear' }
-    ],
-    badges: ['Top Only', '3 Colours'],
-    colors: [
-      { name: 'Black Gold', hex: '#1C1C1C' },
-      { name: 'Maroon Rose', hex: '#800020' },
-      { name: 'Teal Silver', hex: '#005F73' }
-    ],
-    rating: 4.4,
-    reviewsCount: 29,
-    type: 'Top Only',
-    hasBottom: false,
-    sizeChart: {
-      top: [
-        { size: 'M (38)', chestOrWaist: '38"', length: '33"', extra: '14.5" Shoulder' },
-        { size: 'L (40)', chestOrWaist: '40"', length: '33"', extra: '15" Shoulder' },
-        { size: 'XL (42)', chestOrWaist: '42"', length: '33"', extra: '15.5" Shoulder' },
-        { size: 'XXL (44)', chestOrWaist: '44"', length: '33"', extra: '16" Shoulder' }
-      ]
-    },
-    reviews: [
-      { id: 'r10', name: 'Divya Reddy', rating: 4, date: '2026-07-06', comment: 'Very bright color threads used, stands out wonderfully. Soft fabric too.', verified: true }
-    ]
-  },
-  {
-    id: 'sc-009',
-    title: 'Heavy Embroidery Work Kurti with Plazzo Set',
-    price: 1899,
-    mrp: 3499,
-    images: [
-      'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80'
-    ],
-    category: 'bottom-sets',
-    fabric: 'Rayon',
-    length: 'Top: 40", Plazzo: 38"',
-    sizes: ['M', 'L', 'XL', 'XXL'],
-    description: 'A luxurious festive set featuring a full length 40" heavy rayon kurti with exquisite handwork and zardozi detailing, paired with matching heavy rayon straight plazzos.',
-    specs: [
-      { label: 'Top Fabric', value: 'Ultra Heavy Liva Rayon' },
-      { label: 'Plazzo Fabric', value: 'Heavy Rayon Matching Fabric' },
-      { label: 'Work', value: 'Intricate Handwork, Zardozi, and Gota Patti' },
-      { label: 'Length', value: 'Top 40" | Plazzo 38"' },
-      { label: 'Occasion', value: 'Festive, Family Ceremonies, Party Wear' }
-    ],
-    badges: ['Set', 'Premium', '2 Colours'],
-    colors: [
-      { name: 'Royal Navy', hex: '#0A1172' },
-      { name: 'Maroon Gold', hex: '#800000' }
-    ],
-    rating: 4.9,
-    reviewsCount: 76,
-    type: 'Set',
-    hasBottom: true,
-    sizeChart: {
-      top: [
-        { size: 'M (38)', chestOrWaist: '38"', length: '40"', extra: '15" Shoulder' },
-        { size: 'L (40)', chestOrWaist: '40"', length: '40"', extra: '15.5" Shoulder' },
-        { size: 'XL (42)', chestOrWaist: '42"', length: '40"', extra: '16" Shoulder' },
-        { size: 'XXL (44)', chestOrWaist: '44"', length: '40"', extra: '16.5" Shoulder' }
-      ],
-      bottom: [
-        { size: 'M (38)', chestOrWaist: '28" - 34" (Elastic)', length: '38"', extra: '24" Thigh' },
-        { size: 'L (40)', chestOrWaist: '30" - 36" (Elastic)', length: '38"', extra: '25" Thigh' },
-        { size: 'XL (42)', chestOrWaist: '32" - 38" (Elastic)', length: '38"', extra: '26" Thigh' },
-        { size: 'XXL (44)', chestOrWaist: '34" - 40" (Elastic)', length: '38"', extra: '27" Thigh' }
-      ]
-    },
-    reviews: [
-      { id: 'r11', name: 'Neelam Rawat', rating: 5, date: '2026-06-29', comment: 'The handwork is extremely detailed. Perfect for family events. Fabric is very rich and heavy weight.', verified: true }
-    ]
-  },
-  {
-    id: 'sc-010',
-    title: 'Long Sleeve Printed Top with Churi-Style Sleeves',
-    price: 899,
-    mrp: 1699,
-    images: [
-      'https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=800&q=80'
-    ],
-    category: 'tops',
-    fabric: 'Georgette',
-    length: '30"',
-    sizes: ['M', 'L', 'XL', 'XXL'],
-    description: 'An elegant pure Georgette top featuring premium traditional print, comfortable inner lining, and elegant gathered churi-style long sleeves.',
-    specs: [
-      { label: 'Fabric', value: 'Pure Georgette Print with Soft Inner Lining' },
-      { label: 'Sleeves', value: 'Long Gathered Churi-style Sleeves' },
-      { label: 'Length', value: '30 inches' },
-      { label: 'Occasion', value: 'Office Wear, Daily Wear' }
-    ],
-    badges: ['Top Only', '2 Colours'],
-    colors: [
-      { name: 'Crimson Red', hex: '#DC143C' },
-      { name: 'Emerald Peacock', hex: '#004953' }
-    ],
-    rating: 4.6,
-    reviewsCount: 42,
-    type: 'Top Only',
-    hasBottom: false,
-    sizeChart: {
-      top: [
-        { size: 'M (38)', chestOrWaist: '38"', length: '30"', extra: '15" Shoulder' },
-        { size: 'L (40)', chestOrWaist: '40"', length: '30"', extra: '15.5" Shoulder' },
-        { size: 'XL (42)', chestOrWaist: '42"', length: '30"', extra: '16" Shoulder' },
-        { size: 'XXL (44)', chestOrWaist: '44"', length: '30"', extra: '16.5" Shoulder' }
-      ]
-    },
-    reviews: [
-      { id: 'r12', name: 'Kavita Joshi', rating: 4, date: '2026-07-03', comment: 'Sleeves look really beautiful and give a regal look. Lining is soft and of high quality.', verified: true }
-    ]
-  },
-  {
-    id: 'sc-011',
-    title: 'Unstitched Silk Chanderi Embroidery Dress Material',
-    price: 2199,
-    mrp: 3999,
-    images: [
-      'https://images.unsplash.com/photo-1561414927-6d86591d0c4f?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1608748010899-18f300247112?auto=format&fit=crop&w=800&q=80'
+      'https://images.unsplash.com/photo-1597983073493-88cd35cf93b0?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=800&q=80'
     ],
     category: 'unstitched',
-    fabric: 'Chanderi/Silk',
-    length: 'Top 2.5m, Bottom 2.5m, Dupatta 2.5m',
+    fabric: 'Jacquard Brocade Silk',
+    length: '3.5 Meters Sherwani + 2.5 Meters Churidar Fabric',
     sizes: ['Unstitched'],
-    description: 'A gorgeous premium handmade Silk Chanderi unstitched salwar suit dress material featuring exquisite Kashmiri-style embroidery, matched with comfortable organdy cotton bottom fabric and a fully embroidered dupatta.',
+    description: 'Premium uncut 3.5-meter Banarasi brocade silk fabric featuring woven meenakari zari vines. Accompanied by 2.5 meters of heavy raw silk for churidar or straight trousers. Perfect for custom tailoring by your preferred master cutter.',
     specs: [
-      { label: 'Top Fabric', value: 'Premium Chanderi Silk with heavy hand embroidery (2.5 meters)' },
-      { label: 'Bottom Fabric', value: 'Comfort Organdy Cotton (2.5 meters)' },
-      { label: 'Dupatta', value: 'Fully embroidered Organza Silk (2.5 meters)' },
-      { label: 'Style', value: 'Unstitched - Customise as salwar, plazzo suit or straight suit' },
-      { label: 'Occasion', value: 'Festive, Wedding Ceremonies' }
+      { label: 'Sherwani Fabric Cut', value: '3.5 Meters Pure Banarasi Zari Brocade' },
+      { label: 'Bottom Fabric Cut', value: '2.5 Meters Heavy Dupion Raw Silk' },
+      { label: 'Width (Panna)', value: '44 Inches Big Width' },
+      { label: 'Customization', value: 'Can be tailored into Sherwani, Indo-Western, Prince Coat or Achkan' },
+      { label: 'Occasion', value: 'Bespoke Wedding Tailoring' }
     ],
-    badges: ['Unstitched', 'Premium', 'Handcrafted', '2 Colours'],
+    badges: ['Unstitched', 'Pure Brocade', 'Bespoke'],
     colors: [
-      { name: 'Ivory Chanderi', hex: '#FDF6E2' },
-      { name: 'Golden Honey', hex: '#E2A76F' }
+      { name: 'Royal Ivory Gold', hex: '#FFFFF0' },
+      { name: 'Golden Champagne', hex: '#F7E7CE' },
+      { name: 'Royal Blue Zari', hex: '#002366' }
     ],
     rating: 5.0,
-    reviewsCount: 53,
+    reviewsCount: 64,
     type: 'Unstitched',
     hasBottom: true,
     sizeChart: {
       top: [
-        { size: 'Unstitched Material', chestOrWaist: 'Up to 54" Chest (Tailored)', length: '2.5 meters Fabric', extra: 'Fits all body types' }
+        { size: 'Unstitched Material', chestOrWaist: 'Can be tailored up to 54" Chest', length: '3.5 Meters Cut', extra: 'Fits all body builds' }
       ],
       bottom: [
-        { size: 'Unstitched Material', chestOrWaist: 'Up to 50" Waist (Tailored)', length: '2.5 meters Fabric', extra: 'Fits all body types' }
+        { size: 'Unstitched Material', chestOrWaist: 'Can be tailored up to 48" Waist', length: '2.5 Meters Cut', extra: 'Fits all body builds' }
       ]
     },
     reviews: [
-      { id: 'r13', name: 'Sapna Mahajan', rating: 5, date: '2026-06-24', comment: 'Extremely elegant and classy. Got this stitched into a plazzo suit. The embroidery and Chanderi material are top notch.', verified: true }
+      { id: 'r13', name: 'Dr. Shakeel', rating: 5, date: '2026-06-15', comment: 'Took this unstitched fabric to Nomaan Brothers master tailor at Mandi Bazar for bespoke fitting. Finished garment looks stunning!', verified: true }
     ]
   }
 ];
 
 export const TRUST_ANNOUNCEMENTS = [
-  "Loved by 50,000+ Women ♡",
-  "⚡ Cash On Delivery (COD) Now Available on all orders!",
-  "✨ FREE Express Shipping on all orders above ₹999",
-  "🔄 Easy 7-Day Hassle-free Returns & Exchanges"
+  "👑 Warangal's Premier Groom & Ethnic Menswear Destination",
+  "📍 Opp. Madras Masjid, Mandi Bazar, Warangal — Visit Our Showroom",
+  "✨ Custom Tailoring & Made-to-Measure Groom Sherwanis",
+  "⚡ WhatsApp Video Call Consultation & Express Doorstep Delivery",
+  "🤝 Cash On Delivery (COD) & In-Store Trial Available"
 ];
 
 export const STORIES_INFO = {
-  about: "At Sumera Collections, we blend rich heritage textile crafts with contemporary modern silhouettes. Designed for the multi-faceted lifestyle of today’s modern woman, our collections bring you hand-embroidered rayon tops, flowy georgette maxi dresses, premium silk salwar suits, and everyday cotton wear that makes you feel effortlessly graceful.",
-  shipping: "We ship with reliable delivery partners. Metro cities enjoy delivery in 2-4 working days. COD is available for a minor collection fee. Free shipping applies to prepaid and COD orders above ₹999.",
-  returns: "We offer a flexible 7-day return and exchange policy. In case the size does not fit or you would like to return the garment, raise an exchange/return request from the menu. We will schedule a hassle-free reverse pickup."
+  about: "Located opposite Madras Masjid in the historic textile hub of Mandi Bazar, Warangal, Nomaan Brothers (The Designer Sherwani House) is Telangana's distinguished landmark for groom wedding attire and festive menswear. For decades, we have dressed grooms in bespoke Zardozi Sherwanis, Jodhpuris, Sequence Kurtas, and authentic Gulf-imported Arabic Thoobs. Each garment is crafted with meticulous tailoring, imperial embroidery, and custom made-to-measure fitting.",
+  shipping: "We deliver across Warangal and dispatch express parcels all over Telangana, Hyderabad, and across India within 2-4 business days. In-store pickup, custom trial sessions at Mandi Bazar, and Cash On Delivery (COD) are readily available.",
+  returns: "We offer complete fitting assurance. If any made-to-measure adjustment is needed, visit our Mandi Bazar store for instant master-tailor alteration or raise an online size exchange within 7 days."
 };

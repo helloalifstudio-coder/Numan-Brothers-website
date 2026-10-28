@@ -132,8 +132,8 @@ export default function PLP({
   return (
     <>
       <Helmet>
-        <title>{activeCategoryName} | Sumera Collections</title>
-        <meta name="description" content={`Explore our curated collection of ${activeCategoryName} at Sumera Collections. High-quality ethnic & fusion wear.`} />
+        <title>{activeCategoryName} | Nomaan Brothers — The Designer Sherwani House</title>
+        <meta name="description" content={`Explore our curated collection of ${activeCategoryName} at Nomaan Brothers — The Designer Sherwani House, Warangal. High-quality groom sherwanis, festive kurtas & ethnic wear.`} />
       </Helmet>
       <div className="max-w-7xl mx-auto px-4 py-6 md:py-10">
       
@@ -236,7 +236,7 @@ export default function PLP({
                         : 'bg-stone-50 text-stone-600 border-stone-100 hover:bg-stone-100'
                     }`}
                   >
-                    <span className="font-sans">{type === 'Set' ? 'Kurti + Plazzo Sets' : type === 'Top Only' ? 'Tops / Kurtis Only' : 'Unstitched Materials'}</span>
+                    <span className="font-sans">{type === 'Set' ? 'Sherwani & Kurta Sets' : type === 'Top Only' ? 'Kurtas & Thoobs (Single)' : 'Sherwani Fabrics'}</span>
                     {selectedType === type && <Check className="w-3.5 h-3.5" />}
                   </button>
                 ))}
@@ -455,7 +455,7 @@ export default function PLP({
                           : 'bg-stone-50 text-stone-600 border-stone-100'
                       }`}
                     >
-                      <span className="font-sans">{type === 'Set' ? 'Kurti + Plazzo Sets' : type === 'Top Only' ? 'Tops / Kurtis Only' : 'Unstitched Materials'}</span>
+                      <span className="font-sans">{type === 'Set' ? 'Sherwani & Kurta Sets' : type === 'Top Only' ? 'Kurtas & Thoobs (Single)' : 'Sherwani Fabrics'}</span>
                       {selectedType === type && <Check className="w-3.5 h-3.5" />}
                     </button>
                   ))}

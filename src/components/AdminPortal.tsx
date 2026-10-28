@@ -144,7 +144,7 @@ export default function AdminPortal({
       localStorage.removeItem('sumera_admin_lockout');
       setLoginAttempts(0);
       setPinInput('');
-      onShowToast('✓ Authentication successful. Welcome to Sumera Admin Portal.', 'success');
+      onShowToast('✓ Authentication successful. Welcome to Nomaan Admin Portal.', 'success');
     } else {
       const nextAttempts = loginAttempts + 1;
       setLoginAttempts(nextAttempts);
@@ -372,7 +372,7 @@ export default function AdminPortal({
           <div className="flex items-center gap-2.5">
             <Settings className="w-5 h-5 text-amber-400 animate-spin-slow" />
             <div>
-              <h2 className="font-serif text-base md:text-xl font-bold tracking-wide">Sumera Admin Control</h2>
+              <h2 className="font-serif text-base md:text-xl font-bold tracking-wide">Nomaan Admin Control</h2>
               <p className="text-[9px] md:text-[10px] text-stone-400 font-sans font-light">Proprietary Storefront Management Console</p>
             </div>
           </div>
@@ -414,7 +414,7 @@ export default function AdminPortal({
                   </div>
                   <h3 className="font-serif text-xl font-bold text-stone-900">Security Authentication Required</h3>
                   <p className="text-xs text-stone-500 max-w-sm">
-                    Access is restricted strictly to Sumera Collections administration. Please enter your 6-digit credential PIN to unlock management features.
+                    Access is restricted strictly to Nomaan Brothers administration. Please enter your 6-digit credential PIN to unlock management features.
                   </p>
                 </div>
 

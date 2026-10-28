@@ -82,10 +82,10 @@ export default function Header({
           {/* Center: Branding (Heritage Serif paired with clean tracked sans-serif) */}
           <div className="text-center select-none cursor-pointer" onClick={onNavigateHome}>
             <h1 className="font-serif text-xl md:text-2xl lg:text-3xl font-semibold text-stone-900 tracking-wide leading-none">
-              Sumera
+              Nomaan
             </h1>
             <p className="font-sans text-[9px] md:text-[10px] uppercase font-semibold text-stone-500 tracking-[0.25em] mt-0.5 md:mt-1">
-              Collections
+              Brothers • The Designer Sherwani House
             </p>
           </div>
 
@@ -164,7 +164,7 @@ export default function Header({
                   <input
                     id="search-input-field"
                     type="text"
-                    placeholder="Search kurtis, plazzos, unstitched dress materials..."
+                    placeholder="Search sherwanis, kurtas, arabic thoobs, jodhpuri suits..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full pl-4 pr-10 py-3 border border-stone-200 rounded-lg text-sm focus:outline-none focus:border-stone-800 font-sans"
@@ -184,7 +184,7 @@ export default function Header({
               <div className="mt-4">
                 <p className="text-[11px] uppercase font-semibold text-stone-400 tracking-wider mb-2">Popular Searches</p>
                 <div className="flex flex-wrap gap-2">
-                  {['Rayon Set', 'Printed Top', 'Maxi', 'Chanderi Unstitched', 'Charmi Vol 3'].map((tag) => (
+                  {['Groom Sherwani', 'Sequence Kurta', 'Arabic Thoob', 'Jodhpuri Suit', 'Silk Safa & Mala'].map((tag) => (
                     <button
                       id={`search-popular-${tag.toLowerCase().replace(/\s+/g, '-')}`}
                       key={tag}

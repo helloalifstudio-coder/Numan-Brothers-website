@@ -106,10 +106,10 @@ export default function CartDrawer({
     setCouponError('');
     const code = couponCode.trim().toUpperCase();
 
-    if (code === 'SUMERA10') {
-      setAppliedDiscount({ code: 'SUMERA10', type: 'percent', value: 10 });
+    if (code === 'NOMAAN10' || code === 'SUMERA10') {
+      setAppliedDiscount({ code: 'NOMAAN10', type: 'percent', value: 10 });
       setCouponCode('');
-      if (onShowToast) onShowToast('✓ Coupon SUMERA10 applied! Saved 10% off your subtotal.', 'success');
+      if (onShowToast) onShowToast('✓ Coupon NOMAAN10 applied! Saved 10% off your subtotal.', 'success');
     } else if (code === 'WELCOME100') {
       setAppliedDiscount({ code: 'WELCOME100', type: 'flat', value: 100 });
       setCouponCode('');
@@ -123,7 +123,7 @@ export default function CartDrawer({
       setCouponError(errMsg);
       if (onShowToast) onShowToast(errMsg, 'error');
     } else {
-      const errMsg = 'Invalid coupon code. Try SUMERA10 (10% off) or WELCOME100';
+      const errMsg = 'Invalid coupon code. Try NOMAAN10 (10% off) or WELCOME100';
       setCouponError(errMsg);
       if (onShowToast) onShowToast(errMsg, 'error');
     }
@@ -159,7 +159,7 @@ export default function CartDrawer({
         `\n`;
     }
 
-    const message = `🌟 *NEW ORDER FROM SUMERA COLLECTIONS* 🌟\n\n` +
+    const message = `🌟 *NEW ORDER / ENQUIRY - NOMAAN BROTHERS* 🌟\n*The Designer Sherwani House — Mandi Bazar, Warangal*\n\n` +
       idSection +
       `*Date:* ${new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}\n\n` +
       customerDetails +
@@ -195,7 +195,7 @@ export default function CartDrawer({
     }
 
     // Generate random Order ID
-    const orderId = `SC-${Math.floor(100000 + Math.random() * 900000)}`;
+    const orderId = `NB-${Math.floor(100000 + Math.random() * 900000)}`;
 
     // Generate WhatsApp Redirect Link
     const waUrl = getWhatsAppUrl(orderId);
@@ -295,7 +295,7 @@ export default function CartDrawer({
 
                             {/* Info */}
                             <div className="flex-1 min-w-0">
-                              <span className="text-[10px] font-sans font-bold text-stone-400 uppercase tracking-wider">Sumera Collections</span>
+                              <span className="text-[10px] font-sans font-bold text-stone-400 uppercase tracking-wider">Nomaan Brothers</span>
                               <h4 className="text-xs font-serif font-medium text-stone-800 line-clamp-1">{item.product.title}</h4>
                               <p className="text-[11px] text-stone-500 font-sans mt-0.5">
                                 Size: <span className="font-semibold text-stone-700">{item.selectedSize}</span> | Color: <span className="font-semibold text-stone-700">{item.selectedColor}</span>
@@ -354,7 +354,7 @@ export default function CartDrawer({
                           <input
                             id="cart-coupon-input"
                             type="text"
-                            placeholder="Try SUMERA10 or WELCOME100"
+                            placeholder="Try NOMAAN10 or WELCOME100"
                             value={couponCode}
                             onChange={(e) => setCouponCode(e.target.value)}
                             className="flex-1 bg-white border border-stone-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-stone-800 font-mono font-bold uppercase tracking-wider"
@@ -511,7 +511,7 @@ export default function CartDrawer({
                   </div>
 
                   <p className="text-[10px] text-stone-400">
-                    *We use standard 256-bit encryption. Sumera Collections guarantees safe parcel delivery.
+                    *We use standard 256-bit encryption. Nomaan Brothers guarantees safe parcel delivery & perfect fit.
                   </p>
 
                   <button
@@ -553,7 +553,7 @@ export default function CartDrawer({
                       <span>Final Action Required</span>
                     </span>
                     <p className="text-[11px] text-emerald-950 font-medium leading-relaxed">
-                      To guarantee prompt processing and dispatch, please click below to send your complete order summary to Sumera support on WhatsApp (*9908597337*):
+                      To guarantee prompt processing and dispatch, please click below to send your complete order summary to Nomaan Brothers support on WhatsApp (*9908597337*):
                     </p>
                     <a
                       href={getWhatsAppUrl(placedOrderId)}
@@ -572,7 +572,7 @@ export default function CartDrawer({
                       <span>Loyalty Reward Points Credited!</span>
                     </span>
                     <p className="text-[10px] text-stone-500 mt-0.5">
-                      Since you spent ₹{totalAmount}, we credited **{Math.round(totalAmount/10)} SC points** to your Sumera Rewards bubble!
+                      Since you spent ₹{totalAmount}, we credited **{Math.round(totalAmount/10)} NB points** to your Nomaan Royal Rewards bubble!
                     </p>
                   </div>
 

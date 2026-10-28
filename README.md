@@ -1,100 +1,84 @@
-# Sumera Collections
+# Nomaan Brothers — The Designer Sherwani House
 
-Premium D2C Indian Women's Ethnic & Fusion Wear Storefront.
+> **Warangal’s Premier Groom & Ethnic Menswear Boutique**  
+> *Opposite Madras Masjid, Mandi Bazar, JPN Road, Sherpura, Warangal, Telangana - 506002*  
+> *Instagram: [@nomaan_brothers_](https://instagram.com/nomaan_brothers_) | WhatsApp: [+91 99085 97337](https://wa.me/919908597337)*
 
-## Prerequisites
+A high-performance, mobile-first luxury e-commerce and catalog web application engineered for **Nomaan Brothers — The Designer Sherwani House**. Built for seamless groom consultations, festive menswear shopping, custom made-to-measure tailoring, and instant WhatsApp order routing.
 
-- Node.js (v18 or higher recommended)
-- npm or yarn
-- A Google Firebase account for the Firestore database.
+---
 
-## Step-by-Step Installation
+## 🌟 Key Features
 
-1. **Clone the repository.**
-2. **Install dependencies:**
-   ```bash
-   npm install
-   ```
-3. **Configure Environment Variables:**
-   - Copy the `.env.example` file to `.env`:
-     ```bash
-     cp .env.example .env
-     ```
-   - Open `.env` and fill in the required API keys (e.g., Firebase credentials, Gemini API key if required).
+1. **Heritage & Luxury Design Language:**
+   - Bespoke typography pairing editorial serif headings with clean tracked sans-serif interfaces.
+   - Fluid responsive layout optimized for mobile screens (touch-friendly swipe cards, sticky bottom action bars, collapsible drawers).
 
-## Firebase Configuration
+2. **Specialized Groom & Menswear Collections:**
+   - **Royal Groom Sherwanis:** Handcrafted Zardozi, dabka, cutdana, and micro-velvet imperial groom sets with matching churidars, stoles, and chunnis.
+   - **Sequence & Festive Kurtas:** Haldi/Sangeet mirror-work and Lucknowi Chikan threadwork kurtas.
+   - **Authentic Arabic Thoobs & Jubbas:** Imported Saudi and Omani style collarless thoobs with detachable tarboosh tassels.
+   - **Indo-Western & Royal Jodhpuris:** Structured Bandhgalas and asymmetric Angrakha silhouettes.
+   - **Groom Accessories:** Pre-tied Chanderi Safas (pagdis), royal pearl malas, Kundan kalgis, and hand-embroidered leather mojaris (juttis).
 
-This project uses Firestore as the backend database.
+3. **Direct WhatsApp Concierge & Order Routing:**
+   - Every product page features a 1-tap **"Inquire / Order on WhatsApp"** button that pre-populates item details, selected size, chosen colorway, and live link directly to owner WhatsApp (`+91 99085 97337`).
+   - Integrated Cart Drawer generates a structured order receipt for quick WhatsApp dispatch and offline showroom trials.
 
-1. Create a project in the [Firebase Console](https://console.firebase.google.com/).
-2. Enable Firestore and set up Security Rules (as defined in `firestore.rules`).
-3. Set up Firebase Authentication (if required).
-4. Obtain your Firebase SDK configuration object and set the corresponding environment variables in your `.env` file.
+4. **Interactive Size Guide & Measurement Spec:**
+   - Detailed garment sizing (Chest 38" to 46", Length, Shoulder, Waist) with made-to-measure tailoring recommendations.
 
-## Running Locally
+5. **Customer Loyalty & VIP Club:**
+   - **Nomaan Royal Club**: Earn 10 NB Points per ₹100 spent, redeemable for instant coupons (`NOMAAN10`, `WELCOME100`, `ROYAL250`).
+   - Live rewards bubble and account portal with order history tracking.
 
-- **Start development server:**
-  ```bash
-  npm run dev
-  ```
-  The application will run on `http://localhost:3000`.
+6. **Admin Control Console:**
+   - Protected 6-digit PIN management portal for live product updates, orders review, and hero banner customizations.
 
-## Troubleshooting
+---
 
-### Dependency Issues
-If you encounter `module not found` errors:
-- Ensure all dependencies are installed: `npm install`
-- Clear cache and reinstall: `rm -rf node_modules package-lock.json && npm install`
+## 🛠️ Tech Stack
 
-### Database/Authentication Issues
-- Check Firebase Security Rules in `firestore.rules`.
-- Ensure your Firestore database is correctly provisioned and in the right region.
-- Ensure all required environment variables are set in your `.env` file.
+- **Framework:** React 19 + TypeScript
+- **Bundler:** Vite 6
+- **Styling:** Tailwind CSS v4
+- **Animations:** Motion (Framer Motion)
+- **Icons:** Lucide React
+- **SEO & Meta:** React Helmet Async & Schema.org JSON-LD
 
-### Build Failures
-- Run `npm run build` locally to ensure the project compiles correctly. If it fails, check the logs for syntax errors or missing module imports.
+---
 
-## Deployment Guide (GitHub & Vercel)
+## 🚀 Quickstart & Development
 
-This project is built as a high-performance, single-page application (SPA) using React 19, Vite, and Tailwind CSS. It is fully ready to deploy instantly with zero complex server configurations.
+### 1. Install Dependencies
+```bash
+bun install
+# or
+npm install
+```
 
-### 1. Push to GitHub
+### 2. Run Development Server
+```bash
+bun run dev
+# or
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-1. Initialize git if you haven't already:
-   ```bash
-   git init
-   ```
-2. Add your files:
-   ```bash
-   git add .
-   ```
-3. Commit your changes:
-   ```bash
-   git commit -m "feat: configure deployment settings for Vercel and GitHub"
-   ```
-4. Create a new repository on GitHub (keep it public or private).
-5. Link your local repository to GitHub and push:
-   ```bash
-   git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
-   git branch -M main
-   git push -u origin main
-   ```
+### 3. Build for Production
+```bash
+bun run build
+# or
+npm run build
+```
 
-### 2. Deploy on Vercel
+---
 
-1. **Sign in to Vercel** and click **"Add New" -> "Project"**.
-2. **Import your GitHub repository** containing this project.
-3. Vercel will automatically detect the **Vite** configuration.
-4. Keep the default Build and Output Settings:
-   - **Framework Preset**: Vite
-   - **Build Command**: `npm run build`
-   - **Output Directory**: `dist`
-5. **Configure Environment Variables** in the project settings before clicking "Deploy". Copy the values from your `firebase-applet-config.json` or your Firebase Console into these variables:
-   - `VITE_FIREBASE_API_KEY`
-   - `VITE_FIREBASE_AUTH_DOMAIN`
-   - `VITE_FIREBASE_PROJECT_ID`
-   - `VITE_FIREBASE_STORAGE_BUCKET`
-   - `VITE_FIREBASE_MESSAGING_SENDER_ID`
-   - `VITE_FIREBASE_APP_ID`
-   - `VITE_FIREBASE_DATABASE_ID`
-6. Click **"Deploy"**. Your application will build, deploy, and receive a secure production URL in under a minute!
+## ☁️ Deployment (Vercel)
+
+This application is ready for 1-click deployment on **Vercel**:
+1. Connect this GitHub repository (`sumera_collections`) to Vercel.
+2. Framework Preset: **Vite**.
+3. Build Command: `npm run build` or `bun run build`.
+4. Output Directory: `dist`.
+5. Click **Deploy**. Your custom showroom link will be live in ~30 seconds!

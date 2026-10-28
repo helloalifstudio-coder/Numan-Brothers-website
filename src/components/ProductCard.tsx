@@ -136,7 +136,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
         <div className="space-y-1">
           {/* Vendor & Rating */}
           <div className="flex items-center justify-between text-[11px] text-stone-400 font-sans">
-            <span className="uppercase tracking-wider font-semibold">Sumera Collections</span>
+            <span className="uppercase tracking-wider font-semibold">Nomaan Brothers</span>
             <span className="flex items-center gap-1">
               <Star className="w-3 h-3 fill-amber-400 stroke-amber-400" />
               <span className="text-stone-700 font-semibold">{product.rating}</span>

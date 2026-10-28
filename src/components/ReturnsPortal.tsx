@@ -380,7 +380,7 @@ export default function ReturnsPortal({
                       <div className="flex gap-2.5 p-2 bg-amber-50 rounded border border-amber-100 text-amber-800">
                         <Sparkles className="w-4 h-4 flex-shrink-0 text-amber-500" />
                         <p className="text-[11px] font-medium leading-normal">
-                          <strong>Instant loyalty refund applied!</strong> We have credited the total with a +10% retention bonus directly to your Sumera Loyalty Club wallet!
+                          <strong>Instant loyalty refund applied!</strong> We have credited the total with a +10% retention bonus directly to your Nomaan Royal Club wallet!
                         </p>
                       </div>
                     )}
@@ -432,7 +432,7 @@ export default function ReturnsPortal({
                   <div className="p-4 bg-amber-50/55 border border-amber-100/70 rounded-xl flex gap-3 text-amber-800 text-xs leading-relaxed">
                     <Sparkles className="w-5 h-5 text-amber-500 flex-shrink-0" />
                     <div>
-                      <p className="font-bold">Sumera Quick Exchange Pledge</p>
+                      <p className="font-bold">Nomaan Brothers Fitting & Exchange Pledge</p>
                       <p className="mt-0.5 text-amber-700">Not quite the perfect look or size? Choose direct exchanges or instant refund to store credits (with a bonus +10% loyalty gift) to bypass bank transfer latency.</p>
                     </div>
                   </div>
@@ -699,7 +699,7 @@ export default function ReturnsPortal({
                             >
                               <div className="flex items-center gap-2 font-bold text-stone-900 text-xs">
                                 <Coins className="w-4 h-4 text-amber-500" />
-                                <span>Sumera Loyalty wallet credit</span>
+                                <span>Nomaan Royal wallet credit</span>
                                 <span className="bg-amber-400 text-[9px] text-stone-950 font-extrabold px-1.5 py-0.5 rounded ml-auto">+10% BONUS</span>
                               </div>
                               <p className="text-[10px] text-stone-500 mt-1 leading-normal">Instant. Add total return price + an additional 10% bonus immediately to your customer wallet for instant store checkout.</p>
@@ -959,7 +959,7 @@ export default function ReturnsPortal({
                         <div className="pt-2 border-t border-stone-200 flex justify-between text-[11px] text-stone-600">
                           <span>Refund amount details:</span>
                           <span className="font-bold text-stone-900">
-                            ₹{req.refundAmount} via {req.refundMethod === 'points' ? 'Sumera Wallet points (instant)' : 'Original Payment Mode'}
+                            ₹{req.refundAmount} via {req.refundMethod === 'points' ? 'Nomaan Wallet points (instant)' : 'Original Payment Mode'}
                           </span>
                         </div>
                       )}

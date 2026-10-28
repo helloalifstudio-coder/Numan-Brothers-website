@@ -215,10 +215,10 @@ export default function App() {
   }, []);
 
   // Real-time Homepage Hero customization state
-  const [heroImage, setHeroImage] = useState('https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=1600&q=80');
-  const [heroBadge, setHeroBadge] = useState('Festive Collection 2026');
-  const [heroTitle, setHeroTitle] = useState('Everyday Elegance Handcrafted Detail');
-  const [heroSubtitle, setHeroSubtitle] = useState('Loved by 50,000+ women. Premium rayon kurtis, sets, and Chanderi dress materials.');
+  const [heroImage, setHeroImage] = useState('https://images.unsplash.com/photo-1597983073493-88cd35cf93b0?auto=format&fit=crop&w=1600&q=80');
+  const [heroBadge, setHeroBadge] = useState('Royal Wedding Collection 2026');
+  const [heroTitle, setHeroTitle] = useState('The Designer Sherwani House');
+  const [heroSubtitle, setHeroSubtitle] = useState('Warangal’s premier destination for bespoke groom sherwanis, sequence kurtas, and Arabic thoobs. Opp. Madras Masjid, Mandi Bazar.');
 
   useEffect(() => {
     const unsubscribe = subscribeHeroSettings((data) => {
@@ -409,9 +409,9 @@ export default function App() {
     if (!newsletterSubscribed) {
       handleAwardPoints(100, 'Newsletter subscription bonus');
       setNewsletterSubscribed(true);
-      addToast('✓ Thank you for subscribing! We have credited 100 SC points to your rewards club. Copy Coupon: WELCOME100 for ₹100 flat off!', 'success');
+      addToast('✓ Thank you for subscribing! We have credited 100 NB points to your royal rewards club. Copy Coupon: WELCOME100 for ₹100 flat off!', 'success');
     } else {
-      addToast('You are already subscribed to the Sumera newsletter circle!', 'info');
+      addToast('You are already subscribed to the Nomaan VIP circle!', 'info');
     }
     setNewsletterEmail('');
   };
@@ -494,7 +494,7 @@ export default function App() {
     return (
       <>
         <Helmet>
-          <title>Admin Portal | Sumera Collections</title>
+          <title>Admin Portal | Nomaan Brothers</title>
         </Helmet>
         <AdminPortal
           onClose={() => setIsAdminOpen(false)}
@@ -531,8 +531,8 @@ export default function App() {
         }}
       />
       <Helmet>
-        <title>Sumera Collections | Premium Indian Ethnic & Fusion Wear</title>
-        <meta name="description" content="Discover Sumera Collections for exquisite Indian ethnic wear, fusion dresses, and traditional attire. Shop luxury, high-quality ethnic fashion online." />
+        <title>Nomaan Brothers | The Designer Sherwani House — Warangal</title>
+        <meta name="description" content="Nomaan Brothers — The Designer Sherwani House in Mandi Bazar, Warangal. Bespoke groom sherwanis, sequence kurtas, and Arabic thoobs." />
       </Helmet>
 
       {/* Slide-in Full-Screen Left Drawer Menu */}
@@ -638,9 +638,9 @@ export default function App() {
                   <h3 className="font-serif text-2xl font-semibold text-stone-900">Our Heritage Story</h3>
                   <p className="text-sm leading-relaxed">{STORIES_INFO.about}</p>
                   <div className="p-3 bg-stone-50 border border-stone-150 rounded-xl text-xs space-y-1">
-                    <p>📍 **HQ**: Warangal, Telangana</p>
-                    <p>🧵 **Crafts supported**: Kashmiri Crewel work, Jaipur Sanganeri block printing, Chanderi weaves</p>
-                    <p>🤝 **Artisan empowerment**: Fair trade support for 250+ rural women weavers</p>
+                    <p>📍 **Showroom**: Opp. Madras Masjid, Mandi Bazar, JPN Road, Warangal</p>
+                    <p>🧵 **Specialties**: Pure Raw Silk Zardozi, Micro Velvet Zari, Arabic Jubbas, Sequence Kurtas</p>
+                    <p>🤝 **Custom Fitting**: Master-tailor bespoke measurements & in-store alteration trial</p>
                   </div>
                 </div>
               )}
@@ -651,7 +651,7 @@ export default function App() {
                     <Trophy className="w-6 h-6 text-amber-500 flex-shrink-0" />
                     <div>
                       <span className="text-[9px] font-sans font-bold uppercase tracking-widest text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100">
-                        Sumera Loyalty Club
+                        Nomaan Royal Club
                       </span>
                       <h3 className="font-serif text-xl md:text-2xl font-semibold text-stone-900 mt-0.5">Your Account Portal</h3>
                     </div>
@@ -667,7 +667,7 @@ export default function App() {
                         </p>
                       </div>
                       <span className="bg-amber-400 text-stone-950 text-[10px] font-extrabold px-2.5 py-1 rounded-lg shadow-xs">
-                        {points.balance} SC Points
+                        {points.balance} NB Points
                       </span>
                     </div>
 
@@ -802,7 +802,7 @@ export default function App() {
                             type="text"
                             value={userProfile.address}
                             onChange={(e) => handleUpdateProfileField('address', e.target.value)}
-                            placeholder="e.g. Flat 302, Block C, Sumera Heights"
+                            placeholder="e.g. Near Madras Masjid, Mandi Bazar, Warangal"
                             className="w-full bg-stone-50 border border-stone-200 rounded-lg p-2.5 text-xs focus:outline-none focus:border-stone-800 font-sans"
                           />
                         </div>
@@ -836,7 +836,7 @@ export default function App() {
                                   <span className="bg-emerald-50 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded border border-emerald-100">
                                     ● {order.status}
                                   </span>
-                                  <span className="text-[9px] font-mono text-stone-400">Shipped via SC Express</span>
+                                  <span className="text-[9px] font-mono text-stone-400">Shipped via NB Express / Store Pickup</span>
                                 </div>
                               </div>
 
@@ -882,7 +882,7 @@ export default function App() {
                   {profileSubTab === 'points' && (
                     <div className="space-y-2.5 pt-1">
                       <p className="text-xs text-stone-400 leading-relaxed">
-                        Detailed ledger of your Sumera Points activity. Earn 10% points on every purchase!
+                        Detailed ledger of your Nomaan Royal Points activity. Earn 10% points on every purchase!
                       </p>
                       <div className="divide-y divide-stone-100 max-h-[280px] overflow-y-auto pr-1 border border-stone-200/60 rounded-xl p-3 bg-stone-50">
                         {points.history.map((h) => (
@@ -892,7 +892,7 @@ export default function App() {
                               <p className="text-[10px] text-stone-400 mt-0.5">{h.date}</p>
                             </div>
                             <span className={`font-bold font-mono ${h.points > 0 ? 'text-emerald-700' : 'text-red-700'}`}>
-                              {h.points > 0 ? `+${h.points}` : h.points} SC
+                              {h.points > 0 ? `+${h.points}` : h.points} NB
                             </span>
                           </div>
                         ))}
@@ -976,7 +976,7 @@ export default function App() {
                   {/* Backdrop Background Image */}
                   <img
                     src={heroImage}
-                    alt="Sumera Collection Model Wear"
+                    alt="Nomaan Brothers Groom Collection"
                     className="absolute inset-0 w-full h-full object-cover object-top opacity-55 hover:scale-102 transition-transform duration-10000"
                     loading="lazy"
                     referrerPolicy="no-referrer"
@@ -1021,14 +1021,14 @@ export default function App() {
               {/* 2. Horizontal circular category navigation quick explore (Only on homepage) */}
               {activeCategory === 'all' && !searchQuery && (
                 <section className="max-w-7xl mx-auto px-4 py-8 md:py-12">
-                  <p className="text-[10px] font-sans font-bold uppercase tracking-widest text-center text-stone-400 mb-6">Explore Sumera Collections</p>
+                  <p className="text-[10px] font-sans font-bold uppercase tracking-widest text-center text-stone-400 mb-6">Explore Nomaan Brothers Collections</p>
                   <div className="flex gap-4 md:gap-8 overflow-x-auto justify-start md:justify-center py-2 px-1 scrollbar-hide">
                     {[
-                      { id: 'kurtis', name: 'Kurtis & Sets', img: 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=150&q=80' },
-                      { id: 'tops', name: 'Fusion Tops', img: 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=150&q=80' },
-                      { id: 'maxi-dresses', name: 'Maxi Dresses', img: 'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=150&q=80' },
-                      { id: 'bottom-sets', name: 'Plazzo Sets', img: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=150&q=80' },
-                      { id: 'unstitched', name: 'Unstitched Weaves', img: 'https://images.unsplash.com/photo-1561414927-6d86591d0c4f?auto=format&fit=crop&w=150&q=80' }
+                      { id: 'sherwanis', name: 'Royal Sherwanis', img: 'https://images.unsplash.com/photo-1597983073493-88cd35cf93b0?auto=format&fit=crop&w=150&q=80' },
+                      { id: 'kurtas', name: 'Sequence Kurtas', img: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=150&q=80' },
+                      { id: 'thoobs', name: 'Arabic Thoobs', img: 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=150&q=80' },
+                      { id: 'indo-western', name: 'Indo-Western', img: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=150&q=80' },
+                      { id: 'accessories', name: 'Safas & Accessories', img: 'https://images.unsplash.com/photo-1597983073493-88cd35cf93b0?auto=format&fit=crop&w=150&q=80' }
                     ].map((cat) => (
                       <button
                         id={`home-cat-bubble-${cat.id}`}
@@ -1072,10 +1072,10 @@ export default function App() {
             <div className="lg:col-span-5 space-y-1 text-center md:text-left">
               <span className="text-[10px] text-amber-400 font-bold uppercase tracking-widest flex items-center justify-center md:justify-start gap-1">
                 <Gift className="w-3.5 h-3.5" />
-                <span>Join The Sumera Circle</span>
+                <span>Join The Nomaan VIP Circle</span>
               </span>
               <h3 className="font-serif text-lg md:text-2xl font-semibold text-stone-100">Subscribe for 10% Off & +100 Rewards</h3>
-              <p className="text-xs text-stone-400 font-sans mt-1">Get instant access to limited edition kurti launches and styling guidelines.</p>
+              <p className="text-xs text-stone-400 font-sans mt-1">Get instant VIP access to new groom sherwani launches, Eid arrivals, and styling guidelines.</p>
             </div>
 
             <div className="lg:col-span-7">
@@ -1111,16 +1111,16 @@ export default function App() {
           {/* Brand story */}
           <div className="space-y-3.5">
             <h4 className="font-serif text-lg font-semibold text-stone-100 tracking-wide select-none">
-              Sumera
+              Nomaan Brothers
             </h4>
             <p className="text-xs text-stone-400 leading-relaxed font-sans font-light">
-              We blend heritage embroidery craftsmanship with modern silhouettes. Everyday ethnic and vacation wear designed for effortless grace.
+              The Designer Sherwani House — Mandi Bazar, Warangal. Bespoke groom wedding sherwanis, festive sequence kurtas, and imported Arabic thoobs.
             </p>
             <div className="flex gap-2.5">
               <a href="#" className="p-2 bg-stone-850 bg-stone-800/50 hover:bg-stone-800 rounded-full text-stone-300 transition-colors">
                 <Instagram className="w-4.5 h-4.5" />
               </a>
-              <span className="text-xs text-stone-400 font-mono self-center">@SumeraCollections</span>
+              <span className="text-xs text-stone-400 font-mono self-center">@nomaan_brothers_</span>
             </div>
           </div>
 
@@ -1129,9 +1129,9 @@ export default function App() {
             <h5 className="text-xs font-bold text-stone-100 uppercase tracking-widest">Shop Catalog</h5>
             <ul className="text-xs text-stone-400 space-y-2 font-sans font-light">
               <li><button onClick={() => handleSelectCategory('new-arrivals')} className="hover:text-white transition-colors text-left">New Arrivals</button></li>
-              <li><button onClick={() => handleSelectCategory('bottom-sets')} className="hover:text-white transition-colors text-left">Kurti + Plazzo Sets</button></li>
-              <li><button onClick={() => handleSelectCategory('tops')} className="hover:text-white transition-colors text-left">Printed Cotton Tops</button></li>
-              <li><button onClick={() => handleSelectCategory('unstitched')} className="hover:text-white transition-colors text-left">Silk Dress Materials</button></li>
+              <li><button onClick={() => handleSelectCategory('sherwanis')} className="hover:text-white transition-colors text-left">Royal Groom Sherwanis</button></li>
+              <li><button onClick={() => handleSelectCategory('kurtas')} className="hover:text-white transition-colors text-left">Sequence & Festive Kurtas</button></li>
+              <li><button onClick={() => handleSelectCategory('thoobs')} className="hover:text-white transition-colors text-left">Arabic Thoobs & Jubbas</button></li>
               <li><button onClick={() => handleSelectCategory('sale')} className="hover:text-white transition-colors text-left font-bold text-red-400">Clearance Sale</button></li>
             </ul>
           </div>
@@ -1152,7 +1152,7 @@ export default function App() {
             <h5 className="text-xs font-bold text-stone-100 uppercase tracking-widest">Contact Head Office</h5>
             <div className="flex items-start gap-2">
               <MapPin className="w-4 h-4 text-stone-500 mt-0.5 flex-shrink-0" />
-              <span>Sumera Collections, Warangal, Telangana</span>
+              <span>Opposite Madras Masjid, Mandi Bazar, JPN Road, Sherpura, Warangal, Telangana - 506002</span>
             </div>
             <div className="flex items-center gap-2">
               <Phone className="w-4 h-4 text-stone-500 flex-shrink-0" />
@@ -1169,7 +1169,7 @@ export default function App() {
         {/* Lower Banner & Payment Icons */}
         <div className="border-t border-stone-850 bg-stone-950/40 py-6 text-xs text-stone-500 text-center font-sans">
           <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p>© 2026 Sumera Collections. All Rights Reserved. Replicated Modest Essentials logic. Powered by Shopify.</p>
+            <p>© 2026 Nomaan Brothers — The Designer Sherwani House. All Rights Reserved. Opposite Madras Masjid, Mandi Bazar, Warangal.</p>
             
             {/* Payment Icons */}
             <div className="flex items-center gap-2 grayscale opacity-60">

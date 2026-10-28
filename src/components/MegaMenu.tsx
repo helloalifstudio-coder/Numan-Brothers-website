@@ -56,8 +56,8 @@ export default function MegaMenu({
             {/* Header */}
             <div className="p-5 border-b border-stone-100 flex items-center justify-between">
               <div>
-                <span className="font-serif font-semibold text-lg text-stone-900">Sumera Collections</span>
-                <p className="text-[10px] font-sans text-stone-400 uppercase tracking-wider">Everyday Elegance</p>
+                <span className="font-serif font-semibold text-lg text-stone-900">Nomaan Brothers</span>
+                <p className="text-[10px] font-sans text-stone-400 uppercase tracking-wider">The Designer Sherwani House • Warangal</p>
               </div>
               <button
                 id="megamenu-close-btn"
@@ -127,7 +127,7 @@ export default function MegaMenu({
             <div className="p-5 border-t border-stone-100 bg-stone-50">
               {/* Trust Tag */}
               <div className="text-[10px] font-sans text-stone-500 font-medium text-center">
-                Loved by 100,000+ women ♡
+                Warangal's Trusted Groom & Ethnic House ♡
               </div>
             </div>
           </motion.div>

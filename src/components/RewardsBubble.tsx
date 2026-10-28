@@ -55,8 +55,8 @@ export default function RewardsBubble({
   ];
 
   const claimRewards = [
-    { code: 'SUMERA10', desc: 'Flat 10% Off coupon', cost: 150 },
-    { code: 'WELCOME100', desc: 'Save ₹100 on any kurti', cost: 100 },
+    { code: 'NOMAAN10', desc: 'Flat 10% Off coupon', cost: 150 },
+    { code: 'WELCOME100', desc: 'Save ₹100 on any sherwani or kurta', cost: 100 },
     { code: 'FESTIVE250', desc: 'Save ₹250 (orders above ₹1999)', cost: 250 }
   ];
 
@@ -75,7 +75,7 @@ export default function RewardsBubble({
             className="flex items-center gap-2 px-4 py-3 bg-stone-900 text-stone-100 rounded-full shadow-lg hover:bg-stone-800 transition-all focus:outline-none border border-stone-800"
           >
             <Gift className="w-5 h-5 text-amber-400 animate-bounce" />
-            <span className="text-xs font-bold uppercase tracking-wider">Sumera Rewards</span>
+            <span className="text-xs font-bold uppercase tracking-wider">Nomaan Rewards</span>
             <span className="bg-amber-400 text-stone-900 text-[10px] font-sans font-black px-1.5 py-0.5 rounded-full">
               {points.balance} pts
             </span>
@@ -104,14 +104,14 @@ export default function RewardsBubble({
 
               <div className="flex items-center gap-2">
                 <Trophy className="w-6 h-6 text-amber-400" />
-                <span className="font-serif text-base font-semibold tracking-wide text-amber-400">Sumera Loyalty Club</span>
+                <span className="font-serif text-base font-semibold tracking-wide text-amber-400">Nomaan Royal Club</span>
               </div>
               <p className="text-[10px] uppercase tracking-widest text-stone-400 mt-0.5">Earn points, unlock free designer wear</p>
 
               <div className="mt-4 pt-3 border-t border-stone-800 flex justify-between items-end">
                 <div>
                   <p className="text-[9px] uppercase font-semibold text-stone-400">Your Current Points Balance</p>
-                  <p className="text-2xl font-bold text-white font-sans">{points.balance} SC Points</p>
+                  <p className="text-2xl font-bold text-white font-sans">{points.balance} NB Points</p>
                 </div>
                 <span className="bg-amber-400 text-stone-900 text-[10px] font-bold px-2 py-0.5 rounded-full">
                   Club Member
@@ -202,7 +202,7 @@ export default function RewardsBubble({
 
             {/* Footer */}
             <div className="p-3.5 border-t border-stone-100 bg-stone-50 text-center text-[10px] text-stone-400">
-              Sumera loyalty members receive free gifting catalogs yearly ♡
+              Nomaan Brothers loyalty members receive exclusive seasonal groom previews ♡
             </div>
           </motion.div>
         )}
