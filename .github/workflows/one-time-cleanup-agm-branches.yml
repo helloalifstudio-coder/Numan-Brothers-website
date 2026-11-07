@@ -1,0 +1,102 @@
+# ONE-TIME CLEANUP: delete precisely thirteen obsolete, closed-PR AGM branches.
+# The merged release is already on main. Branch SHA checks prevent accidental
+# deletion if someone has added new commits since the user authorized cleanup.
+# Only fires on this workflow file's creation/change on main.
+name: One-time cleanup of merged AGM branches
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/one-time-cleanup-agm-branches.yml
+permissions:
+  contents: write
+jobs:
+  prune:
+    if: github.repository == 'helloalifstudio-coder/Numan-Brothers-website'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Refuse unexpected merge base or open PRs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          BEFORE_SHA: ${{ github.event.before }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$BEFORE_SHA" != "8818babddb2aa33bc589e5b4295be857f9a6f386" ]]; then
+            echo "::error::Main advanced unexpectedly; refuse automatic branch cleanup"
+            exit 1
+          fi
+          open_prs="$(gh api "repos/$GH_REPO/pulls?state=open&per_page=100" --jq 'length')"
+          if [[ "$open_prs" != "0" ]]; then
+            echo "::error::There are $open_prs open pull requests; refuse branch cleanup"
+            exit 1
+          fi
+      - name: Verify all exact branch heads before deletion
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          while read -r branch expected_sha; do
+            [[ "$branch" == agm/* ]] || exit 1
+            live_sha="$(gh api "repos/$GH_REPO/git/ref/heads/$branch" --jq '.object.sha')"
+            if [[ "$live_sha" != "$expected_sha" ]]; then
+              echo "::error::Ref moved: $branch ($live_sha != $expected_sha). Nothing deleted."
+              exit 1
+            fi
+          done <<'BRANCHES'
+          agm/architecture-cms-release-hardening ef70ffc87d2a92f24cf0f9c268e3931d9ecb8a30
+          agm/heritage-uiux-audit-2026-11 f5c8b725efc7f14ba9b717e6f9b9d30391fc8cad
+          agm/nomaan-supabase-cms-production 7c4fb922916b27f768a731a70c5fc187a89960b3
+          agm/nomaan-v2-navigation-homepage 1d6afa4d01e3fac04b04b615dab49488fc699b35
+          agm/noman-supabase-sql-editor-kit 0e80a32270437fe247b0a277defb743d648d9cb1
+          agm/phase1-security-fork-foundation 4b26cf819e1191244c8a4c28444140ed44b6b30c
+          agm/phase2-scalable-catalogue-private-media 37ded71bd348486a00f1af1106fddefa7099fce2
+          agm/phase3-studio-product-media-workflow 2f767b8a9310f95a6a6b70cb8a22e640a991eb25
+          agm/phase4-bulk-csv-image-imports 1a094e142b993fd50fbe3796ffb64e88689d581f
+          agm/phase5-crawlable-catalogue-performance 106b3b29e6260ad0bdb1287018e0a8b453224212
+          agm/phase6-release-acceptance-handover 1a43dec447487f39904dea14656102ef7932784e
+          agm/premium-product-atmosphere-home-discovery 40583fbb75b5fe1748f1fab8b465cbdc4c99569f
+          agm/staging-supabase-migration-pack e016011b15eaa2bddb15539902ca33604ded020a
+          BRANCHES
+      - name: Delete checked old refs (never main)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          while read -r branch expected_sha; do
+            [[ "$branch" == agm/* ]] || exit 1
+            gh api -X DELETE "repos/$GH_REPO/git/refs/heads/$branch" >/dev/null
+            echo "Deleted: $branch ($expected_sha)"
+          done <<'BRANCHES'
+          agm/architecture-cms-release-hardening ef70ffc87d2a92f24cf0f9c268e3931d9ecb8a30
+          agm/heritage-uiux-audit-2026-11 f5c8b725efc7f14ba9b717e6f9b9d30391fc8cad
+          agm/nomaan-supabase-cms-production 7c4fb922916b27f768a731a70c5fc187a89960b3
+          agm/nomaan-v2-navigation-homepage 1d6afa4d01e3fac04b04b615dab49488fc699b35
+          agm/noman-supabase-sql-editor-kit 0e80a32270437fe247b0a277defb743d648d9cb1
+          agm/phase1-security-fork-foundation 4b26cf819e1191244c8a4c28444140ed44b6b30c
+          agm/phase2-scalable-catalogue-private-media 37ded71bd348486a00f1af1106fddefa7099fce2
+          agm/phase3-studio-product-media-workflow 2f767b8a9310f95a6a6b70cb8a22e640a991eb25
+          agm/phase4-bulk-csv-image-imports 1a094e142b993fd50fbe3796ffb64e88689d581f
+          agm/phase5-crawlable-catalogue-performance 106b3b29e6260ad0bdb1287018e0a8b453224212
+          agm/phase6-release-acceptance-handover 1a43dec447487f39904dea14656102ef7932784e
+          agm/premium-product-atmosphere-home-discovery 40583fbb75b5fe1748f1fab8b465cbdc4c99569f
+          agm/staging-supabase-migration-pack e016011b15eaa2bddb15539902ca33604ded020a
+          BRANCHES
+      - name: Ensure main is the only branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          remaining="$(gh api --paginate "repos/$GH_REPO/branches?per_page=100" --jq '.[].name')"
+          if [[ "$remaining" != "main" ]]; then
+            echo "::error::Unexpected remaining branches: $remaining"
+            exit 1
+          fi
+          echo "Success: main is the only remaining branch."
