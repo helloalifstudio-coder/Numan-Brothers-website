@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { ArrowLeft, ArrowRight, Plus, Save, Send } from 'lucide-react';
-import { type CmsProductRow, type CmsMediaRow, isSafeHttps } from '../../lib/cmsData';
+import { type CmsProductRow, type CmsMediaRow, isSafeHttps, mediaPublicUrl } from '../../lib/cmsData';
 import { COLLECTION_ROUTES } from '../../storefront/navigation';
 import { AssetPicker, ErrorText, Field, inputClass, outlineClass, primaryClass } from './StudioShared';
 
@@ -54,33 +54,49 @@ export default function CmsProducts({client,userId,canPublish,media}:Props){
   const [busy,setBusy]=useState(false);
   const [error,setError]=useState<string|null>(null);
   const [message,setMessage]=useState<string|null>(null);
-  const [publishedCount,setPublishedCount]=useState(0);
+  const [totalCount,setTotalCount]=useState(0);
+  const [search,setSearch]=useState('');
+  const [statusFilter,setStatusFilter]=useState('all');
+  const [departmentFilter,setDepartmentFilter]=useState('all');
   const active=rows.find((r)=>r.id===id);
   const categories=COLLECTION_ROUTES.filter((c)=>!c.isDepartment && !c.isGroup && c.department===form.department);
   const approvedImages=media.filter((m)=>m.approved && m.mime_type.startsWith('image/'));
   const approvedVideos=media.filter((m)=>m.approved && m.mime_type.startsWith('video/'));
   const load=async()=>{
-    setLoading(true);
-    const [d,p]=await Promise.all([
-      client.from('nb_product_drafts').select('product_id,content,updated_at')
-        .order('updated_at',{ascending:false}).range(page*50,page*50+49),
-      client.from('nb_products').select('id,sku,slug,title,department,category_paths,description,fabric,sizes,image_urls,video_url,price,status,sort_rank,created_at,updated_at')
-        .order('updated_at',{ascending:false}).range(page*50,page*50+49),
-    ]);
-    if(d.error||p.error)setError(d.error?.message||p.error?.message||'Cannot load products.');
-    const published=(p.data||[]) as CmsProductRow[],drafts=(d.data||[]) as DraftRow[];
-    const map=new Map<string,Entry>();
-    for(const item of published)map.set(item.id,{id:item.id,label:item.title,live:item.status==='published',draft:false,form:fromPublished(item)});
-    for(const item of drafts){
-      const draft=fromUnknown(item.content);
-      map.set(item.product_id,{id:item.product_id,label:draft.title||'(Untitled draft)',
-        live:map.get(item.product_id)?.live||false,draft:true,form:draft});
-    }
-    setRows(Array.from(map.values()));setPublishedCount(published.filter(x=>x.status==='published').length);
+    setLoading(true);setError(null);
+    let query=client.from('nb_studio_product_index')
+      .select('id,title,sku,department,status,has_draft,updated_at',{count:'exact'});
+    const term=search.replace(/[^a-zA-Z0-9 -]/g,' ').trim().slice(0,72);
+    if(term)query=query.or('title.ilike.%'+term+'%,sku.ilike.%'+term+'%');
+    if(statusFilter!=='all')query=query.eq('status',statusFilter);
+    if(departmentFilter!=='all')query=query.eq('department',departmentFilter);
+    const {data,count,error}=await query.order('updated_at',{ascending:false})
+      .order('id',{ascending:true}).range(page*50,page*50+49);
+    if(error)setError(error.message);
+    setRows((data||[]).map(item=>({
+      id:item.id as string,label:item.title as string,live:item.status==='published',
+      draft:Boolean(item.has_draft),form:{...blank},
+    })));
+    setTotalCount(count||0);
     setLoading(false);
   };
-  useEffect(()=>{void load()},[page,client]);
-  const open=(entry:Entry)=>{setId(entry.id);setForm({...entry.form});setError(null);setMessage(null)};
+  useEffect(()=>{
+    const timer=setTimeout(()=>{void load()},250);
+    return()=>clearTimeout(timer);
+  },[page,client,search,statusFilter,departmentFilter]);
+  const open=async(entry:Entry)=>{
+    setId(entry.id);setError(null);setMessage(null);setBusy(true);
+    const [draft,published]=await Promise.all([
+      client.from('nb_product_drafts').select('content').eq('product_id',entry.id).maybeSingle(),
+      client.from('nb_products')
+        .select('id,sku,slug,title,department,category_paths,description,fabric,sizes,image_urls,video_url,price,status,sort_rank,created_at,updated_at')
+        .eq('id',entry.id).maybeSingle(),
+    ]);
+    if(draft.error||published.error)setError(draft.error?.message||published.error?.message||'Cannot open product');
+    else setForm(draft.data?fromUnknown(draft.data.content):
+      published.data?fromPublished(published.data as CmsProductRow):{...blank});
+    setBusy(false);
+  };
   const update=<K extends keyof Draft>(key:K,value:Draft[K])=>setForm((current)=>({...current,[key]:value}));
   const create=()=>{setId(crypto.randomUUID());setForm({...blank});setError(null);setMessage(null)};
   const save=async():Promise<boolean>=>{
@@ -103,7 +119,7 @@ export default function CmsProducts({client,userId,canPublish,media}:Props){
     const err=validate(form);
     if(err){setError(err);return;}
     if(form.imageUrls.some((url)=>!approvedImages.some((m)=>{
-      const stored=client.storage.from('nb-media').getPublicUrl(m.storage_path).data.publicUrl;
+      const stored=mediaPublicUrl(m.storage_path);
       return url===stored;
     }))){setError('Choose images from the approved media library.');return;}
     if(!await save())return;
@@ -119,6 +135,20 @@ export default function CmsProducts({client,userId,canPublish,media}:Props){
       <div><h2 className="font-serif text-3xl">Products</h2><p className="mt-2 text-sm text-stone-600">Create and edit private drafts; approved owners publish changes atomically.</p></div>
       <button type="button" className={primaryClass} onClick={create}><Plus size={16}/> New product</button>
     </div>
+    <div className="grid gap-3 rounded-lg border border-stone-200 bg-white p-4 sm:grid-cols-[1fr_auto_auto]">
+      <input className={inputClass} type="search" aria-label="Search products by name or SKU"
+        placeholder="Search by garment name or SKU…" value={search} onChange={e=>{setSearch(e.target.value);setPage(0);}}/>
+      <select aria-label="Filter product status" className={inputClass} value={statusFilter}
+        onChange={e=>{setStatusFilter(e.target.value);setPage(0);}}>
+        <option value="all">All statuses</option><option value="published">Published</option>
+        <option value="draft">Draft</option><option value="archived">Archived</option>
+      </select>
+      <select aria-label="Filter department" className={inputClass} value={departmentFilter}
+        onChange={e=>{setDepartmentFilter(e.target.value);setPage(0);}}>
+        <option value="all">All departments</option><option value="men">Men's Wear</option><option value="kids">Kids Wear</option>
+      </select>
+      <p className="text-xs text-stone-500 sm:col-span-3">{totalCount.toLocaleString('en-IN')} records · 50 per page</p>
+    </div>
     <div className="grid gap-5 lg:grid-cols-[300px_1fr]">
       <div className="max-h-[800px] space-y-2 overflow-y-auto rounded-lg border border-stone-200 bg-white p-3">
         {loading?<p className="p-3 text-sm">Loading catalogue…</p>:rows.length===0?<p className="p-3 text-sm text-stone-600">No products yet. Add the first genuine garment.</p>:
@@ -133,7 +163,7 @@ export default function CmsProducts({client,userId,canPublish,media}:Props){
         <div className="flex items-center justify-between border-t border-stone-200 pt-3 text-xs">
           <button disabled={page===0} onClick={()=>setPage((p)=>Math.max(0,p-1))} className={outlineClass}>Previous</button>
           <span>Page {page+1}</span>
-          <button disabled={rows.length<50} onClick={()=>setPage((p)=>p+1)} className={outlineClass}>Next</button>
+          <button disabled={(page+1)*50>=totalCount} onClick={()=>setPage((p)=>p+1)} className={outlineClass}>Next</button>
         </div>
       </div>
       <div className="rounded-lg border border-stone-200 bg-white p-5 md:p-7">
@@ -169,7 +199,7 @@ export default function CmsProducts({client,userId,canPublish,media}:Props){
               </label>)}
             </div>
           </fieldset>
-          <AssetPicker label="Product photographs" multiple media={media} selected={form.imageUrls} onChange={urls=>update('imageUrls',urls)}/>
+          <AssetPicker client={client} label="Product photographs" multiple media={media} selected={form.imageUrls} onChange={urls=>update('imageUrls',urls)}/>
           {form.imageUrls.length>1&&<div className="space-y-2"><p className="text-xs font-semibold">Gallery order (first image is the cover)</p>
             {form.imageUrls.map((url,index)=><div key={url} className="flex items-center gap-3 text-xs">
               <span>{index+1}.</span><img alt="" src={url} className="h-12 w-10 object-cover"/>
@@ -181,8 +211,8 @@ export default function CmsProducts({client,userId,canPublish,media}:Props){
               }}>Move down</button>
             </div>)}
           </div>}
-          <AssetPicker label="Optional uploaded product video" allowVideo media={media}
-            selected={approvedVideos.some(m=>client.storage.from('nb-media').getPublicUrl(m.storage_path).data.publicUrl===form.videoUrl)?[form.videoUrl]:[]}
+          <AssetPicker client={client} label="Optional uploaded product video" allowVideo media={media}
+            selected={approvedVideos.some(m=>mediaPublicUrl(m.storage_path)===form.videoUrl)?[form.videoUrl]:[]}
             onChange={urls=>update('videoUrl',urls[0]||'')}/>
           <Field label="Or external HTTPS video / streaming link"><input type="url" className={inputClass} value={form.videoUrl} onChange={e=>update('videoUrl',e.target.value)} placeholder="https://..."/></Field>
           <div className="flex flex-wrap gap-3 border-t border-stone-200 pt-6">
