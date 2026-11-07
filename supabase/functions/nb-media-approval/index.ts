@@ -67,7 +67,38 @@ const handler = withSupabase({ auth: 'user' }, async (req, ctx) => {
     return json(200, { ok: true, approved: true })
   }
 
-  // Fail closed for public catalogue selection before deleting the public copy.
+  // A published product or homepage must never be left with a broken gallery.
+  // Associations are rebuilt transactionally when a product is published.
+  const publicUrl = publicBucket.getPublicUrl(path).data.publicUrl
+  const [products, homes, collections, legacyImages, legacyVideo] = await Promise.all([
+    ctx.supabaseAdmin.from('nb_product_media')
+      .select('product_id', { count: 'exact', head: true }).eq('media_id', id),
+    ctx.supabaseAdmin.from('nb_home_public').select('content').eq('key', 'home').maybeSingle(),
+    ctx.supabaseAdmin.from('nb_categories')
+      .select('path', { count: 'exact', head: true }).eq('image_url', publicUrl),
+    ctx.supabaseAdmin.from('nb_products')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'published').contains('image_urls', [publicUrl]),
+    ctx.supabaseAdmin.from('nb_products')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'published').eq('video_url', publicUrl),
+  ])
+  if (products.error || homes.error || collections.error ||
+      legacyImages.error || legacyVideo.error) {
+    return json(503, { error: 'Cannot verify media references; revocation denied' })
+  }
+  const homeContent = homes.data?.content as Record<string, unknown> | undefined
+  const referencedByHome = homeContent &&
+    ['heroImage', 'menImage', 'kidsImage', 'storyImage']
+      .some(key => homeContent[key] === publicUrl)
+  if ((products.count ?? 0) > 0 || (collections.count ?? 0) > 0 ||
+      (legacyImages.count ?? 0) > 0 || (legacyVideo.count ?? 0) > 0 ||
+      referencedByHome) {
+    return json(409, { error: 'Remove this image from published products, homepage and collections before revoking approval' })
+  }
+
+  // No currently published content depends on this image. Unpublish metadata
+  // first, then remove the public Storage copy; failures require reconciliation.
   const { error: updateError } = await ctx.supabaseAdmin.from('nb_media')
     .update({ approved: false }).eq('id', id)
   if (updateError) return json(500, { error: 'Could not revoke media approval' })
