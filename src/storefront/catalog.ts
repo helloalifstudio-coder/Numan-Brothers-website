@@ -54,7 +54,7 @@ export const productPaths = (p: CatalogProduct): string[] => {
       if (/\bhandwork\b|\bembroider\b|\bzardozi\b/.test(name)) paths.push('/men/suits/handwork');
       if (/\bplain\b/.test(name)) paths.push('/men/suits/plain');
     }
-  } else if (!kids && /\bjutti\b|\bmojari\b/.test(name)) {
+  } else if (!kids && /\bjutti\b|\bmojaris?\b/.test(name)) {
     paths.push('/men/marriage/jutti');
   } else if (!kids && /\bpagdi\b|\bsafa\b|\bturban\b/.test(name)) {
     paths.push('/men/marriage/pagdi');
@@ -72,5 +72,7 @@ export const publicProducts = (products: CatalogProduct[]): CatalogProduct[] =>
   products.filter((product) => productPaths(product).length > 0);
 export const productPath = (product: Product): string =>
   '/products/' + encodeURIComponent(product.id);
-export const productImage = (product: Product): string =>
-  (Array.isArray(product.images) && product.images.find((image) => /^https:\/\//.test(image))) || '';
+export const productImage = (product: Product): string => {
+  const images = Array.isArray(product.images) ? product.images.filter((image) => /^https:\/\//.test(image)) : [];
+  return images.find((image) => !image.includes('img.youtube.com')) || images[0] || '';
+};
