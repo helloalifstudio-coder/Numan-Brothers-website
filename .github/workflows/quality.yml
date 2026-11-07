@@ -37,7 +37,7 @@ jobs:
       - name: TypeScript checks
         run: bun run lint
       - name: Navigation and catalogue tests
-        run: bun test tests/navigation.test.ts tests/cms-security.test.ts tests/cms-data.test.ts tests/metadata.test.ts tests/catalog-queries.test.ts tests/bulk-csv.test.ts tests/seo-routes.test.ts
+        run: bun test tests/navigation.test.ts tests/cms-security.test.ts tests/cms-data.test.ts tests/metadata.test.ts tests/catalog-queries.test.ts tests/bulk-csv.test.ts tests/seo-routes.test.ts tests/catalog-load.test.ts
       - name: SEO markup injection and sitemap manifest tests
         run: node --test tests/seo.test.mjs
       - name: Client onboarding preflight contract tests
@@ -57,6 +57,7 @@ jobs:
           psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261107170000_bulk_import_jobs.sql
           psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261107172000_match_approved_media.sql
           psql -v ON_ERROR_STOP=1 -f tests/sql/assert.sql
+          psql -v ON_ERROR_STOP=1 -f tests/sql/assert_imports.sql
       - name: Reject production deployments without client CMS credentials
         run: |
           if env VERCEL_ENV=production VITE_SUPABASE_URL= VITE_SUPABASE_PUBLISHABLE_KEY= VITE_SUPABASE_ANON_KEY= bun run build; then
