@@ -23,7 +23,7 @@ $$;
 reset role;
 \echo 'Checking editor permissions'
 select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',false);
-select set_config('request.jwt.claims','{"app_metadata":{"nb_role":"editor"}}',false);
+select set_config('request.jwt.claims','{"iss":"https://test.supabase.co/auth/v1","app_metadata":{"nb_role":"editor"}}',false);
 set role authenticated;
 do $$
 begin
@@ -69,7 +69,7 @@ end;
 $$;
 reset role;
 \echo 'Checking publisher transaction and media approval'
-select set_config('request.jwt.claims','{"app_metadata":{"nb_role":"owner"}}',false);
+select set_config('request.jwt.claims','{"iss":"https://test.supabase.co/auth/v1","app_metadata":{"nb_role":"owner"}}',false);
 set role authenticated;
 update public.nb_media set approved=true;
 do $$
@@ -79,6 +79,26 @@ begin
   if public.nb_publish_product('22222222-2222-4222-8222-222222222222') <> 1 then
     raise exception 'Invalid product version';
   end if;
+end;
+$$;
+-- Reject a media URL hosted on any other domain, even if its path
+-- duplicates an otherwise approved Storage object.
+do $$
+declare blocked boolean := false;
+begin
+  update public.nb_product_drafts
+    set content = jsonb_set(content, '{imageUrls}',
+      '["https://attacker.example/storage/v1/object/public/nb-media/11111111-1111-4111-8111-111111111111/a.webp"]'::jsonb)
+    where product_id='22222222-2222-4222-8222-222222222222';
+  begin
+    perform public.nb_publish_product('22222222-2222-4222-8222-222222222222');
+  exception when others then blocked := true;
+  end;
+  if not blocked then raise exception 'Unapproved external media URL was accepted'; end if;
+  update public.nb_product_drafts
+    set content = jsonb_set(content, '{imageUrls}',
+      '["https://test.supabase.co/storage/v1/object/public/nb-media/11111111-1111-4111-8111-111111111111/a.webp"]'::jsonb)
+    where product_id='22222222-2222-4222-8222-222222222222';
 end;
 $$;
 -- The owner may publish via RPC, but must not directly mutate a live row.
