@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { type CmsHome, type CmsMediaRow, HOME_TEMPLATE, cleanHome } from '../../lib/cmsData';
 import { SITE_PAGES,SITE_FIELDS,siteText,HOME_SECTIONS,FEATURED_CARDS,normalizeOrder,type SitePage } from '../../lib/siteContent';
-import { AssetPicker, ErrorText, Field, inputClass, outlineClass, primaryClass } from './StudioShared';
+import {ErrorText,Field,inputClass,outlineClass,primaryClass} from './StudioShared';
+import AssetEditor from './AssetEditor';
 
 interface Props {client:SupabaseClient; userId:string; canPublish:boolean; media:CmsMediaRow[];}
 export default function CmsHomepage({client,userId,canPublish,media}:Props) {
@@ -96,8 +97,9 @@ export default function CmsHomepage({client,userId,canPublish,media}:Props) {
     else setHistory((latest.data||[]) as {id:number;version:number;published_at:string}[]);
     setMessage('Website content version '+data+' is published. Reload the public pages to see it.');
   };
-  const assets = (key:'heroImage'|'menImage'|'kidsImage'|'storyImage',label:string)=><AssetPicker client={client} label={label} media={media}
-    selected={form[key]?[form[key]]:[]} onChange={(urls)=>update(key,urls[0]||'')}/>;
+  const assets = (key:'heroImage'|'menImage'|'kidsImage'|'storyImage',label:string)=>
+    <AssetEditor client={client} userId={userId} canPublish={canPublish} label={label} media={media}
+      selected={form[key]?[form[key]]:[]} onChange={urls=>update(key,urls[0]||'')}/>;
 
   return <section className="max-w-5xl space-y-7">
     <div><h2 className="font-serif text-3xl">Website CMS</h2>

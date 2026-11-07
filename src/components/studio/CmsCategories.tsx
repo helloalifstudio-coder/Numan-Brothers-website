@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { type CmsCategoryRow, type CmsMediaRow } from '../../lib/cmsData';
-import { AssetPicker, ErrorText, Field, inputClass, primaryClass, outlineClass } from './StudioShared';
+import {ErrorText,Field,inputClass,primaryClass,outlineClass} from './StudioShared';
+import AssetEditor from './AssetEditor';
 
-interface Props {client:SupabaseClient;canPublish:boolean;media:CmsMediaRow[];}
-export default function CmsCategories({client,canPublish,media}:Props) {
+interface Props {client:SupabaseClient;canPublish:boolean;media:CmsMediaRow[];userId:string;}
+export default function CmsCategories({client,canPublish,media,userId}:Props) {
   const [rows,setRows]=useState<CmsCategoryRow[]>([]);
   const [selected,setSelected]=useState<CmsCategoryRow|null>(null);
   const [loading,setLoading]=useState(true);
@@ -50,9 +51,11 @@ export default function CmsCategories({client,canPublish,media}:Props) {
                 disabled={!canPublish} onChange={e=>setSelected({...selected,sort_order:Number(e.target.value)||0})}/></Field>
             <Field label="Collection description"><textarea rows={4} className={inputClass} value={selected.description}
               disabled={!canPublish} onChange={(e)=>setSelected({...selected,description:e.target.value})}/></Field>
-            <AssetPicker client={client} label="Category banner image" media={media}
+            <AssetEditor client={client} userId={userId} canPublish={canPublish}
+              department={selected.department} categoryPath={selected.path}
+              label="Collection banner image" media={media}
               selected={selected.image_url?[selected.image_url]:[]}
-              onChange={(urls)=>setSelected({...selected,image_url:urls[0]||null})}/>
+              onChange={urls=>setSelected({...selected,image_url:urls[0]||null})}/>
             {canPublish?<button type="button" className={primaryClass} disabled={saving} onClick={()=>void save()}>
               Save collection changes</button>:
               <p className="text-xs text-stone-500">Only a publisher may update live collection pages.</p>}

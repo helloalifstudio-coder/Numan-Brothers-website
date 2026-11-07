@@ -10,16 +10,15 @@ import CmsMedia from './studio/CmsMedia';
 import CmsProducts from './studio/CmsProducts';
 import CmsHomepage from './studio/CmsHomepage';
 import CmsCategories from './studio/CmsCategories';
-import CmsImports from './studio/CmsImports';
 
-type Section = 'dashboard' | 'products' | 'media' | 'homepage' | 'collections' | 'imports';
+
+type Section = 'dashboard' | 'products' | 'media' | 'homepage' | 'collections';
 type CmsUser = { id:string;email:string;role:'owner'|'admin'|'editor' };
 const sections: { id:Section;label:string;icon:React.ComponentType<{size?:number}> }[] = [
   {id:'dashboard',label:'Dashboard',icon:LayoutDashboard},
   {id:'products',label:'Products',icon:Package},
   {id:'collections',label:'Collections',icon:FolderOpen},
-  {id:'imports',label:'Bulk imports',icon:FileUp},
-  {id:'media',label:'Media',icon:Image},
+  {id:'media',label:'Media & Bulk uploads',icon:Image},
   {id:'homepage',label:'Website CMS',icon:BookOpen},
 ];
 
@@ -245,7 +244,7 @@ export default function CmsStudio(){
                     {id:'collections' as Section,title:'Review your collections',detail:"Choose Men’s or Kids’ collections. Update names, descriptions, order and approved banners."},
                     {id:'media' as Section,title:'Upload photos and videos',detail:'Upload approved garment photos or videos. Add a display name and alt text, then approve each asset before using it.'},
                     {id:'products' as Section,title:'Create a product',detail:'Enter a unique SKU, title, slug, size, fabric and collection. Select approved photos, save a draft, and publish.'},
-                    {id:'imports' as Section,title:'Bulk import many garments',detail:'Fill in the sample CSV, review validation, import drafts, upload SKU-named photos, approve them and auto-match by SKU.'},
+                    {id:'media' as Section,title:'Bulk upload products and media',detail:'Open Media → Bulk upload & product CSV imports. Upload SKU-named photos, approve and match them to product drafts.'},
                     {id:'homepage' as Section,title:'Edit your website',detail:'Change homepage sections, cards, navigation, footer and page text. Reorder sections and save a draft before publishing.'},
                     {id:'products' as Section,title:'Verify live changes',detail:'Open the website and check your published garments, images and descriptions. Edit or archive when necessary.'},
                   ].map((item,index)=><li key={index} className="rounded-lg border border-[#eee5d8] p-4">
@@ -254,7 +253,7 @@ export default function CmsStudio(){
                       <div><h4 className="text-sm font-semibold">{item.title}</h4>
                         <p className="mt-2 text-xs leading-6 text-stone-600">{item.detail}</p>
                         <button type="button" onClick={()=>setSection(item.id)} className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-amber-800 underline underline-offset-4">
-                          Open {item.id==='homepage'?'Website CMS':item.id==='imports'?'Bulk imports':item.id} <ArrowUpRight size={13}/>
+                          Open {item.id==='homepage'?'Website CMS':item.id==='media'?'Media & Bulk uploads':item.id} <ArrowUpRight size={13}/>
                         </button>
                       </div>
                     </div>
@@ -268,10 +267,10 @@ export default function CmsStudio(){
               </div>
             </section>}
             {section==='media'&&<CmsMedia client={client} userId={staff.id} canPublish={canPublish} onMediaChange={()=>void loadMedia()}/>}
-            {section==='imports'&&<CmsImports client={client} userId={staff.id} onMediaChange={()=>void loadMedia()}/>}
+
             {section==='products'&&<CmsProducts client={client} userId={staff.id} canPublish={canPublish} media={media}/>}
             {section==='homepage'&&<CmsHomepage client={client} userId={staff.id} canPublish={canPublish} media={media}/>}
-            {section==='collections'&&<CmsCategories client={client} canPublish={canPublish} media={media}/>}
+            {section==='collections'&&<CmsCategories client={client} canPublish={canPublish} userId={staff.id} media={media}/>}
           </div>
         </main>
       </div>}
