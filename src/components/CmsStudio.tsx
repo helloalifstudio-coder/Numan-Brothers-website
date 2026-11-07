@@ -29,7 +29,7 @@ export default function CmsStudio(){
   const [checking,setChecking]=useState(true);
   const [authError,setAuthError]=useState<string|null>(null);
   const [unprovisionedEmail,setUnprovisionedEmail]=useState<string|null>(null);
-  const [serviceStatus,setServiceStatus]=useState<{auth:boolean;catalogue:boolean}|null>(null);
+  const [serviceStatus,setServiceStatus]=useState<{auth:boolean;catalogue:boolean;privateAccess:boolean}|null>(null);
   const [email,setEmail]=useState('');
   const [password,setPassword]=useState('');
   const [signingIn,setSigningIn]=useState(false);
@@ -102,10 +102,10 @@ export default function CmsStudio(){
     const status=async()=>{
       try{
         const response=await fetch('/api/cms-status',{cache:'no-store',headers:{Accept:'application/json'}});
-        const result=await response.json() as {auth?:{ok:boolean};catalogue?:{ok:boolean}};
-        if(active)setServiceStatus({auth:result.auth?.ok===true,catalogue:result.catalogue?.ok===true});
+        const result=await response.json() as {auth?:{ok:boolean};catalogue?:{ok:boolean};privateAccess?:{ok:boolean}};
+        if(active)setServiceStatus({auth:result.auth?.ok===true,catalogue:result.catalogue?.ok===true,privateAccess:result.privateAccess?.ok===true});
       }catch{
-        if(active)setServiceStatus({auth:false,catalogue:false});
+        if(active)setServiceStatus({auth:false,catalogue:false,privateAccess:false});
       }
     };
     void status();
@@ -198,7 +198,8 @@ export default function CmsStudio(){
           <p className="font-semibold text-stone-800">Connection checks</p>
           <p>Supabase Auth: {serviceStatus.auth?'reachable':'unavailable or unverified'}</p>
           <p>Published catalogue: {serviceStatus.catalogue?'database API reachable':'migrations or API permissions need checking'}</p>
-          {(!serviceStatus.auth||!serviceStatus.catalogue)&&<p>These checks never test your password or CMS role. Review the linked project's Auth and SQL setup.</p>}
+          <p>Private CMS records: {serviceStatus.privateAccess?'not anonymously accessible':'permission checks need review'}</p>
+          {(!serviceStatus.auth||!serviceStatus.catalogue||!serviceStatus.privateAccess)&&<p>These checks never test your password or CMS role. Review the linked project's Auth and SQL setup before publishing.</p>}
         </div>}
         <a href="/" className="text-center text-xs font-semibold text-stone-600">Return to public site <ArrowUpRight size={13} className="inline"/></a>
       </div>:
