@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, ArrowRight, ArrowUpRight, ChevronLeft, ChevronRight, MapPin, MessageCircle, Sparkles } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ArrowUpRight, ChevronLeft, ChevronRight, MapPin, MessageCircle, Sparkles, Phone, Scissors } from 'lucide-react';
 import type { Product } from '../types';
 import { productImage, type CatalogProduct } from '../storefront/catalog';
 import { getRelatedCollectionLinks } from '../storefront/navigation';
@@ -9,14 +9,14 @@ import V2Reveal from './V2Reveal';
 import type {CmsHome} from '../lib/cmsData';
 import {siteText} from '../lib/siteContent';
 
-interface Props { product: Product; whatsappNumber?: string; home?:CmsHome; onNavigate: (path: string) => void; }
+interface Props {product:Product;whatsappNumber?:string;contactPhone?:string;home?:CmsHome;onNavigate:(path:string)=>void;}
 
 /**
  * Each approved garment supplies its own blurred photographic environment.
  * The ambient layer is decorative only; important copy is on a solid glass-like
  * panel with a stable contrast level, including on small screens.
  */
-export default function V2Product({ product, whatsappNumber, home, onNavigate }: Props) {
+export default function V2Product({ product, whatsappNumber, contactPhone, home, onNavigate }: Props) {
   const garment = product as CatalogProduct;
   const theme = productTheme(garment);
   const images = (product.images || []).filter(image => /^https:\/\//i.test(image));
@@ -27,6 +27,13 @@ export default function V2Product({ product, whatsappNumber, home, onNavigate }:
   const videoUrl = garment.videoUrl;
   const playableVideo = typeof videoUrl === 'string' && /^https:\/\//i.test(videoUrl) &&
     (/\.(mp4|webm)(\?|$)/i.test(videoUrl) || videoUrl.includes('/storage/v1/object/public/nb-media-public/'));
+  const call=contactPhone && /^[1-9][0-9]{9,14}$/.test(contactPhone)?'tel:+'+contactPhone:null;
+  const original=garment.originalPrice??null;
+  const discounted=garment.offerPrice!=null&&original!=null&&garment.offerPrice<original?garment.offerPrice:null;
+  const price=(n:number)=>n.toLocaleString('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0});
+  const customizationContact=whatsappNumber&&/^[1-9][0-9]{9,14}$/.test(whatsappNumber)
+    ? 'https://wa.me/'+whatsappNumber+'?text='+
+      encodeURIComponent('Hello Nomaan Brothers, I would like to customize '+product.title+' with my fabric choice and measurements.') : null;
   const contact = whatsappNumber && /^[1-9][0-9]{9,14}$/.test(whatsappNumber)
     ? 'https://wa.me/' + whatsappNumber + '?text=' +
       encodeURIComponent('Hello Nomaan Brothers, I would like to enquire about ' + product.title + ' (' + product.id + ').')
@@ -113,13 +120,29 @@ export default function V2Product({ product, whatsappNumber, home, onNavigate }:
               <p className="mt-7 text-sm leading-8 text-[#5c5147]">
                 {product.description?.trim() || 'Discover the details of this occasionwear design, thoughtfully selected for the collection.'}
               </p>
+              {original!=null&&original>0&&<div className="mt-5 flex flex-wrap items-baseline gap-3">
+                <span className="font-serif text-3xl font-semibold text-[#302319]">{price(discounted??original)}</span>
+                {discounted!=null&&<><span className="text-base text-[#9b8b79] line-through">{price(original)}</span>
+                  <span className="bg-emerald-100 px-2 py-1 text-xs font-bold text-emerald-800">{Math.round((1-discounted/original)*100)}% off</span></>}
+              </div>}
               <p className="mt-3 text-xs leading-6 text-[#7c7064]">{siteText(home,'product.pricing')}</p>
+              {garment.customizable&&<section className="mt-6 border border-[#d8c5a6] bg-[#f4eada] p-5">
+                <p className="flex items-center gap-2 font-serif text-xl"><Scissors size={20}/>{siteText(home,'product.customTitle')}</p>
+                <p className="mt-3 text-xs leading-6 text-[#6c5640]">{siteText(home,'product.customText')}</p>
+                {customizationContact?<a href={customizationContact} target="_blank" rel="noopener noreferrer"
+                  className="mt-4 inline-flex min-h-11 items-center gap-2 border-b border-[#785d39] text-xs font-semibold">
+                  <MessageCircle size={17}/>{siteText(home,'product.customCta')} <ArrowUpRight size={14}/></a>:
+                  <V2Link href="/contact" onNavigate={onNavigate} className="mt-4 inline-flex items-center gap-2 text-xs font-semibold underline">
+                  {siteText(home,'product.customCta')} <ArrowUpRight size={14}/></V2Link>}
+              </section>}
               <dl className="mt-8 space-y-4 border-y border-[#dfd3c3] py-6 text-sm">
                 {product.fabric && <div className="flex flex-wrap justify-between gap-4"><dt className="text-[#857565]">Fabric</dt><dd className="max-w-[65%] text-right font-medium text-[#362b21]">{product.fabric}</dd></div>}
                 {Array.isArray(product.sizes) && product.sizes.length > 0 && <div className="flex flex-wrap justify-between gap-4"><dt className="text-[#857565]">Listed sizes</dt><dd className="max-w-[65%] text-right font-medium text-[#362b21]">{product.sizes.join(', ')}</dd></div>}
                 <div className="flex flex-wrap justify-between gap-4"><dt className="text-[#857565]">Product reference</dt><dd className="max-w-[65%] break-all text-right font-medium text-[#362b21]">{product.id}</dd></div>
               </dl>
               <div className="mt-8 space-y-3">
+                {call&&<a href={call} className="flex min-h-12 items-center gap-3 border border-[#baa381] px-6 text-xs font-bold uppercase">
+                  <Phone size={18}/>{siteText(home,'product.callCta')}</a>}
                 {contact && <a href={contact} target="_blank" rel="noopener noreferrer"
                   className="flex min-h-14 items-center justify-between gap-4 bg-[#30251b] px-6 text-xs font-semibold uppercase tracking-[.12em] text-[#fbf3e8] transition-colors hover:bg-[#765332]">
                   <span className="inline-flex items-center gap-3"><MessageCircle size={18}/> {siteText(home,'product.enquiry')}</span><ArrowUpRight size={18}/>

@@ -24,6 +24,12 @@ export function V2ProductGrid({ products, onNavigate,home }: { products: Catalog
           <p className="mt-4 text-[9px] font-semibold uppercase tracking-[.18em] text-[#a17e4f]">{siteText(home,'footer.brand')}</p>
           <h3 className="mt-1.5 font-serif text-base leading-snug text-[#2d271f] md:text-xl">{product.title}</h3>
           {product.fabric && <p className="mt-1.5 text-xs leading-5 text-[#807366]">{product.fabric}</p>}
+          {!!product.originalPrice&&product.originalPrice>0&&<div className="mt-2 flex flex-wrap items-baseline gap-2">
+            <strong className="text-sm text-[#30251d]">{(product.offerPrice??product.originalPrice).toLocaleString('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0})}</strong>
+            {product.offerPrice!=null&&product.offerPrice<product.originalPrice&&<span className="text-xs text-stone-500 line-through">
+              {product.originalPrice.toLocaleString('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0})}</span>}
+          </div>}
+          {product.customizable&&<p className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-[#80603b]">Tailoring available</p>}
           <span className="mt-2 inline-flex items-center gap-2 text-[11px] font-medium text-[#82623f]">{siteText(home,'collection.cardCta')} <ArrowRight size={13}/></span>
         </V2Link>
       </V2Reveal>
