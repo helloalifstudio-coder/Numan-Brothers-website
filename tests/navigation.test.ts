@@ -14,13 +14,13 @@ describe('approved website taxonomy', () => {
     expect(DEPARTMENTS.map((department) => department.id)).toEqual(['men', 'kids']);
     expect(new Set(COLLECTION_ROUTES.map((route) => route.path)).size).toBe(COLLECTION_ROUTES.length);
   });
-  test('keeps every user-requested label, including unresolved names', () => {
+  test('uses store-approved corrected garment names', () => {
     expect(getCollection('/men/sherwani/handwork')?.title).toBe('Handwork Sherwani');
     expect(getCollection('/men/sherwani/plain')?.title).toBe('Plain Suits');
     expect(getCollection('/men/suits/plain')?.title).toBe('Plain Suits');
-    expect(getCollection('/men/marriage/sadi')?.title).toBe('Sadi');
-    expect(getCollection('/kids/sadi')?.title).toBe('Sadi');
-    expect(getCollection('/kids/tope')?.title).toBe('Tope');
+    expect(getCollection('/men/marriage/sadi')?.title).toBe('Sadiri');
+    expect(getCollection('/kids/sadi')?.title).toBe('Sadiri');
+    expect(getCollection('/kids/tope')?.title).toBe('Tobh');
   });
   test('normalizes slash and query suffix', () => {
     expect(normalizePath('/men/sherwani/?ref=nav')).toBe('/men/sherwani');

@@ -21,7 +21,7 @@ describe('Catalogue-only release architecture and CMS readiness',()=>{
   test('does not reject old approved images when the 300-asset preview cache is incomplete',()=>{
     expect(productStudio).not.toContain('approvedImages.some(');
     expect(productStudio).toContain("client.rpc('nb_publish_product'");
-    expect(productStudio).toContain('AssetPicker client={client}');
+    expect(productStudio).toContain('AssetEditor client={client}');
   });
   test('renders a read-only history of product and homepage version numbers',()=>{
     expect(productStudio).toContain("from('nb_product_revisions')");
