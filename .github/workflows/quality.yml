@@ -71,6 +71,7 @@ jobs:
           psql -v ON_ERROR_STOP=1 -f tests/sql/assert.sql
           psql -v ON_ERROR_STOP=1 -f tests/sql/assert_imports.sql
           psql -v ON_ERROR_STOP=1 -f tests/sql/assert_staging_integrity.sql
+          psql -v ON_ERROR_STOP=1 -f tests/sql/verify_supabase_inventory.sql
       - name: Reject production deployments without client CMS credentials
         run: |
           if env VERCEL_ENV=production VITE_SUPABASE_URL= VITE_SUPABASE_PUBLISHABLE_KEY= VITE_SUPABASE_ANON_KEY= bun run build; then
