@@ -6,15 +6,17 @@ import { getRelatedCollectionLinks } from '../storefront/navigation';
 import { productTheme } from '../storefront/productTheme';
 import V2Link from './V2Link';
 import V2Reveal from './V2Reveal';
+import type {CmsHome} from '../lib/cmsData';
+import {siteText} from '../lib/siteContent';
 
-interface Props { product: Product; whatsappNumber?: string; onNavigate: (path: string) => void; }
+interface Props { product: Product; whatsappNumber?: string; home?:CmsHome; onNavigate: (path: string) => void; }
 
 /**
  * Each approved garment supplies its own blurred photographic environment.
  * The ambient layer is decorative only; important copy is on a solid glass-like
  * panel with a stable contrast level, including on small screens.
  */
-export default function V2Product({ product, whatsappNumber, onNavigate }: Props) {
+export default function V2Product({ product, whatsappNumber, home, onNavigate }: Props) {
   const garment = product as CatalogProduct;
   const theme = productTheme(garment);
   const images = (product.images || []).filter(image => /^https:\/\//i.test(image));
@@ -65,7 +67,7 @@ export default function V2Product({ product, whatsappNumber, onNavigate }: Props
                     <span className="font-serif text-5xl italic text-[#ead5b3]/65 md:text-7xl">Nomaan</span>
                   </div>}
                 <div className="pointer-events-none absolute inset-x-0 top-0 flex items-center justify-between bg-gradient-to-b from-black/40 to-transparent px-5 py-5 text-[10px] font-semibold uppercase tracking-[.2em] text-white">
-                  <span>Nomaan Brothers / Atelier</span>
+                  <span>{siteText(home,'product.brand')}</span>
                   {images.length > 0 && <span>{String(selectedImage + 1).padStart(2,'0')} / {String(images.length).padStart(2,'0')}</span>}
                 </div>
                 {images.length > 1 && <div className="absolute inset-x-4 bottom-4 flex justify-between gap-3">
@@ -91,12 +93,12 @@ export default function V2Product({ product, whatsappNumber, onNavigate }: Props
               </div>}
               {videoUrl && <div className="mt-5 overflow-hidden border border-white/15 bg-[#1c1714]">
                 <div className="flex items-center gap-2 border-b border-white/10 px-5 py-3 text-[10px] font-semibold uppercase tracking-[.16em] text-[#e5c89e]">
-                  <Sparkles size={14}/> A closer look at the garment
+                  <Sparkles size={14}/> {siteText(home,'product.videoTitle')}
                 </div>
                 {playableVideo ? <video src={videoUrl} controls preload="metadata" playsInline poster={images[0]}
                   className="aspect-video w-full" aria-label={'Video of ' + product.title}/> :
                   <a href={videoUrl} target="_blank" rel="noopener noreferrer"
-                    className="flex min-h-20 items-center justify-center gap-3 text-sm font-medium text-white">View product video <ArrowUpRight size={17}/></a>}
+                    className="flex min-h-20 items-center justify-center gap-3 text-sm font-medium text-white">{siteText(home,'product.videoCta')} <ArrowUpRight size={17}/></a>}
               </div>}
             </div>
           </V2Reveal>
@@ -111,7 +113,7 @@ export default function V2Product({ product, whatsappNumber, onNavigate }: Props
               <p className="mt-7 text-sm leading-8 text-[#5c5147]">
                 {product.description?.trim() || 'Discover the details of this occasionwear design, thoughtfully selected for the collection.'}
               </p>
-              <p className="mt-3 text-xs leading-6 text-[#7c7064]">For current prices, fitting options and availability, please contact the showroom.</p>
+              <p className="mt-3 text-xs leading-6 text-[#7c7064]">{siteText(home,'product.pricing')}</p>
               <dl className="mt-8 space-y-4 border-y border-[#dfd3c3] py-6 text-sm">
                 {product.fabric && <div className="flex flex-wrap justify-between gap-4"><dt className="text-[#857565]">Fabric</dt><dd className="max-w-[65%] text-right font-medium text-[#362b21]">{product.fabric}</dd></div>}
                 {Array.isArray(product.sizes) && product.sizes.length > 0 && <div className="flex flex-wrap justify-between gap-4"><dt className="text-[#857565]">Listed sizes</dt><dd className="max-w-[65%] text-right font-medium text-[#362b21]">{product.sizes.join(', ')}</dd></div>}
@@ -120,14 +122,14 @@ export default function V2Product({ product, whatsappNumber, onNavigate }: Props
               <div className="mt-8 space-y-3">
                 {contact && <a href={contact} target="_blank" rel="noopener noreferrer"
                   className="flex min-h-14 items-center justify-between gap-4 bg-[#30251b] px-6 text-xs font-semibold uppercase tracking-[.12em] text-[#fbf3e8] transition-colors hover:bg-[#765332]">
-                  <span className="inline-flex items-center gap-3"><MessageCircle size={18}/> Enquire about this design</span><ArrowUpRight size={18}/>
+                  <span className="inline-flex items-center gap-3"><MessageCircle size={18}/> {siteText(home,'product.enquiry')}</span><ArrowUpRight size={18}/>
                 </a>}
                 <V2Link href="/contact" onNavigate={onNavigate}
                   className="flex min-h-14 items-center justify-between gap-4 border border-[#b7a080] px-6 text-xs font-semibold uppercase tracking-[.12em] text-[#5b4934] transition-colors hover:bg-[#f1e5d4]">
-                  <span className="inline-flex items-center gap-3"><MapPin size={17}/> Visit our showroom</span><ArrowUpRight size={18}/>
+                  <span className="inline-flex items-center gap-3"><MapPin size={17}/> {siteText(home,'product.visit')}</span><ArrowUpRight size={18}/>
                 </V2Link>
               </div>
-              <p className="mt-6 text-xs leading-6 text-[#918273]">Imagery and garment details will be confirmed by the showroom before public launch.</p>
+              <p className="mt-6 text-xs leading-6 text-[#918273]">{siteText(home,'product.disclaimer')}</p>
             </div>
           </V2Reveal>
         </div>
@@ -136,8 +138,8 @@ export default function V2Product({ product, whatsappNumber, onNavigate }: Props
     <section className="mx-auto max-w-[1400px] px-5 py-16 md:px-12 md:py-24 lg:px-20" aria-labelledby="next-collection-title">
       <div className="flex flex-wrap items-end justify-between gap-5 border-b border-[#ded1be] pb-7">
         <div>
-          <p className="mb-3 text-[10px] font-bold uppercase tracking-[.22em] text-[#977249]">Continue your journey</p>
-          <h2 id="next-collection-title" className="font-serif text-[clamp(2rem,4vw,3.8rem)] tracking-[-.05em] text-[#30251d]">There is more to <em>discover.</em></h2>
+          <p className="mb-3 text-[10px] font-bold uppercase tracking-[.22em] text-[#977249]">{siteText(home,'product.nextEyebrow')}</p>
+          <h2 id="next-collection-title" className="font-serif text-[clamp(2rem,4vw,3.8rem)] tracking-[-.05em] text-[#30251d]">{siteText(home,'product.nextTitle')}</h2>
         </div>
         <V2Link href={theme.collectionPath} onNavigate={onNavigate}
           className="inline-flex min-h-11 items-center gap-2 border-b border-[#a88a63] text-[11px] font-semibold uppercase tracking-[.12em] text-[#745536]">

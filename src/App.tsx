@@ -2,6 +2,7 @@ import React, { Suspense, useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { ArrowLeft, ArrowRight, ArrowUpRight, MapPin, MessageCircle } from 'lucide-react';
 import { type PublishedData, HOME_TEMPLATE, loadPublishedData, isSafeHttps } from './lib/cmsData';
+import {siteText} from './lib/siteContent';
 import { loadCataloguePage, loadProductById, type CataloguePage } from './lib/catalogQueries';
 import type { CatalogProduct } from './storefront/catalog';
 import { productPath, publicProducts } from './storefront/catalog';
@@ -35,7 +36,12 @@ export default function App() {
   }, []);
 
   const published = useMemo(() => publicProducts(siteData.products), [siteData.products]);
-  const collectionDefault = getCollection(path);
+  const rawCollection=getCollection(path);
+  // Inactive leaf categories disappear from the public catalogue and menus.
+  const collectionDefault=rawCollection && (
+    siteData.categories.length===0 || rawCollection.isDepartment || rawCollection.isGroup
+    || siteData.categories.some(c=>c.path===rawCollection.path)
+  )?rawCollection:null;
   const categoryOverride = siteData.categories.find((c) => c.path === collectionDefault?.path);
   const collection = collectionDefault && categoryOverride
     ? { ...collectionDefault, title: categoryOverride.label,
@@ -71,34 +77,35 @@ export default function App() {
 
   return <div className="min-h-screen bg-[#fbf8f2]">
     <Helmet>
-      <title>{title} | Nomaan Brothers</title>
-      <meta name="description" content="Explore men's and kids' traditional occasionwear at Nomaan Brothers, Mandi Bazar, Warangal. Browse collections and enquire about styles." />
+      <title>{title} | {siteText(siteData.homepage,'seo.brand')}</title>
+      <meta name="description" content={siteText(siteData.homepage,'seo.description')} />
       <meta name="theme-color" content="#fbf8f2"/>
-      <meta property="og:title" content={title + ' | Nomaan Brothers'} />
+      <meta property="og:title" content={title + ' | '+siteText(siteData.homepage,'seo.brand')} />
     </Helmet>
-    <V2Header path={path} onNavigate={navigate}/>
+    <V2Header path={path} home={siteData.homepage} categories={siteData.categories} onNavigate={navigate}/>
     <main id="main-content" className="min-h-[40vh]">
       {!catalogLoading && siteData.error && <div role="status" className="border-b border-amber-200 bg-amber-50 px-6 py-3 text-center text-xs text-amber-900">
         The online catalogue is temporarily unavailable. Contact the showroom for current styles.
       </div>}
       {path === '/' ? <V2Home products={published} home={siteData.homepage} onNavigate={navigate}/> :
        collection ? (activeRoutePage ? <V2Collection route={collection} products={matches}
-         bannerImage={categoryOverride?.image_url && isSafeHttps(categoryOverride.image_url) ? categoryOverride.image_url : undefined} totalCount={activeRoutePage.count}
+         bannerImage={categoryOverride?.image_url && isSafeHttps(categoryOverride.image_url) ? categoryOverride.image_url : undefined}
+         home={siteData.homepage} categories={siteData.categories} totalCount={activeRoutePage.count}
          page={page} pageSize={activeRoutePage.pageSize} onPageChange={setPage} onNavigate={navigate}/> :
          <p role="status" className="p-12 text-center text-stone-500">Loading collection…</p>) :
        selectedId && !detail ? <p role="status" className="p-12 text-center text-stone-500">Loading product…</p> :
-       product ? <V2Product key={product.id} product={product} whatsappNumber={siteData.homepage.contactWhatsapp} onNavigate={navigate}/> :
+       product ? <V2Product key={product.id} product={product} home={siteData.homepage} whatsappNumber={siteData.homepage.contactWhatsapp} onNavigate={navigate}/> :
        path === '/search' ? <section className="mx-auto min-h-[70vh] max-w-[1360px] px-5 py-16 md:px-12">
          <V2Reveal>
-           <p className="mb-5 text-[10px] font-bold uppercase tracking-[.24em] text-[#a37f50]">Discover the catalogue</p>
-           <h1 className="font-serif text-[clamp(3rem,6vw,5.5rem)] tracking-[-.05em] text-[#29221c]">Search <em>collections</em></h1>
+           <p className="mb-5 text-[10px] font-bold uppercase tracking-[.24em] text-[#a37f50]">{siteText(siteData.homepage,'search.eyebrow')}</p>
+           <h1 className="font-serif text-[clamp(3rem,6vw,5.5rem)] tracking-[-.05em] text-[#29221c]">{siteText(siteData.homepage,'search.title')}</h1>
            <p className="mt-5 mb-12 text-sm text-[#817164]">{searchQuery ? 'Results for "' + searchQuery + '"' : 'Enter a product name or browse a collection.'} · {activeRoutePage?.count ?? '—'} styles</p>
          </V2Reveal>
-         {!activeRoutePage ? <p role="status">Searching catalogue…</p> : matches.length ? <V2ProductGrid products={matches} onNavigate={navigate}/> :
+         {!activeRoutePage ? <p role="status">Searching catalogue…</p> : matches.length ? <V2ProductGrid products={matches} home={siteData.homepage} onNavigate={navigate}/> :
           <div className="border border-[#e4d5c2] bg-[#f5ece0] px-7 py-14 text-center">
-            <h2 className="font-serif text-3xl">No matching styles yet.</h2>
-            <p className="mt-4 text-sm leading-7 text-[#766b5e]">Try searching for Sherwani, Kurta or Jodhpuri, or explore the departments.</p>
-            <V2Link href="/men" onNavigate={navigate} className="mt-7 inline-flex items-center gap-2 text-sm font-semibold text-[#805e38]">Browse Men's Wear <ArrowRight size={16}/></V2Link>
+            <h2 className="font-serif text-3xl">{siteText(siteData.homepage,'search.emptyTitle')}</h2>
+            <p className="mt-4 text-sm leading-7 text-[#766b5e]">{siteText(siteData.homepage,'search.emptyText')}</p>
+            <V2Link href="/men" onNavigate={navigate} className="mt-7 inline-flex items-center gap-2 text-sm font-semibold text-[#805e38]">{siteText(siteData.homepage,'search.browse')} <ArrowRight size={16}/></V2Link>
           </div>}
          {activeRoutePage && activeRoutePage.count>activeRoutePage.pageSize && <nav aria-label="Search results pages" className="mt-10 flex justify-center gap-3">
            <button type="button" className="min-h-11 border border-stone-300 px-5 disabled:opacity-40"
@@ -112,22 +119,22 @@ export default function App() {
        path === '/contact' ? <section className="relative min-h-[70vh] overflow-hidden bg-[#2b241e] px-6 py-20 text-[#f8eddd] md:px-12 md:py-32">
          <div className="pointer-events-none absolute -right-24 top-0 h-[600px] w-[600px] rounded-full bg-[radial-gradient(circle,#644f38,transparent_70%)]"/>
          <div className="relative mx-auto max-w-[1050px]">
-           <V2Link href="/" onNavigate={navigate} className="mb-12 inline-flex items-center gap-2 text-[11px] uppercase tracking-[.18em] text-[#dcc6a4]"><ArrowLeft size={15}/> Back home</V2Link>
-           <p className="mb-7 text-[10px] font-bold uppercase tracking-[.27em] text-[#dcba85]">Visit the boutique</p>
-           <h1 className="max-w-[12ch] font-serif text-[clamp(3.6rem,7vw,7rem)] leading-[1] tracking-[-.06em]">Your next look starts <em>here.</em></h1>
-           <p className="mt-8 max-w-xl text-base leading-8 text-[#ded2c3]">Nomaan Brothers, Mandi Bazar, Warangal, Telangana. Ask about the collection, sizes and availability before your visit.</p>
+           <V2Link href="/" onNavigate={navigate} className="mb-12 inline-flex items-center gap-2 text-[11px] uppercase tracking-[.18em] text-[#dcc6a4]"><ArrowLeft size={15}/> {siteText(siteData.homepage,'contact.back')}</V2Link>
+           <p className="mb-7 text-[10px] font-bold uppercase tracking-[.27em] text-[#dcba85]">{siteText(siteData.homepage,'contact.eyebrow')}</p>
+           <h1 className="max-w-[12ch] font-serif text-[clamp(3.6rem,7vw,7rem)] leading-[1] tracking-[-.06em]">{siteText(siteData.homepage,'contact.title')}</h1>
+           <p className="mt-8 max-w-xl text-base leading-8 text-[#ded2c3]">{siteText(siteData.homepage,'contact.description')}</p>
            <div className="mt-10 flex flex-wrap gap-3">
              <a href="https://www.google.com/maps/search/?api=1&query=Nomaan+Brothers+Dresses+Mandi+Bazar+Warangal"
                target="_blank" rel="noopener noreferrer" className="inline-flex min-h-12 items-center gap-3 bg-[#e2c9a4] px-7 text-xs font-bold uppercase tracking-[.12em] text-[#2b2118]">
-               <MapPin size={17}/> Find directions <ArrowUpRight size={17}/>
+               <MapPin size={17}/> {siteText(siteData.homepage,'contact.directions')} <ArrowUpRight size={17}/>
              </a>
              {siteData.homepage.contactWhatsapp && <a
                href={'https://wa.me/'+siteData.homepage.contactWhatsapp+'?text='+encodeURIComponent('Hello Nomaan Brothers, I would like to enquire about your collections.')}
                target="_blank" rel="noopener noreferrer" className="inline-flex min-h-12 items-center gap-3 border border-[#e2c9a4] px-7 text-xs font-bold uppercase tracking-[.12em] text-[#f8e9d0]">
-               <MessageCircle size={17}/> WhatsApp enquiry
+               <MessageCircle size={17}/> {siteText(siteData.homepage,'contact.whatsapp')}
              </a>}
            </div>
-           <p className="mt-12 max-w-lg text-xs leading-6 text-[#af9e8a]">Showroom address and contact details must be confirmed by the owner before public launch.</p>
+           <p className="mt-12 max-w-lg text-xs leading-6 text-[#af9e8a]">{siteText(siteData.homepage,'contact.disclaimer')}</p>
          </div>
        </section> :
        <section className="mx-auto min-h-[60vh] max-w-3xl px-6 py-24 text-center">
@@ -137,6 +144,6 @@ export default function App() {
          <V2Link href="/" onNavigate={navigate} className="mt-9 inline-flex min-h-12 items-center gap-3 bg-[#32271d] px-7 text-xs font-semibold uppercase tracking-[.12em] text-white">Return home <ArrowRight size={16}/></V2Link>
        </section>}
     </main>
-    <V2Footer onNavigate={navigate}/>
+    <V2Footer home={siteData.homepage} categories={siteData.categories} onNavigate={navigate}/>
   </div>;
 }
