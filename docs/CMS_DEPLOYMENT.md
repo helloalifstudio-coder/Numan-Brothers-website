@@ -8,14 +8,14 @@
 
 ## Database
 Review the migration file at:
-supabase/migrations/20261107060000_nomaan_cms.sql
+supabase/migrations/ (all versioned migrations in timestamp order)
 
 Apply it through the Supabase project's SQL editor or a reviewed Supabase CLI migration flow. It creates isolated nb_ tables, category labels and the nb-media bucket. It does not add fake inventory or overwrite unrelated tables.
 
 Inspect these tables:
 nb_categories, nb_products, nb_product_drafts, nb_product_revisions, nb_media, nb_home_drafts, nb_home_public, nb_home_revisions.
 
-Run Supabase Security Advisor and verify RLS/GRANTs. Anonymous readers should access only **published** products and homepage; they cannot access drafts. Ensure Data API exposure is explicitly configured where needed. Storage uploads must be authenticated and limited to a user-specific prefix. The bucket currently serves uploaded objects publicly; media approval controls whether they are referenced by the website, **not whether someone with the direct URL can access the file**. Do not upload confidential photos.
+Run Supabase Security Advisor and verify RLS/GRANTs. Anonymous readers should access only **published** products and homepage; they cannot access drafts. Ensure Data API exposure is explicitly configured where needed. Storage uploads must be authenticated and limited to a user-specific prefix. **Legacy bucket warning:** the initial CMS migration created a public nb-media bucket. Phase 2 source converts it to private and creates nb-media-staging (private) and nb-media-public (approved-public). Changes are NOT deployed or verified against a client project; do not upload confidential content or go live until real Storage access tests prove the behavior.
 
 ## Provision owner/editor accounts
 - Create or invite the owner email through Supabase Auth in the **new** project.
@@ -72,3 +72,8 @@ For heavy streaming or large marketing videos, plan a dedicated adaptive video p
 
 ## Rollback
 Keep the existing Vercel production deployment as known-good. A failed staging deployment must not alter production. Before retiring Firebase, export data and verify retention requirements. The git file firestore.rules alone does not update remotely deployed Firebase policy.
+
+
+## Phase 6 release package
+
+Review docs/CLIENT_ONBOARDING.md, docs/RELEASE_ACCEPTANCE.md, docs/CMS_USER_GUIDE.md and docs/OPERATIONS.md. Passing source CI alone does NOT constitute production sign-off. The owner must validate a dedicated Supabase staging environment, real Auth/Storage policies, migrations, load tests and the controlled Vercel release.
