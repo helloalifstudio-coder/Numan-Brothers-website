@@ -67,7 +67,7 @@
   ],
   "functions": {
     "api/product.ts": {
-      "includeFiles": "dist/index.html"
+      "includeFiles": "dist/_shell.html"
     }
   }
 }
