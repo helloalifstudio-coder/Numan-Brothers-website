@@ -16,6 +16,7 @@ for(const item of seoRoutes){
   const docTitle=escapeHtml(item.title+' | Nomaan Brothers');
   const description=escapeHtml(item.description);
   const head=[
+    ...(site?[]:['<meta name="robots" content="noindex, nofollow, noarchive"/>']),
     '<title>'+docTitle+'</title>',
     '<meta name="description" content="'+description+'"/>',
     '<meta property="og:title" content="'+docTitle+'"/>',
@@ -39,5 +40,9 @@ for(const item of seoRoutes){
 if(site){
   writeFileSync(resolve(dist,'robots.txt'),
     'User-agent: *\nDisallow: /studio\nDisallow: /api/\nSitemap: '+site+'/sitemap.xml\n');
+}else{
+  // Review links and not-yet-verified client domains must not appear in search.
+  writeFileSync(resolve(dist,'robots.txt'),
+    'User-agent: *\nDisallow: /\nDisallow: /studio\n');
 }
 console.log('Prerendered '+seoRoutes.length+' public category/home pages.');
