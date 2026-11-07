@@ -145,7 +145,7 @@ end;
 $$;
 -- Publishers must use the RPC even for writing revision history. An owner
 -- cannot forge a published version or permanently remove a live catalogue row.
-do $
+do $phase1$
 declare denied boolean := false;
 begin
   begin
@@ -188,7 +188,7 @@ begin
     raise exception 'Revision history was tampered with';
   end if;
 end;
-$;
+$phase1$;
 -- Confirm unpublished/draft HTML cannot be publicly selected.
 reset role;
 select set_config('request.jwt.claims','{}',false);
