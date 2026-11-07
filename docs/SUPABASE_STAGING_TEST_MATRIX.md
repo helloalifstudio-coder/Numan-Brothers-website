@@ -4,7 +4,7 @@ This is an **execution checklist**. Each row needs an actual observed result, te
 
 | Gate | Test steps on a NEW AGM staging project | Pass criterion |
 | --- | --- | --- |
-| Schema / migrations | Apply all eight migrations in order; run `tests/sql/verify_supabase_inventory.sql` | 13 expected `nb_*` tables have RLS; correct functions, indexes and private/public buckets |
+| Schema / migrations | Apply all nine migrations in order; run `tests/sql/verify_supabase_inventory.sql` | 13 expected `nb_*` tables have RLS; category artwork guard, correct functions, indexes and private/public buckets |
 | Public catalogue | As an anonymous visitor read products/categories/homepage; attempt draft/media/audit access | Published information only; all sensitive data denied |
 | Editor role | Sign in as editor; create draft, upload pending image/video, change alt text; try publishing/approving/deleting/reading audit | Draft/upload work; privileged operations denied |
 | Owner role | Sign in as owner; review pending file, approve via Edge Function, publish product and homepage; inspect revision | Public copy exists; correct version and audit event; gallery available |
@@ -14,6 +14,7 @@ This is an **execution checklist**. Each row needs an actual observed result, te
 | Video types | MP4, WebM upload, preview in CMS, approve, attach to product, view in public browser | MIME, metadata, video playback, mobile compatibility, public URL correct |
 | Upload limits | 1 B, 6 MB, 50 MB boundary; retry interrupted TUS PATCH; offline/reconnect | Valid files succeed or safely fail; no duplicate metadata or orphan leaks |
 | Media dependencies | Publish an image as product cover/category/hero; attempt to revoke | Revoke must fail until all published references removed |
+| Collection banners | As manager, save an approved category banner and attempt a direct unapproved/external image URL | Approved art appears on category page; direct unapproved URL rejected by database trigger |
 | SKU image match | Upload `NB-SHW-001_01.jpg`, `_02.jpg`, approve, match to empty draft gallery | Correct SKU and order; manual gallery untouched; no auto-publication |
 | Bulk CSV | Valid import, 10k-row import, invalid category, duplicate SKU, file replay, concurrent editors | Expected row counts, no silent overwrite, verified idempotence and ownership |
 | Interrupted import | Kill browser after draft insert but before audit; retry same file | Existing draft recognized, counters reconcile, no duplicate product |
