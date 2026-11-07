@@ -37,3 +37,8 @@ The source code intentionally does not display an invented product catalogue or 
 8. Verify production rollback plan and secure the deployed legacy Firebase project after export.
 
 A Vercel READY status or successful CI alone never establishes that customer data is safe for production.
+
+
+## Definitive release ledger (Phase 6)
+
+Implementation in development branches is not proof of production readiness. See docs/RELEASE_ACCEPTANCE.md for authoritative go/no-go criteria. Real client Auth/RLS/Storage tests, private media promotion, 10k/100k load qualification, live SSR/sitemap/404 checks, backups, verified catalogue assets, and owner release sign-off are still mandatory. A GitHub CI success or Vercel READY status is insufficient.
