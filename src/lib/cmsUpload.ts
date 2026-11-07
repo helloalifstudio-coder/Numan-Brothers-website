@@ -81,28 +81,64 @@ async function resumableUpload(
   }
 }
 
+const mediaSelectColumns = 'id,storage_path,original_name,mime_type,size_bytes,alt_text,approved,uploaded_by,created_at';
+
+/**
+ * For batch import retries, stableObjectId is derived from the owner's job
+ * ID and row index. It prevents duplicate Storage objects if the upload
+ * succeeded before the audit row was saved.
+ */
 export async function uploadCmsFile(
   client: SupabaseClient, file: File, userId: string, onProgress: (value: number) => void,
+  options?: {stableObjectId?:string},
 ): Promise<CmsMediaRow> {
   const validation = checkMediaFile(file);
   if (validation) throw new Error(validation);
   const extension = allowed.get(file.type)!;
-  const path = userId + '/' + crypto.randomUUID() + '.' + extension;
-  if (file.size <= CHUNK_SIZE) {
+  const objectId = options?.stableObjectId ?? crypto.randomUUID();
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(objectId))
+    throw new Error('Invalid private upload identity');
+  const path = userId + '/' + objectId + '.' + extension;
+  let alreadyStored = false;
+
+  if (options?.stableObjectId) {
+    const {data: existing, error: lookupError} = await client.from('nb_media')
+      .select(mediaSelectColumns).eq('storage_path',path).maybeSingle();
+    if (lookupError) throw new Error('Cannot reconcile existing media metadata: ' + lookupError.message);
+    if (existing) {
+      if (existing.size_bytes !== file.size || existing.mime_type !== file.type ||
+          existing.original_name !== file.name.slice(0,220)) {
+        throw new Error('Upload identity conflicts with existing media metadata');
+      }
+      onProgress(100);
+      return existing as CmsMediaRow;
+    }
+    // Recover an orphan private object from a previous failed metadata insert.
+    // A deterministic ID is used only for the same hashed image job and row.
+    const {data: object} = await client.storage.from('nb-media-staging').info(path);
+    if (object) {
+      if (Number(object.size) !== file.size)
+        throw new Error('Previously uploaded object has a different file size');
+      alreadyStored = true;
+      onProgress(100);
+    }
+  }
+
+  if (!alreadyStored && file.size <= CHUNK_SIZE) {
     const { error } = await client.storage.from('nb-media-staging').upload(path, file, {
       upsert:false, cacheControl:'3600', contentType:file.type,
     });
     if (error) throw error;
     onProgress(100);
-  } else {
+  } else if (!alreadyStored) {
     await resumableUpload(client, path, file, onProgress);
   }
   const { data, error } = await client.from('nb_media').insert({
     storage_path:path, original_name:file.name.slice(0,220), mime_type:file.type,
     size_bytes:file.size, alt_text:'', approved:false, uploaded_by:userId,
-  }).select('id,storage_path,original_name,mime_type,size_bytes,alt_text,approved,uploaded_by,created_at').single();
+  }).select(mediaSelectColumns).single();
   if (error || !data) {
-    throw new Error('File uploaded, but saving metadata failed. Ask an administrator to reconcile: ' +
+    throw new Error('File uploaded, but saving metadata failed. Retry the same import to reconcile: ' +
       (error?.message || 'unknown database error'));
   }
   return data as CmsMediaRow;
