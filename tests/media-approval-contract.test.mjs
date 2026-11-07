@@ -26,7 +26,7 @@ describe('Server-only media approval contract',()=>{
     const references=code.indexOf("from('nb_product_media')");
     const revocation=code.indexOf('update({ approved: false })');
     assert.ok(references>0 && revocation>references,'reference checks must precede revocation');
-    assert.match(code,/return json\(409,.*Remove this asset/);
+    assert.match(code,/return json\(409,.*This file is still used/);
   });
   it('supports deliberate archiving and fully deleting unused assets, never direct anonymous mutation',()=>{
     assert.match(code,/action === 'archive'/);
