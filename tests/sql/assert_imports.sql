@@ -52,4 +52,36 @@ begin
   end if;
 end $roleless$;
 reset role;
+-- Separate editors may each import the same file. Their job ID and
+-- change permissions are scoped to their own identity.
+insert into auth.users (id) values ('33333333-3333-4333-8333-333333333333');
+select set_config('request.jwt.claim.sub','33333333-3333-4333-8333-333333333333',false);
+select set_config('request.jwt.claims','{"iss":"https://test.supabase.co/auth/v1","app_metadata":{"nb_role":"editor"}}',false);
+set role authenticated;
+insert into public.nb_import_jobs(import_key,kind,filename,status,total_count,created_by)
+  values (repeat('a',64),'csv','same-filename.csv','pending',1,
+    '33333333-3333-4333-8333-333333333333');
+
+do $owner_scope$
+declare
+  own_count integer;
+  changed integer;
+begin
+  select count(*) into own_count from public.nb_import_jobs where import_key=repeat('a',64);
+  if own_count <> 2 then
+    raise exception 'Same file hash is not allowed for distinct authorized staff';
+  end if;
+  update public.nb_import_jobs set filename='unauthorized-override.csv'
+    where import_key=repeat('a',64)
+      and created_by='11111111-1111-4111-8111-111111111111';
+  get diagnostics changed = row_count;
+  if changed <> 0 then raise exception 'Editor modified another staff import job'; end if;
+  update public.nb_import_jobs set filename='authorized-own-update.csv'
+    where import_key=repeat('a',64)
+      and created_by='33333333-3333-4333-8333-333333333333';
+  get diagnostics changed = row_count;
+  if changed <> 1 then raise exception 'Editor cannot update their own import job'; end if;
+end $owner_scope$;
+reset role;
+
 \echo 'Import and staff index SQL privilege tests PASSED'
