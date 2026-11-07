@@ -16,6 +16,11 @@ export default function CmsImports({client,userId,onMediaChange}:Props){
   const [error,setError]=useState<string|null>(null);
   const [busy,setBusy]=useState(false);
   const [finished,setFinished]=useState(false);
+  const [linking,setLinking]=useState(false);
+  const [linked,setLinked]=useState(0);
+  const [scanned,setScanned]=useState(0);
+  const [linkCursor,setLinkCursor]=useState<string|null>(null);
+  const [matchingDone,setMatchingDone]=useState(false);
 
   const selectCsv=async(file:File|null)=>{
     setCsvFile(file);setPreview([]);setProgress(null);setError(null);setFinished(false);
@@ -41,6 +46,27 @@ export default function CmsImports({client,userId,onMediaChange}:Props){
       setProgress(result);setFinished(true);onMediaChange();
     }catch(cause){setError(cause instanceof Error?cause.message:'Image import failed.');}
     finally{setBusy(false);}
+  };
+  const linkApprovedImages=async()=>{
+    if(linking)return;
+    setLinking(true);setError(null);
+    try{
+      let cursor=linkCursor, processedTotal=0, linkedTotal=0, ended=false;
+      for(let batch=0;batch<100;batch++){
+        const {data,error}=await client.rpc('nb_link_approved_media',{
+          p_after:cursor,p_limit:100,
+        });
+        if(error)throw new Error(error.message);
+        const result=Array.isArray(data)?data[0]:data;
+        const count=Number(result?.processed||0),newLinked=Number(result?.linked||0);
+        processedTotal+=count;linkedTotal+=newLinked;
+        cursor=result?.next_after||cursor;
+        setLinkCursor(cursor);setScanned(x=>x+count);setLinked(x=>x+newLinked);
+        if(count<100){ended=true;break;}
+      }
+      if(ended)setMatchingDone(true);
+    }catch(cause){setError(cause instanceof Error?cause.message:'Auto-match failed.');}
+    finally{setLinking(false);}
   };
   const downloadReport=()=>{
     if(!progress)return;
@@ -94,6 +120,17 @@ export default function CmsImports({client,userId,onMediaChange}:Props){
           <progress className="mt-2 w-full" value={fileProgress} max={100}/>
         </div>}
       </div>
+    </div>
+    <div className="space-y-3 rounded-lg border border-amber-200 bg-[#fffaf0] p-5">
+      <h3 className="font-serif text-xl">3. Link approved photos to drafts</h3>
+      <p className="text-xs leading-6 text-stone-700">
+        After owner approval in Media Library, match filenames such as NB-SHW-001_01.jpg to the corresponding SKU.
+        Only draft products with empty galleries are updated; existing gallery arrangements are preserved.
+        No product is published by this step.
+      </p>
+      <button type="button" className={outlineClass} disabled={linking||matchingDone}
+        onClick={()=>void linkApprovedImages()}>{linking?'Matching galleries…':matchingDone?'Finished scanning drafts':'Match approved images by SKU'}</button>
+      <p className="text-xs text-stone-600">{scanned} drafts scanned · {linked} galleries linked</p>
     </div>
     {progress&&<div className="space-y-3 rounded-lg border border-stone-200 bg-stone-50 p-5">
       <h3 className="font-semibold">{finished?'Import finished':'Import progress'} · Job {progress.jobId.slice(0,8)}</h3>
