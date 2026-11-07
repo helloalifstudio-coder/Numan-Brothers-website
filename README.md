@@ -42,7 +42,7 @@ Never use a secret key or database password as a VITE_ variable. Do not use anot
 - Studio: /studio (manual staff provisioning via Supabase Auth)
 - Product drafts/versions: nb_product_drafts, nb_product_revisions, nb_products
 - Homepage drafts/versions: nb_home_drafts, nb_home_revisions, nb_home_public
-- Media: nb_media plus the nb-media Storage bucket
+- Media: nb_media plus private nb-media-staging and approved nb-media-public Storage buckets (Phase 2; not live-tested)
 - Categories: nb_categories (seeded with user-requested category names, not inventory).
 
 Full setup and go/no-go instructions:
@@ -50,9 +50,12 @@ Full setup and go/no-go instructions:
 - docs/PHASE1_SECURITY_REVIEW.md (Phase 1 audit, controls, unresolved security blockers)
 - docs/CMS_DEPLOYMENT.md
 - docs/CMS_RELEASE_GATE.md
+- docs/RELEASE_ACCEPTANCE.md (hard launch blockers)
+- docs/CMS_USER_GUIDE.md (staff usage and imports)
+- docs/OPERATIONS.md (backups, incidents and recovery)
 
 ## Boundaries and known pending work
-**Important release blocker:** the initial CMS Storage bucket is still public: unapproved uploads are accessible through direct URLs. The approved Phase 2/3 architecture must add private staging and controlled public promotion before client upload or production launch. Phase 1 only hardens publishing history/deletes and adds a read-only installation probe.
+**Production gate:** Phase 2 source introduces private staging and approved-public media promotion, but this has NOT been deployed or validated on a client Supabase project. Treat the old public bucket as insecure until the reviewed migration and real Storage tests prove otherwise. Never use the unrelated gym project.
 
 The website is *browse and enquire*, not an online payment system. Future ERP/POS is the authoritative stock, prices and tax source. Production SEO requires real indexing tests and an SSR/prerender decision for dynamically generated product routes. Real photography, contact numbers and the meanings of "Sadi" and Sherwani "Plain Suits" need owner confirmation.
 
