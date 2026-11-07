@@ -305,6 +305,10 @@ begin
   if jsonb_typeof(draft) <> 'object' or length(trim(coalesce(draft ->> 'heroTitle',''))) < 4 then
     raise exception 'Homepage draft requires a valid hero title';
   end if;
+  if coalesce(draft->>'contactWhatsapp','') <> ''
+     and (draft->>'contactWhatsapp') !~ '^[1-9][0-9]{9,14}$' then
+    raise exception 'Contact number must be verified and in international digits-only format';
+  end if;
   if exists (
     select 1 from (values (draft->>'heroImage'), (draft->>'menImage'),
       (draft->>'kidsImage'), (draft->>'storyImage')) as urls(photo)

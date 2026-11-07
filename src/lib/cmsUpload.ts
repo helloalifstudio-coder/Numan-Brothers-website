@@ -100,7 +100,7 @@ export async function uploadCmsFile(
   const { data, error } = await client.from('nb_media').insert({
     storage_path:path, original_name:file.name.slice(0,220), mime_type:file.type,
     size_bytes:file.size, alt_text:'', approved:false, uploaded_by:userId,
-  }).select('id,storage_path,original_name,mime_type,size_bytes,alt_text,approved,created_at').single();
+  }).select('id,storage_path,original_name,mime_type,size_bytes,alt_text,approved,uploaded_by,created_at').single();
   if (error || !data) {
     throw new Error('File uploaded, but saving metadata failed. Ask an administrator to reconcile: ' +
       (error?.message || 'unknown database error'));

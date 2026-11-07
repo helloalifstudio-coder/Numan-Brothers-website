@@ -31,6 +31,7 @@ export default function CmsHomepage({client,userId,canPublish,media}:Props) {
     setSaving(true);setError(null);setMessage(null);
     try {
       if(form.heroTitle.trim().length<4)throw new Error('Hero headline must have at least four characters.');
+      if(form.contactWhatsapp && !/^[1-9][0-9]{9,14}$/.test(form.contactWhatsapp))throw new Error('WhatsApp must be a verified international number (10–15 digits, including country code).');
       const {error}=await client.from('nb_home_drafts').upsert({
         key:'home', content:form,updated_by:userId,
       },{onConflict:'key'});
@@ -72,6 +73,12 @@ export default function CmsHomepage({client,userId,canPublish,media}:Props) {
         <Field label="Section heading"><input className={inputClass} value={form.storyTitle} onChange={e=>update('storyTitle',e.target.value)} maxLength={180}/></Field>
         <div className="md:col-span-2"><Field label="Short story"><textarea rows={4} className={inputClass} value={form.storyDescription} onChange={e=>update('storyDescription',e.target.value)}/></Field></div>
         <div className="md:col-span-2">{assets('storyImage','Story photograph')}</div>
+        <div className="md:col-span-2 border-t border-stone-200 pt-6"><h3 className="font-serif text-2xl">Contact information</h3>
+          <p className="mt-2 text-xs leading-6 text-stone-600">Add the verified business WhatsApp number only after the shop owner approves it. Leave blank to hide all WhatsApp buttons.</p></div>
+        <div className="md:col-span-2"><Field label="Verified WhatsApp number including country code (digits only, e.g. 91XXXXXXXXXX)">
+          <input type="tel" className={inputClass} maxLength={15} value={form.contactWhatsapp}
+            onChange={e=>update('contactWhatsapp',e.target.value.replace(/[^0-9]/g,''))} placeholder="Not published"/>
+        </Field></div>
       </div>
       <div className="flex flex-wrap gap-3">
         <button type="button" className={outlineClass} disabled={saving} onClick={()=>void save()}>Save draft</button>

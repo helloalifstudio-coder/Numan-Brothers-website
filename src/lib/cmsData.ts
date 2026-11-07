@@ -29,6 +29,7 @@ export interface CmsMediaRow {
   size_bytes: number;
   alt_text: string;
   approved: boolean;
+  uploaded_by: string;
   created_at: string;
 }
 export interface CmsCategoryRow {
@@ -51,6 +52,7 @@ export interface CmsHome {
   storyTitle: string;
   storyDescription: string;
   storyImage: string;
+  contactWhatsapp: string;
 }
 export const HOME_TEMPLATE: CmsHome = {
   heroTitle: 'For the moments you remember.',
@@ -62,6 +64,7 @@ export const HOME_TEMPLATE: CmsHome = {
   storyTitle: 'A sense of occasion.',
   storyDescription: 'From wedding ensembles to traditional everyday styles, discover the silhouettes that feel right for your celebration.',
   storyImage: '',
+  contactWhatsapp: '',
 };
 export const homeKeys = Object.keys(HOME_TEMPLATE) as (keyof CmsHome)[];
 export const cleanHome = (value: unknown): CmsHome => {
@@ -69,7 +72,9 @@ export const cleanHome = (value: unknown): CmsHome => {
   return homeKeys.reduce((next, key) => {
     const raw = record[key];
     const value = typeof raw === 'string' ? raw.slice(0, key.includes('Description') || key.includes('Subtitle') ? 900 : 300) : HOME_TEMPLATE[key];
-    next[key] = key.toLowerCase().includes('image') ? (value && isSafeHttps(value) ? value : '') : value;
+    next[key] = key === 'contactWhatsapp'
+      ? (/^[1-9][0-9]{9,14}$/.test(value) ? value : '')
+      : key.toLowerCase().includes('image') ? (value && isSafeHttps(value) ? value : '') : value;
     return next;
   }, { ...HOME_TEMPLATE });
 };

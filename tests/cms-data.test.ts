@@ -6,6 +6,8 @@ describe('CMS content mapping', () => {
     expect(cleanHome({ heroTitle: 'New campaign', heroImage: false }).heroTitle).toBe('New campaign');
     expect(cleanHome({ heroImage: false }).heroImage).toBe('');
     expect(cleanHome(null)).toEqual(HOME_TEMPLATE);
+    expect(cleanHome({ contactWhatsapp:'javascript:alert(1)' }).contactWhatsapp).toBe('');
+    expect(cleanHome({ contactWhatsapp:'919876543210' }).contactWhatsapp).toBe('919876543210');
   });
   test('rejects unsafe media URLs', () => {
     expect(isSafeHttps('https://example.com/media.jpg')).toBe(true);

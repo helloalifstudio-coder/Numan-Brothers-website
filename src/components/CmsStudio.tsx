@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { ArrowUpRight, Database, FolderOpen, Image, LayoutDashboard, LockKeyhole, LogOut, Package } from 'lucide-react';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient, User } from '@supabase/supabase-js';
 import { getCmsClient } from '../lib/supabaseClient';
 import { allowedCmsRole, canPublishRole, type CmsMediaRow } from '../lib/cmsData';
 import { ErrorText, Field, inputClass, primaryClass } from './studio/StudioShared';
@@ -37,29 +37,39 @@ export default function CmsStudio(){
   useEffect(()=>{
     if(!client){setChecking(false);return;}
     let active=true;
-    const fetchIdentity=async()=>{
-      const {data,error}=await client.auth.getUser();
+    const applyIdentity=(user:User|null)=>{
       if(!active)return;
-      const user=data.user;
       const role=user?.app_metadata?.nb_role;
       if(user && allowedCmsRole(role)){
         setStaff({id:user.id,email:user.email||'',role});
         setAuthError(null);
       }else{
         setStaff(null);
-        if(user && !error)setAuthError('This account is signed in but does not have an approved CMS role. Ask the owner to provision access.');
+        if(user)setAuthError('This account does not have an approved CMS role. Ask the owner to provision access.');
       }
+    };
+    const fetchIdentity=async()=>{
+      const {data,error}=await client.auth.getUser();
+      if(!active)return;
+      applyIdentity(error ? null : data.user);
+      if(error)setAuthError('Session verification failed. Please sign in again.');
       setChecking(false);
     };
+    // Auth callbacks execute inside Supabase's session lock. Never call
+    // another auth method from here: doing so can deadlock token refresh.
+    const {data:{subscription}}=client.auth.onAuthStateChange((event,session)=>{
+      if(!active || event==='INITIAL_SESSION')return;
+      applyIdentity(session?.user || null);
+      setChecking(false);
+    });
     void fetchIdentity();
-    const {data:{subscription}}=client.auth.onAuthStateChange(()=>{void fetchIdentity()});
     return()=>{active=false;subscription.unsubscribe()};
   },[client]);
 
   const loadMedia=async()=>{
     if(!client||!staff)return;
     const {data,error}=await client.from('nb_media')
-      .select('id,storage_path,original_name,mime_type,size_bytes,alt_text,approved,created_at')
+      .select('id,storage_path,original_name,mime_type,size_bytes,alt_text,approved,uploaded_by,created_at')
       .order('created_at',{ascending:false}).limit(300);
     setMedia((data||[]) as CmsMediaRow[]);
     setMediaError(error?.message||null);

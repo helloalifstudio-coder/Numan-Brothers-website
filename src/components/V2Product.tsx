@@ -5,15 +5,16 @@ import { productImage, type CatalogProduct } from '../storefront/catalog';
 import V2Link from './V2Link';
 import V2Reveal from './V2Reveal';
 
-interface Props { product: Product; onNavigate: (path: string) => void; }
-export default function V2Product({ product, onNavigate }: Props) {
+interface Props { product: Product; whatsappNumber?: string; onNavigate: (path: string) => void; }
+export default function V2Product({ product, whatsappNumber, onNavigate }: Props) {
   const images = (product.images || []).filter((image) => /^https:\/\//.test(image));
   const [selectedImage, setSelectedImage] = useState(0);
   const videoUrl = (product as CatalogProduct).videoUrl;
   const playableVideo = typeof videoUrl === 'string' && /^https:\/\//.test(videoUrl) &&
     (/\.(mp4|webm)(\?|$)/i.test(videoUrl) || videoUrl.includes('/storage/v1/object/public/nb-media/'));
-  const contact = 'https://wa.me/919908597337?text=' +
-    encodeURIComponent('Hello Nomaan Brothers, I would like to enquire about ' + product.title + ' (' + product.id + ').');
+  const contact = whatsappNumber && /^[1-9][0-9]{9,14}$/.test(whatsappNumber)
+    ? 'https://wa.me/'+whatsappNumber+'?text=' + encodeURIComponent('Hello Nomaan Brothers, I would like to enquire about ' + product.title + ' (' + product.id + ').')
+    : null;
   return <div className="min-h-[65vh] bg-[#fbf8f2] px-5 pb-28 pt-9 md:px-12 lg:px-20">
     <div className="mx-auto max-w-[1330px]">
       <V2Link href="/men" onNavigate={onNavigate} className="mb-11 inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[.15em] text-[#8d714e]"><ArrowLeft size={15}/> Back to collections</V2Link>
@@ -47,10 +48,10 @@ export default function V2Product({ product, onNavigate }: Props) {
             {Array.isArray(product.sizes) && product.sizes.length > 0 && <div className="flex flex-wrap justify-between gap-4"><dt className="text-[#857565]">Listed sizes</dt><dd className="max-w-[65%] text-right font-medium text-[#362b21]">{product.sizes.join(', ')}</dd></div>}
             <div className="flex flex-wrap justify-between gap-4"><dt className="text-[#857565]">Product reference</dt><dd className="font-medium text-[#362b21]">{product.id}</dd></div>
           </dl>
-          <a href={contact} target="_blank" rel="noopener noreferrer"
+          {contact && <a href={contact} target="_blank" rel="noopener noreferrer"
             className="mt-8 flex min-h-14 items-center justify-between bg-[#30251b] px-7 text-xs font-semibold uppercase tracking-[.14em] text-[#fbf3e8] transition-colors hover:bg-[#765332]">
             Enquire about this style <ArrowUpRight size={19}/>
-          </a>
+          </a>}
           <V2Link href="/contact" onNavigate={onNavigate} className="mt-3 flex min-h-14 items-center justify-between border border-[#b7a080] px-7 text-xs font-semibold uppercase tracking-[.14em] text-[#5b4934] hover:bg-[#f1e5d4]">
             Visit our showroom <MapPin size={17}/>
           </V2Link>

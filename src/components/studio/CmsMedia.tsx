@@ -14,12 +14,15 @@ export default function CmsMedia({client,userId,canPublish,onMediaChange}:Props)
   const [progress,setProgress] = useState(0);
   const [selection,setSelection] = useState<FileList|null>(null);
   const [busyId,setBusyId] = useState<string|null>(null);
+  const [altDrafts,setAltDrafts] = useState<Record<string,string>>({});
   const refresh = async () => {
     setLoading(true);
     const {data,error} = await client.from('nb_media')
-      .select('id,storage_path,original_name,mime_type,size_bytes,alt_text,approved,created_at')
+      .select('id,storage_path,original_name,mime_type,size_bytes,alt_text,approved,uploaded_by,created_at')
       .order('created_at',{ascending:false}).limit(150);
-    setRows((data||[]) as CmsMediaRow[]);
+    const assets=(data||[]) as CmsMediaRow[];
+    setRows(assets);
+    setAltDrafts(Object.fromEntries(assets.map(a=>[a.id,a.alt_text])));
     setError(error?.message || null);
     setLoading(false);
   };
@@ -43,8 +46,18 @@ export default function CmsMedia({client,userId,canPublish,onMediaChange}:Props)
   const approve = async (asset:CmsMediaRow) => {
     if (!canPublish) return;
     setBusyId(asset.id);setError(null);
-    const {error} = await client.from('nb_media').update({approved:!asset.approved}).eq('id',asset.id);
-    if (error) setError(error.message); else { await refresh();onMediaChange(); }
+    const {data,error} = await client.from('nb_media').update({approved:!asset.approved}).eq('id',asset.id).select('id').maybeSingle();
+    if (error || !data) setError(error?.message||'Unable to change approval status.'); else { await refresh();onMediaChange(); }
+    setBusyId(null);
+  };
+  const saveDescription = async (asset:CmsMediaRow) => {
+    const permitted = canPublish || (!asset.approved && asset.uploaded_by===userId);
+    if(!permitted)return;
+    setBusyId(asset.id);setError(null);
+    const value=(altDrafts[asset.id]||'').trim().slice(0,400);
+    const {data,error}=await client.from('nb_media').update({alt_text:value}).eq('id',asset.id).select('id').maybeSingle();
+    if(error||!data)setError(error?.message||'Asset description could not be saved.');
+    else {await refresh();onMediaChange();}
     setBusyId(null);
   };
   return <section className="space-y-7">
@@ -78,7 +91,16 @@ export default function CmsMedia({client,userId,canPublish,onMediaChange}:Props)
               <p className={'text-xs font-semibold ' + (asset.approved?'text-emerald-700':'text-amber-700')}>
                 {asset.approved?'Approved for publication':'Awaiting approval'}
               </p>
+              <label className="block text-xs font-semibold text-stone-700">
+                {asset.mime_type.startsWith('video/')?'Video description':'Image alternative text'}
+                <input type="text" maxLength={400} className={inputClass+' mt-2'} value={altDrafts[asset.id]??asset.alt_text}
+                  disabled={!canPublish && (asset.approved || asset.uploaded_by!==userId)}
+                  onChange={e=>setAltDrafts((current)=>({...current,[asset.id]:e.target.value}))}/>
+              </label>
               <div className="flex flex-wrap gap-2">
+                {(canPublish || (!asset.approved && asset.uploaded_by===userId)) && <button type="button"
+                  disabled={busyId===asset.id || (altDrafts[asset.id]??asset.alt_text)===asset.alt_text}
+                  onClick={()=>void saveDescription(asset)} className={outlineClass}>Save description</button>}
                 {canPublish && <button type="button" disabled={busyId===asset.id} onClick={()=>void approve(asset)} className={outlineClass}>
                   <CheckCircle2 size={15}/>{asset.approved?'Revoke approval':'Approve'}
                 </button>}
