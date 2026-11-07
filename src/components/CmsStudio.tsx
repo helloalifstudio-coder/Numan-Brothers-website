@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { ArrowUpRight, Database, FolderOpen, Image, LayoutDashboard, LockKeyhole, LogOut, Package, FileUp } from 'lucide-react';
+import { ArrowUpRight, Database, FolderOpen, Image, LayoutDashboard, LockKeyhole, LogOut, Package, FileUp, BookOpen } from 'lucide-react';
 import type { SupabaseClient, User } from '@supabase/supabase-js';
 import { getCmsClient } from '../lib/supabaseClient';
 import { canPublishRole, type CmsMediaRow } from '../lib/cmsData';
@@ -17,10 +17,10 @@ type CmsUser = { id:string;email:string;role:'owner'|'admin'|'editor' };
 const sections: { id:Section;label:string;icon:React.ComponentType<{size?:number}> }[] = [
   {id:'dashboard',label:'Dashboard',icon:LayoutDashboard},
   {id:'products',label:'Products',icon:Package},
+  {id:'collections',label:'Collections',icon:FolderOpen},
   {id:'imports',label:'Bulk imports',icon:FileUp},
   {id:'media',label:'Media',icon:Image},
-  {id:'homepage',label:'Homepage',icon:LayoutDashboard},
-  {id:'collections',label:'Collections',icon:FolderOpen},
+  {id:'homepage',label:'Website CMS',icon:BookOpen},
 ];
 
 export default function CmsStudio(){
@@ -235,6 +235,33 @@ export default function CmsStudio(){
                     <p className="mt-4 font-serif text-4xl">{count??'—'}</p>
                   </div>)}
               </div>
+              <section className="rounded-xl border border-[#e0d3bd] bg-white p-6 md:p-8" aria-labelledby="cms-getting-started">
+                <div><p className="text-[11px] font-semibold uppercase tracking-[.2em] text-amber-800">Your store-manager guide</p>
+                  <h3 id="cms-getting-started" className="mt-2 font-serif text-2xl">How to use your dashboard</h3>
+                  <p className="mt-2 text-sm leading-7 text-stone-600">Use the steps below in order. Draft changes stay private until published.</p>
+                </div>
+                <ol className="mt-6 grid gap-4 md:grid-cols-2">
+                  {[
+                    {id:'collections' as Section,title:'Review your collections',detail:"Choose Men’s or Kids’ collections. Update names, descriptions, order and approved banners."},
+                    {id:'media' as Section,title:'Upload photos and videos',detail:'Upload approved garment photos or videos. Add a display name and alt text, then approve each asset before using it.'},
+                    {id:'products' as Section,title:'Create a product',detail:'Enter a unique SKU, title, slug, size, fabric and collection. Select approved photos, save a draft, and publish.'},
+                    {id:'imports' as Section,title:'Bulk import many garments',detail:'Fill in the sample CSV, review validation, import drafts, upload SKU-named photos, approve them and auto-match by SKU.'},
+                    {id:'homepage' as Section,title:'Edit your website',detail:'Change homepage sections, cards, navigation, footer and page text. Reorder sections and save a draft before publishing.'},
+                    {id:'products' as Section,title:'Verify live changes',detail:'Open the website and check your published garments, images and descriptions. Edit or archive when necessary.'},
+                  ].map((item,index)=><li key={index} className="rounded-lg border border-[#eee5d8] p-4">
+                    <div className="flex items-start gap-3">
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#29221b] text-xs font-semibold text-white">{index+1}</span>
+                      <div><h4 className="text-sm font-semibold">{item.title}</h4>
+                        <p className="mt-2 text-xs leading-6 text-stone-600">{item.detail}</p>
+                        <button type="button" onClick={()=>setSection(item.id)} className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-amber-800 underline underline-offset-4">
+                          Open {item.id==='homepage'?'Website CMS':item.id==='imports'?'Bulk imports':item.id} <ArrowUpRight size={13}/>
+                        </button>
+                      </div>
+                    </div>
+                  </li>)}
+                </ol>
+                <p className="mt-5 border-t border-stone-200 pt-4 text-xs leading-6 text-stone-600">Editors prepare drafts and upload files. Admins approve media, publish, archive garments and hide collections. Never upload photos without permission.</p>
+              </section>
               <div className="rounded-lg border border-[#e6d8bd] bg-[#fff8e9] p-6 text-sm leading-7 text-stone-700">
                 <p className="font-semibold">Publishing permissions</p>
                 <p className="mt-2">Editors may save drafts and upload media. Only owners and admins can approve assets and publish changes. Public visitors can read only published catalogue content.</p>
