@@ -7,6 +7,7 @@ interface Props {client:SupabaseClient; userId:string; canPublish:boolean; media
 export default function CmsHomepage({client,userId,canPublish,media}:Props) {
   const [form,setForm]=useState<CmsHome>(HOME_TEMPLATE);
   const [version,setVersion]=useState<number|null>(null);
+  const [history,setHistory]=useState<{id:number;version:number;published_at:string}[]>([]);
   const [loading,setLoading]=useState(true);
   const [saving,setSaving]=useState(false);
   const [message,setMessage]=useState<string|null>(null);
@@ -14,12 +15,15 @@ export default function CmsHomepage({client,userId,canPublish,media}:Props) {
   useEffect(()=>{
     let active=true;
     const load=async()=>{
-      const [draft,published] = await Promise.all([
+      const [draft,published,revisions] = await Promise.all([
         client.from('nb_home_drafts').select('content').eq('key','home').maybeSingle(),
         client.from('nb_home_public').select('content,version').eq('key','home').maybeSingle(),
+        client.from('nb_home_revisions').select('id,version,published_at').eq('key','home')
+          .order('version',{ascending:false}).limit(15),
       ]);
       if(!active)return;
-      setError(draft.error?.message || published.error?.message || null);
+      setError(draft.error?.message || published.error?.message || revisions.error?.message || null);
+      setHistory((revisions.data||[]) as {id:number;version:number;published_at:string}[]);
       setForm(cleanHome(draft.data?.content ?? published.data?.content));
       setVersion(typeof published.data?.version==='number'?published.data.version:null);
       setLoading(false);
@@ -49,6 +53,10 @@ export default function CmsHomepage({client,userId,canPublish,media}:Props) {
     setSaving(false);
     if(error){setError(error.message);return;}
     setVersion(Number(data));
+    const latest=await client.from('nb_home_revisions')
+      .select('id,version,published_at').eq('key','home').order('version',{ascending:false}).limit(15);
+    if(latest.error)setError(latest.error.message);
+    else setHistory((latest.data||[]) as {id:number;version:number;published_at:string}[]);
     setMessage('Homepage version '+data+' is now published. Reload the public site to see it.');
   };
   const assets = (key:keyof CmsHome,label:string)=><AssetPicker client={client} label={label} media={media}
@@ -80,6 +88,19 @@ export default function CmsHomepage({client,userId,canPublish,media}:Props) {
             onChange={e=>update('contactWhatsapp',e.target.value.replace(/[^0-9]/g,''))} placeholder="Not published"/>
         </Field></div>
       </div>
+      <section className="space-y-3 rounded-lg border border-[#ded0bc] bg-[#faf7f0] p-5" aria-labelledby="homepage-versions-title">
+        <h3 id="homepage-versions-title" className="font-serif text-xl">Published homepage versions</h3>
+        <p className="text-xs leading-6 text-stone-600">Draft edits are private. Publishing creates an immutable, numbered snapshot and changes what public visitors see.</p>
+        {history.length===0 ? <p className="text-xs text-stone-500">No published homepage revisions yet.</p> :
+          <ol className="space-y-2">
+            {history.map(item=><li key={item.id} className="flex flex-wrap justify-between gap-2 border-b border-[#e8dccb] py-2 text-xs">
+              <span className="font-semibold text-[#5a4533]">Version {item.version}</span>
+              <time dateTime={item.published_at} className="text-[#756958]">
+                {new Date(item.published_at).toLocaleString('en-IN',{dateStyle:'medium',timeStyle:'short'})}
+              </time>
+            </li>)}
+          </ol>}
+      </section>
       <div className="flex flex-wrap gap-3">
         <button type="button" className={outlineClass} disabled={saving} onClick={()=>void save()}>Save draft</button>
         {canPublish&&<button type="button" className={primaryClass} disabled={saving} onClick={()=>void publish()}>Publish homepage</button>}
