@@ -1,14 +1,16 @@
 /**
- * Read-only service checks for Noman Brothers review deployments.
+ * Read-only Supabase commissioning checks. Only public browser-safe settings
+ * are used, and no Auth user data, session, key, or table rows are returned.
  *
- * Uses ONLY the browser-safe Supabase publishable key; does not access user
- * sessions, Auth admin APIs, secrets or any draft/private content.
- * This endpoint intentionally returns only booleans, not response payloads.
+ * This cannot certify actual staff sign-in, Storage authorization, or function
+ * deployment. Confirm those separately with genuine owner/editor sessions.
  */
 const url=process.env.VITE_SUPABASE_URL?.trim()||'';
 const key=process.env.VITE_SUPABASE_PUBLISHABLE_KEY?.trim()||'';
+type Check = {ok:boolean};
+type Kind = 'public'|'restricted'|'published';
 
-async function testPublicEndpoint(path:string):Promise<{ok:boolean}>{
+async function probe(path:string,kind:Kind):Promise<Check>{
   try{
     const response=await fetch(url+path,{
       method:'GET',
@@ -17,7 +19,13 @@ async function testPublicEndpoint(path:string):Promise<{ok:boolean}>{
       redirect:'error',
       cache:'no-store',
     });
-    return {ok:response.ok};
+    if(kind==='restricted')return {ok:response.status===401||response.status===403};
+    if(!response.ok)return {ok:false};
+    const value=await response.json() as unknown;
+    if(!Array.isArray(value))return {ok:false};
+    if(kind==='published')return {ok:value.every(row=>
+      row && typeof row==='object' && (row as {status?:unknown}).status==='published')};
+    return {ok:true};
   }catch{return {ok:false}}
 }
 
@@ -32,17 +40,45 @@ export default {
     };
     if(!/^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(url)||
        !/^sb_publishable_[A-Za-z0-9_-]{12,}$/.test(key))
-      return new Response(JSON.stringify({configured:false,auth:{ok:false},catalogue:{ok:false}}),{
+      return new Response(JSON.stringify({configured:false,auth:{ok:false},catalogue:{ok:false},privateAccess:{ok:false}}),{
         status:503,headers,
       });
-    // Auth health is not a substitute for attempting a real user login;
-    // the public read-model probe shows whether migrations/API are usable.
-    const [auth,catalogue]=await Promise.all([
-      testPublicEndpoint('/auth/v1/health'),
-      testPublicEndpoint('/rest/v1/nb_categories?select=path&limit=1'),
+
+    // An Auth health response does not verify passwords or CMS role claims.
+    const health=await (async()=>{
+      try{
+        const response=await fetch(url+'/auth/v1/health',{
+          method:'GET',
+          headers:{apikey:key,Accept:'application/json'},
+          signal:AbortSignal.timeout(7000),
+          redirect:'error',
+          cache:'no-store',
+        });
+        return {ok:response.ok};
+      }catch{return {ok:false}}
+    })();
+
+    const [categories,products,homepage,drafts,media,revisions]=await Promise.all([
+      probe('/rest/v1/nb_categories?select=path&limit=1','public'),
+      probe('/rest/v1/nb_products?select=id,status&limit=3','published'),
+      probe('/rest/v1/nb_home_public?select=key&limit=1','public'),
+      probe('/rest/v1/nb_product_drafts?select=product_id&limit=1','restricted'),
+      probe('/rest/v1/nb_media?select=id&limit=1','restricted'),
+      probe('/rest/v1/nb_product_revisions?select=id&limit=1','restricted'),
     ]);
-    return new Response(JSON.stringify({configured:true,auth,catalogue}),{
-      status:200,headers,
-    });
+    return new Response(JSON.stringify({
+      configured:true,
+      auth:health,
+      catalogue:{ok:categories.ok&&products.ok&&homepage.ok},
+      privateAccess:{ok:drafts.ok&&media.ok&&revisions.ok},
+      checks:{
+        categories:categories.ok,
+        products:products.ok,
+        homepage:homepage.ok,
+        draftsPrivate:drafts.ok,
+        mediaPrivate:media.ok,
+        revisionsPrivate:revisions.ok,
+      },
+    }),{status:200,headers});
   },
 };
