@@ -24,6 +24,14 @@ describe('Server-only media approval contract',()=>{
     const references=code.indexOf("from('nb_product_media')");
     const revocation=code.indexOf('update({ approved: false })');
     assert.ok(references>0 && revocation>references,'reference checks must precede revocation');
-    assert.match(code,/return json\(409,.*Remove this image/);
+    assert.match(code,/return json\(409,.*Remove this asset/);
+  });
+  it('supports deliberate archiving and fully deleting unused assets, never direct anonymous mutation',()=>{
+    assert.match(code,/action === 'archive'/);
+    assert.match(code,/action === 'restore'/);
+    assert.match(code,/action==='delete'/);
+    assert.match(code,/from\('nb_media'\)\.delete\(\)/);
+    assert.match(code,/from\('nb-media-staging'\)\.remove/);
+    assert.match(code,/publicBucket\.remove/);
   });
 });
