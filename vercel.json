@@ -1,6 +1,22 @@
 {
   "rewrites": [
     {
+      "source": "/products/:id",
+      "destination": "/api/product?id=:id"
+    },
+    {
+      "source": "/sitemap.xml",
+      "destination": "/api/sitemap"
+    },
+    {
+      "source": "/sitemap-static.xml",
+      "destination": "/api/sitemap-static"
+    },
+    {
+      "source": "/sitemap-products/:page.xml",
+      "destination": "/api/sitemap-products?page=:page"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
@@ -48,5 +64,10 @@
         }
       ]
     }
-  ]
+  ],
+  "functions": {
+    "api/product.ts": {
+      "includeFiles": "dist/index.html"
+    }
+  }
 }
