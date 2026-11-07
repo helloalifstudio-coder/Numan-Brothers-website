@@ -59,6 +59,10 @@ export interface CmsHome {
   storyDescription: string;
   storyImage: string;
   contactWhatsapp: string;
+  contactPhone:string;
+  customizationImage:string;
+  socialLinks:Record<'instagram'|'facebook'|'youtube',string>;
+  sectionVideos:Record<string,string>;
   siteText: Record<string,string>;
   sectionOrder: string[];
   hiddenSections: string[];
@@ -75,24 +79,39 @@ export const HOME_TEMPLATE: CmsHome = {
   storyDescription: 'From wedding ensembles to traditional everyday styles, discover the silhouettes that feel right for your celebration.',
   storyImage: '',
   contactWhatsapp: '',
+  contactPhone:'',
+  customizationImage:'',
+  socialLinks:{instagram:'',facebook:'',youtube:''},
+  sectionVideos:{},
   siteText: {},
   sectionOrder:HOME_SECTIONS.map(s=>s.id),
   hiddenSections:[],
   featuredOrder:FEATURED_CARDS.map(s=>s.id),
 };
 export const homeKeys = ['heroTitle','heroEyebrow','heroSubtitle','heroImage','menImage',
-  'kidsImage','storyTitle','storyDescription','storyImage','contactWhatsapp'] as const;
+  'kidsImage','storyTitle','storyDescription','storyImage','contactWhatsapp','contactPhone','customizationImage'] as const;
 export const cleanHome = (value: unknown): CmsHome => {
   const record = value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {};
   const base=homeKeys.reduce((next, key) => {
     const raw = record[key];
     const value = typeof raw === 'string' ? raw.slice(0, key.includes('Description') || key.includes('Subtitle') ? 900 : 300) : HOME_TEMPLATE[key];
-    next[key] = key === 'contactWhatsapp'
+    next[key] = key === 'contactWhatsapp' || key === 'contactPhone'
       ? (/^[1-9][0-9]{9,14}$/.test(value) ? value : '')
       : key.toLowerCase().includes('image') ? (value && isSafeHttps(value) ? value : '') : value;
     return next;
   }, { ...HOME_TEMPLATE });
+  const socials=record.socialLinks&&typeof record.socialLinks==='object'&&!Array.isArray(record.socialLinks)
+    ?record.socialLinks as Record<string,unknown>:{};
+  const videos=record.sectionVideos&&typeof record.sectionVideos==='object'&&!Array.isArray(record.sectionVideos)
+    ?record.sectionVideos as Record<string,unknown>:{};
   return {...base,
+    socialLinks:Object.fromEntries((['instagram','facebook','youtube'] as const).map(key=>{
+      const url=socials[key];
+      return [key,typeof url==='string'&&isSafeHttps(url)?url.slice(0,500):''];
+    })) as CmsHome['socialLinks'],
+    sectionVideos:Object.fromEntries(Object.entries(videos)
+      .filter(([key,url])=>HOME_SECTIONS.some(s=>s.id===key)&&typeof url==='string'&&isSafeHttps(url))
+      .map(([key,url])=>[key,(url as string).slice(0,900)])),
     siteText:cleanSiteText(record.siteText),
     sectionOrder:normalizeOrder(record.sectionOrder,HOME_SECTIONS.map(s=>s.id)),
     featuredOrder:normalizeOrder(record.featuredOrder,FEATURED_CARDS.map(s=>s.id)),

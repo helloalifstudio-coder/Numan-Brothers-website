@@ -16,6 +16,9 @@ export const SITE_PAGES: {id:SitePage;title:string;description:string}[]=[
 export const SITE_FIELDS:Record<SitePage,SiteField[]>={
  home:make([
   ['home.heroMen','Hero men’s button',"Explore men's wear",'Hero'],
+  ['home.heroWhatsapp','Hero WhatsApp CTA','Enquire on WhatsApp','Hero'],
+  ['home.heroPhone','Hero phone CTA','Call the showroom','Hero'],
+  ['home.heroTailor','Hero tailoring link','Custom tailoring','Hero'],
   ['home.heroKids','Hero kids’ button','Kids collection','Hero'],
   ['home.scroll','Scroll prompt','Scroll to discover','Hero'],
   ['home.quickLabel','Quick menu heading','Explore quickly','Quick links'],
@@ -59,6 +62,14 @@ export const SITE_FIELDS:Record<SitePage,SiteField[]>={
   ['home.visitTitle','Visit heading','Come discover Nomaan Brothers.','Visit'],
   ['home.visitText','Visit description','Find our showroom in Mandi Bazar, Warangal. Explore styles, ask questions, and plan your visit.','Visit',true],
   ['home.visitCta','Visit link','Plan your visit','Visit'],
+  ['home.customEyebrow','Tailoring eyebrow','Your occasion, your fabric','Customization'],
+  ['home.customTitle','Customization section title','Made to fit your celebration.','Customization'],
+  ['home.customText','Tailoring section description','Choose your fabric, share your measurements, and discuss your ideal sherwani with our tailoring team. We will guide you through fit, design and availability.','Customization',true],
+  ['home.customStep1','First step','Choose a fabric','Customization'],
+  ['home.customStep2','Second step','Tell us your measurements','Customization'],
+  ['home.customStep3','Third step','Discuss your design','Customization'],
+  ['home.customWhatsApp','Tailoring WhatsApp button','Discuss custom tailoring','Customization'],
+  ['home.customCall','Tailoring call button','Call about tailoring','Customization'],
  ]),
  navigation:make([
   ['nav.announcement','Top announcement','Traditional occasionwear · Mandi Bazar, Warangal','Top bar'],
@@ -92,6 +103,10 @@ export const SITE_FIELDS:Record<SitePage,SiteField[]>={
   ['product.videoCta','Video link','View product video','Gallery'],
   ['product.pricing','Availability message','For current prices, fitting options and availability, please contact the showroom.','Details',true],
   ['product.enquiry','Enquiry button','Enquire about this design','Details'],
+  ['product.customTitle','Tailoring heading','Made to your measurements','Details'],
+  ['product.customText','Tailoring description','This garment can be tailored with your preferred fabric and measurements. Contact our team to discuss details and availability.','Details',true],
+  ['product.customCta','Tailoring enquiry button','Ask about customization','Details'],
+  ['product.callCta','Phone button','Call the showroom','Details'],
   ['product.visit','Visit button','Visit our showroom','Details'],
   ['product.disclaimer','Disclaimer','Imagery and garment details will be confirmed by the showroom before public launch.','Details',true],
   ['product.nextEyebrow','More styles label','Continue your journey','More styles'],
@@ -110,6 +125,7 @@ export const SITE_FIELDS:Record<SitePage,SiteField[]>={
   ['contact.title','Contact heading','Your next look starts here.','Header'],
   ['contact.description','Contact text','Nomaan Brothers, Mandi Bazar, Warangal, Telangana. Ask about the collection, sizes and availability before your visit.','Header',true],
   ['contact.directions','Directions link','Find directions','Actions'],
+  ['contact.call','Phone button','Call the showroom','Actions'],
   ['contact.whatsapp','WhatsApp link','WhatsApp enquiry','Actions'],
   ['contact.disclaimer','Disclaimer','Showroom address and contact details must be confirmed by the owner before public launch.','Actions',true],
  ]),
@@ -150,6 +166,7 @@ export const HOME_SECTIONS=[
  {id:'directory',title:'Collection directory',description:'All the category links'},
  {id:'featured',title:'Featured styles',description:'Sherwani, kurta, Jodhpuri cards'},
  {id:'story',title:'Brand story',description:'Editorial photograph and story'},
+ {id:'customization',title:'Custom tailoring',description:'Choose fabric, measurements and WhatsApp/call enquiries'},
  {id:'visit',title:'Visit showroom',description:'Directions call-to-action'},
 ] as const;
 export const FEATURED_CARDS=[
