@@ -81,7 +81,7 @@ async function resumableUpload(
   }
 }
 
-const mediaSelectColumns = 'id,storage_path,original_name,mime_type,size_bytes,alt_text,approved,uploaded_by,created_at';
+const mediaSelectColumns = 'id,storage_path,original_name,mime_type,size_bytes,alt_text,department,category_path,archived_at,approved,uploaded_by,created_at';
 
 /**
  * For batch import retries, stableObjectId is derived from the owner's job
@@ -90,7 +90,7 @@ const mediaSelectColumns = 'id,storage_path,original_name,mime_type,size_bytes,a
  */
 export async function uploadCmsFile(
   client: SupabaseClient, file: File, userId: string, onProgress: (value: number) => void,
-  options?: {stableObjectId?:string},
+  options?: {stableObjectId?:string;department?:'men'|'kids'|null;categoryPath?:string|null},
 ): Promise<CmsMediaRow> {
   const validation = checkMediaFile(file);
   if (validation) throw new Error(validation);
@@ -136,6 +136,7 @@ export async function uploadCmsFile(
   const { data, error } = await client.from('nb_media').insert({
     storage_path:path, original_name:file.name.slice(0,220), mime_type:file.type,
     size_bytes:file.size, alt_text:'', approved:false, uploaded_by:userId,
+    department:options?.department||null,category_path:options?.categoryPath||null,
   }).select(mediaSelectColumns).single();
   if (error || !data) {
     throw new Error('File uploaded, but saving metadata failed. Retry the same import to reconcile: ' +

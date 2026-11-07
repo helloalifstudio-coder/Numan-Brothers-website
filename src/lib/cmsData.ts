@@ -16,6 +16,8 @@ export interface CmsProductRow {
   image_urls: string[];
   video_url: string | null;
   price: number | null;
+  offer_price: number | null;
+  customizable: boolean;
   status: 'draft' | 'published' | 'archived';
   sort_rank: number;
   created_at: string;
@@ -29,6 +31,9 @@ export interface CmsMediaRow {
   mime_type: string;
   size_bytes: number;
   alt_text: string;
+  department:'men'|'kids'|null;
+  category_path:string|null;
+  archived_at:string|null;
   approved: boolean;
   uploaded_by: string;
   created_at: string;
@@ -108,7 +113,7 @@ export const mediaPublicUrl = (path: string): string => {
 export function rowToProduct(row: CmsProductRow): CatalogProduct {
   const images = Array.isArray(row.image_urls) ? row.image_urls.filter(isSafeHttps) : [];
   const p: Product = {
-    id: row.id, title: row.title, price: row.price ?? 0, mrp: row.price ?? 0,
+    id: row.id, title: row.title, price: row.offer_price ?? row.price ?? 0, mrp: row.price ?? 0,
     images, category: row.department, fabric: row.fabric || '', length: '',
     sizes: Array.isArray(row.sizes) ? row.sizes : [], description: row.description || '',
     specs: [], badges: [], colors: [], rating: 0, reviewsCount: 0, type: 'Set',
@@ -116,7 +121,10 @@ export function rowToProduct(row: CmsProductRow): CatalogProduct {
   };
   return { ...p, collectionPaths: row.category_paths || [], department: row.department,
     videoUrl: row.video_url && isSafeHttps(row.video_url) ? row.video_url : undefined,
-    published: row.status === 'published' };
+    published: row.status === 'published',
+    offerPrice:row.offer_price??undefined,
+    originalPrice:row.price??undefined,
+    customizable:Boolean(row.customizable) };
 }
 
 export interface PublishedData {
@@ -131,7 +139,7 @@ export async function loadPublishedData(): Promise<PublishedData> {
   try {
     const [productsResult, homeResult, categoriesResult] = await Promise.all([
       client.from('nb_products')
-        .select('id,sku,slug,title,department,category_paths,description,fabric,sizes,image_urls,video_url,price,status,sort_rank,created_at,updated_at')
+        .select('id,sku,slug,title,department,category_paths,description,fabric,sizes,image_urls,video_url,price,offer_price,customizable,status,sort_rank,created_at,updated_at')
         .eq('status','published').order('sort_rank', { ascending: true }).limit(12),
       client.from('nb_home_public').select('content').eq('key','home').maybeSingle(),
       client.from('nb_categories').select('path,department,label,description,image_url,active,sort_order').eq('active',true),
