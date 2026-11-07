@@ -132,7 +132,7 @@ export default function CmsHomepage({client,userId,canPublish,media}:Props) {
           <input type="tel" className={inputClass} maxLength={15} value={form.contactWhatsapp}
             onChange={e=>update('contactWhatsapp',e.target.value.replace(/[^0-9]/g,''))} placeholder="Not published"/>
         </Field></div>
-      </div>
+      </div>}
       <section className="space-y-5 rounded-lg border border-stone-200 bg-white p-5 md:p-7">
         <div><p className="text-[11px] font-semibold uppercase tracking-[.2em] text-amber-800">{SITE_PAGES.find(tab=>tab.id===page)?.title}</p>
           <h3 className="mt-2 font-serif text-2xl">Editable text and card content</h3>
