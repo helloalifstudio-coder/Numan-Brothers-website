@@ -47,6 +47,7 @@ Never use a secret key or database password as a VITE_ variable. Do not use anot
 
 Full setup and go/no-go instructions:
 - docs/ARCHITECTURE_FRONTEND_CMS_PAYMENTS.md (live vs candidate systems, frontend/backend map, payments, CMS vs code versions)
+- docs/ACTIVATE_LIVE_CMS.md (new Vercel review URL, nine SQL migrations, Supabase function, Auth owner and Vercel env handover)
 - docs/SUPABASE_STAGING_INSTALL.md (all nine SQL migrations, Auth, Storage and deployment setup)
 - docs/SUPABASE_STAGING_TEST_MATRIX.md (actual image/video/role/load acceptance evidence)
 - docs/CLIENT_ONBOARDING.md (client-owned fork, new Supabase, Vercel and read-only commissioning)
