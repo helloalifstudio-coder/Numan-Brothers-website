@@ -51,7 +51,7 @@ export default function CmsHomepage({client,userId,canPublish,media}:Props) {
     setVersion(Number(data));
     setMessage('Homepage version '+data+' is now published. Reload the public site to see it.');
   };
-  const assets = (key:keyof CmsHome,label:string)=><AssetPicker label={label} media={media}
+  const assets = (key:keyof CmsHome,label:string)=><AssetPicker client={client} label={label} media={media}
     selected={form[key]?[form[key]]:[]} onChange={(urls)=>update(key,urls[0]||'')}/>;
 
   return <section className="max-w-5xl space-y-7">
