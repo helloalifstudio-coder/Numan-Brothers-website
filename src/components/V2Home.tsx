@@ -2,16 +2,16 @@ import React, { useRef } from 'react';
 import { ArrowDownRight, ArrowRight, ArrowUpRight, MapPin, MoveDownRight } from 'lucide-react';
 import { motion, useReducedMotion, useScroll, useTransform } from 'motion/react';
 import { Product } from '../types';
-import { type CmsHome } from '../lib/cmsData';
+import { type CmsHome, type CmsCategoryRow } from '../lib/cmsData';
 import {siteText,homeSectionStyle,featuredCardStyle} from '../lib/siteContent';
 import { productsForCollection, productImage } from '../storefront/catalog';
 import V2Link from './V2Link';
 import V2Reveal from './V2Reveal';
 import V2HomeDiscovery from './V2HomeDiscovery';
 
-interface Props { products: Product[]; home: CmsHome; onNavigate: (path: string) => void; }
+interface Props {products: Product[]; home: CmsHome; categories?:CmsCategoryRow[]; onNavigate:(path:string)=>void;}
 
-export default function V2Home({ products, home, onNavigate }: Props) {
+export default function V2Home({ products, home, categories=[], onNavigate }: Props) {
   const photo = home.heroImage;
   const photoTwo = home.storyImage || home.menImage;
   const hero = useRef<HTMLElement>(null);
@@ -133,7 +133,7 @@ export default function V2Home({ products, home, onNavigate }: Props) {
       </div>
     </section>
 
-    <div style={homeSectionStyle(home,'directory')}><V2HomeDiscovery products={products} home={home} onNavigate={onNavigate}/></div>
+    <div style={homeSectionStyle(home,'directory')}><V2HomeDiscovery products={products} home={home} categories={categories} onNavigate={onNavigate}/></div>
 
     <section style={homeSectionStyle(home,'featured')} className="bg-[#eee7db] px-5 py-24 md:px-12 md:py-28 lg:px-20" aria-labelledby="featured-title">
       <div className="mx-auto max-w-[1330px]">

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowRight, ArrowUpRight, Compass, Sparkles } from 'lucide-react';
 import type { Product } from '../types';
-import type { CmsHome } from '../lib/cmsData';
+import type {CmsHome,CmsCategoryRow} from '../lib/cmsData';
 import {siteText} from '../lib/siteContent';
 import { productImage, productsForCollection } from '../storefront/catalog';
 import { getDepartment, type DepartmentId } from '../storefront/navigation';
@@ -11,6 +11,7 @@ import V2Reveal from './V2Reveal';
 interface Props {
   products: Product[];
   home: CmsHome;
+  categories?: CmsCategoryRow[];
   onNavigate: (path: string) => void;
 }
 
@@ -18,7 +19,7 @@ interface Props {
  * A single navigational map of the existing CMS taxonomy. All destinations
  * are registered collection routes, not manually repeated links or mock data.
  */
-export default function V2HomeDiscovery({ products, home, onNavigate }: Props) {
+export default function V2HomeDiscovery({ products, home, categories=[], onNavigate }: Props) {
   const [active, setActive] = useState<DepartmentId>('men');
   const department = getDepartment(active);
   const photo = active === 'kids'
@@ -27,7 +28,10 @@ export default function V2HomeDiscovery({ products, home, onNavigate }: Props) {
   const featured = active === 'men'
     ? siteText(home,'home.directoryMen')
     : siteText(home,'home.directoryKids');
-  const cards = department.groups;
+  const visible=(path:string)=>categories.length===0||categories.some(c=>c.path===path);
+  const label=(path:string,fallback:string)=>categories.find(c=>c.path===path)?.label||fallback;
+  const cards=department.groups.map(group=>({...group,
+    items:group.items.filter(item=>visible(item.path))})).filter(group=>group.items.length>0);
   return <section id="collection-directory" className="scroll-mt-28 border-y border-[#dacebd] bg-[#eae2d6] px-5 py-20 md:px-12 md:py-28 lg:px-20"
     aria-labelledby="directory-title">
     <div className="mx-auto max-w-[1330px]">
@@ -63,11 +67,11 @@ export default function V2HomeDiscovery({ products, home, onNavigate }: Props) {
           <div className="relative flex h-full min-h-[310px] flex-col justify-between p-7 md:min-h-[400px] md:p-10 lg:min-h-[530px]">
             <span className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[.21em] text-[#f0d6ad]"><Sparkles size={15}/> Discover / {active==='men'?'01':'02'}</span>
             <div>
-              <h3 className="font-serif text-[clamp(2.9rem,4.7vw,5.5rem)] leading-[1] tracking-[-.055em]">{department.title}</h3>
+              <h3 className="font-serif text-[clamp(2.9rem,4.7vw,5.5rem)] leading-[1] tracking-[-.055em]">{siteText(home,active==='men'?'home.menCardTitle':'home.kidsCardTitle')}</h3>
               <p className="mt-5 max-w-sm text-sm leading-7 text-[#efdec7]">{featured}</p>
               <V2Link href={department.path} onNavigate={onNavigate}
                 className="mt-7 inline-flex min-h-12 items-center gap-3 border border-[#f1dabc]/80 px-6 text-[11px] font-semibold uppercase tracking-[.12em] text-white transition-colors hover:bg-[#f3dfbd] hover:text-[#29221b]">
-                Explore all {department.title} <ArrowUpRight size={17}/>
+                Explore all {siteText(home,active==='men'?'home.menCardTitle':'home.kidsCardTitle')} <ArrowUpRight size={17}/>
               </V2Link>
             </div>
           </div>
@@ -90,7 +94,7 @@ export default function V2HomeDiscovery({ products, home, onNavigate }: Props) {
                 {group.items.map(item=><li key={item.path}>
                   <V2Link href={item.path} onNavigate={onNavigate}
                     className="group/link flex min-h-11 items-center justify-between gap-3 border-b border-[#e7ddcf]/80 py-3 text-[13px] font-medium text-[#625548] transition-colors hover:text-[#8b633b]">
-                    <span>{item.label}</span>
+                    <span>{label(item.path,item.label)}</span>
                     <ArrowRight size={15} className="shrink-0 opacity-55 transition-transform group-hover/link:translate-x-1 group-hover/link:opacity-100"/>
                   </V2Link>
                 </li>)}

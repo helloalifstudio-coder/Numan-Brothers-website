@@ -87,7 +87,7 @@ export default function App() {
       {!catalogLoading && siteData.error && <div role="status" className="border-b border-amber-200 bg-amber-50 px-6 py-3 text-center text-xs text-amber-900">
         The online catalogue is temporarily unavailable. Contact the showroom for current styles.
       </div>}
-      {path === '/' ? <V2Home products={published} home={siteData.homepage} onNavigate={navigate}/> :
+      {path === '/' ? <V2Home products={published} home={siteData.homepage} categories={siteData.categories} onNavigate={navigate}/> :
        collection ? (activeRoutePage ? <V2Collection route={collection} products={matches}
          bannerImage={categoryOverride?.image_url && isSafeHttps(categoryOverride.image_url) ? categoryOverride.image_url : undefined}
          home={siteData.homepage} categories={siteData.categories} totalCount={activeRoutePage.count}

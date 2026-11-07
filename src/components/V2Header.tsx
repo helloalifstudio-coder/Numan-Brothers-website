@@ -163,7 +163,7 @@ export default function V2Header({ path, home, categories=[] , onNavigate }: Pro
                 <button key={department.id} type="button" aria-expanded={mobileDepartment === department.id}
                   className={'min-h-12 border px-2 text-xs font-semibold uppercase tracking-[.08em] ' +
                     (mobileDepartment === department.id ? 'border-[#9c7949] bg-[#30251c] text-[#f4e9d4]' : 'border-[#dfd4c5] text-[#544b40]')}
-                  onClick={() => setMobileDepartment(department.id)}>{department.title}</button>
+                  onClick={() => setMobileDepartment(department.id)}>{deptLabel(department.id)}</button>
               ))}
             </div>
             <V2Link href={getDepartment(mobileDepartment).path} onNavigate={go}
@@ -178,7 +178,7 @@ export default function V2Header({ path, home, categories=[] , onNavigate }: Pro
                     <li key={item.path}>
                       <V2Link href={item.path} onNavigate={go}
                         className="flex min-h-11 items-center border-b border-[#ede4d9] py-3 text-sm text-[#3d362e]">
-                        {item.label}
+                        {categoryLabel(item.path,item.label)}
                       </V2Link>
                     </li>
                   ))}
