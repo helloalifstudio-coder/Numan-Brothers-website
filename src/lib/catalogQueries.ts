@@ -3,7 +3,7 @@ import { COLLECTION_ROUTES } from '../storefront/navigation';
 import { getCmsClient } from './supabaseClient';
 import { rowToProduct, type CmsProductRow } from './cmsData';
 
-const columns = 'id,sku,slug,title,department,category_paths,description,fabric,sizes,image_urls,video_url,price,status,sort_rank,created_at,updated_at';
+const columns = 'id,sku,slug,title,department,category_paths,description,fabric,sizes,image_urls,video_url,price,offer_price,customizable,status,sort_rank,created_at,updated_at';
 export const PUBLIC_PAGE_SIZE = 24;
 export interface CataloguePage {
   products: CatalogProduct[];
@@ -43,7 +43,8 @@ export async function loadCataloguePage(
     }
   }
   if(q)builder=builder.or('title.ilike.%'+q+'%,sku.ilike.%'+q+'%');
-  const {data,count,error}=await builder.order('updated_at',{ascending:false})
+  const {data,count,error}=await builder.order('sort_rank',{ascending:true})
+    .order('updated_at',{ascending:false})
     .order('id',{ascending:true})
     .range(page*PUBLIC_PAGE_SIZE,(page+1)*PUBLIC_PAGE_SIZE-1);
   return error?empty(page,error.message):{

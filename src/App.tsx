@@ -94,7 +94,8 @@ export default function App() {
          page={page} pageSize={activeRoutePage.pageSize} onPageChange={setPage} onNavigate={navigate}/> :
          <p role="status" className="p-12 text-center text-stone-500">Loading collection…</p>) :
        selectedId && !detail ? <p role="status" className="p-12 text-center text-stone-500">Loading product…</p> :
-       product ? <V2Product key={product.id} product={product} home={siteData.homepage} whatsappNumber={siteData.homepage.contactWhatsapp} onNavigate={navigate}/> :
+       product ? <V2Product key={product.id} product={product} home={siteData.homepage}
+         whatsappNumber={siteData.homepage.contactWhatsapp} contactPhone={siteData.homepage.contactPhone} onNavigate={navigate}/> :
        path === '/search' ? <section className="mx-auto min-h-[70vh] max-w-[1360px] px-5 py-16 md:px-12">
          <V2Reveal>
            <p className="mb-5 text-[10px] font-bold uppercase tracking-[.24em] text-[#a37f50]">{siteText(siteData.homepage,'search.eyebrow')}</p>
@@ -134,6 +135,9 @@ export default function App() {
                <MessageCircle size={17}/> {siteText(siteData.homepage,'contact.whatsapp')}
              </a>}
            </div>
+           {siteData.homepage.contactPhone&&<a href={'tel:+'+siteData.homepage.contactPhone}
+             className="mt-6 inline-flex min-h-12 items-center gap-3 border border-[#e2c9a4] px-7 text-xs font-bold uppercase text-[#f8e9d0]">
+             {siteText(siteData.homepage,'contact.call')} <ArrowUpRight size={16}/></a>}
            <p className="mt-12 max-w-lg text-xs leading-6 text-[#af9e8a]">{siteText(siteData.homepage,'contact.disclaimer')}</p>
          </div>
        </section> :
