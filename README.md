@@ -27,6 +27,7 @@ Checks:
     bun run lint
     bun test
     bun run build
+    node --test tests/client-preflight.test.mjs
 
 ## Environment
 Create .env locally using .env.example. For Vercel use the two **frontend public values** of the dedicated Nomaan Supabase project:
@@ -45,10 +46,14 @@ Never use a secret key or database password as a VITE_ variable. Do not use anot
 - Categories: nb_categories (seeded with user-requested category names, not inventory).
 
 Full setup and go/no-go instructions:
+- docs/CLIENT_ONBOARDING.md (client-owned fork, new Supabase, Vercel and read-only commissioning)
+- docs/PHASE1_SECURITY_REVIEW.md (Phase 1 audit, controls, unresolved security blockers)
 - docs/CMS_DEPLOYMENT.md
 - docs/CMS_RELEASE_GATE.md
 
 ## Boundaries and known pending work
+**Important release blocker:** the initial CMS Storage bucket is still public: unapproved uploads are accessible through direct URLs. The approved Phase 2/3 architecture must add private staging and controlled public promotion before client upload or production launch. Phase 1 only hardens publishing history/deletes and adds a read-only installation probe.
+
 The website is *browse and enquire*, not an online payment system. Future ERP/POS is the authoritative stock, prices and tax source. Production SEO requires real indexing tests and an SSR/prerender decision for dynamically generated product routes. Real photography, contact numbers and the meanings of "Sadi" and Sherwani "Plain Suits" need owner confirmation.
 
 The legacy Firebase rules in the repository are deny-all, **but that file is not deployed to Firebase**. Back up and secure the old live Firebase project in a controlled migration.
