@@ -143,6 +143,52 @@ begin
   if not forbidden then raise exception 'Published revisions are mutable'; end if;
 end;
 $$;
+-- Publishers must use the RPC even for writing revision history. An owner
+-- cannot forge a published version or permanently remove a live catalogue row.
+do $
+declare denied boolean := false;
+begin
+  begin
+    insert into public.nb_product_revisions(product_id,version,content,published_by)
+    values ('22222222-2222-4222-8222-222222222222',99,
+      '{"title":"Forged product revision"}'::jsonb,
+      '11111111-1111-4111-8111-111111111111');
+  exception when insufficient_privilege then denied := true;
+  end;
+  if not denied then raise exception 'Owner forged product revision history'; end if;
+
+  denied := false;
+  begin
+    insert into public.nb_home_revisions(key,version,content,published_by)
+    values ('home',99,'{"heroTitle":"Forged homepage"}'::jsonb,
+      '11111111-1111-4111-8111-111111111111');
+  exception when insufficient_privilege then denied := true;
+  end;
+  if not denied then raise exception 'Owner forged homepage revision history'; end if;
+
+  denied := false;
+  begin
+    delete from public.nb_products where sku='NB-CI-1';
+  exception when insufficient_privilege then denied := true;
+  end;
+  if not denied then raise exception 'Direct product deletion was allowed'; end if;
+
+  denied := false;
+  begin
+    delete from public.nb_media where original_name='a.webp';
+  exception when insufficient_privilege then denied := true;
+  end;
+  if not denied then raise exception 'Direct media deletion was allowed'; end if;
+
+  if (select count(*) from public.nb_products where sku='NB-CI-1') <> 1 then
+    raise exception 'A publishing-protected product was deleted';
+  end if;
+  if (select count(*) from public.nb_product_revisions) <> 1 or
+     (select count(*) from public.nb_home_revisions) <> 1 then
+    raise exception 'Revision history was tampered with';
+  end if;
+end;
+$;
 -- Confirm unpublished/draft HTML cannot be publicly selected.
 reset role;
 select set_config('request.jwt.claims','{}',false);
