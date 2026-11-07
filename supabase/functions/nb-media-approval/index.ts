@@ -25,7 +25,7 @@ const handler = withSupabase({ auth: 'user' }, async (req, ctx) => {
   const id = request.id;
   const action = request.action;
   if (typeof id !== 'string' || !/^[0-9a-f-]{36}$/i.test(id) ||
-      (action !== 'approve' && action !== 'revoke' && action !== 'delete')) {
+      !['approve','revoke','archive','restore','delete'].includes(action as string)) {
     return json(400, { error: 'Invalid asset or action' })
   }
 
@@ -43,7 +43,7 @@ const handler = withSupabase({ auth: 'user' }, async (req, ctx) => {
   }
 
   const { data: asset, error: assetError } = await ctx.supabaseAdmin
-    .from('nb_media').select('id,storage_path,approved').eq('id', id).maybeSingle()
+    .from('nb_media').select('id,storage_path,approved,archived_at').eq('id', id).maybeSingle()
   if (assetError) return json(500, { error: 'Could not inspect the media record' })
   if (!asset) return json(404, { error: 'Media not found' })
 
@@ -52,24 +52,16 @@ const handler = withSupabase({ auth: 'user' }, async (req, ctx) => {
     return json(409, { error: 'Media path requires manual review' })
   }
 
-  // Deletion is restricted to unapproved media after checking fresh Auth role
-  // and any attached product-gallery associations. Approved media must first
-  // pass the existing revocation checks, never a direct browser DELETE.
-  if (action === 'delete') {
-    if (asset.approved) return json(409, { error: 'Revoke approval before deletion' })
-    const refs = await ctx.supabaseAdmin.from('nb_product_media')
-      .select('media_id', { count: 'exact', head: true }).eq('media_id', id)
-    if (refs.error) return json(503, { error: 'Could not verify references; removal denied' })
-    if ((refs.count ?? 0) > 0) return json(409, { error: 'Remove product-gallery references first' })
-    const { error: recordError } = await ctx.supabaseAdmin.from('nb_media').delete().eq('id', id)
-    if (recordError) return json(500, { error: 'Could not delete media record' })
-    const { error: fileError } = await ctx.supabaseAdmin.storage.from('nb-media-staging').remove([path])
-    if (fileError) return json(502, { error: 'Metadata removed; staged-file cleanup needs reconciliation' })
-    return json(200, { ok: true, deleted: true })
+  if (action === 'archive' || action === 'restore') {
+    const {error}=await ctx.supabaseAdmin.from('nb_media')
+      .update({archived_at:action==='archive'?new Date().toISOString():null}).eq('id',id)
+    if(error)return json(500,{error:'Unable to update the asset archive status'})
+    return json(200,{ok:true,archived:action==='archive'})
   }
 
   const publicBucket = ctx.supabaseAdmin.storage.from('nb-media-public');
   if (action === 'approve') {
+    if(asset.archived_at)return json(409,{error:'Restore the asset from archive before approving'})
     // An earlier retry may have copied the object before the DB update failed.
     const { data: existing } = await publicBucket.info(path)
     if (!existing) {
@@ -110,7 +102,24 @@ const handler = withSupabase({ auth: 'user' }, async (req, ctx) => {
   if ((products.count ?? 0) > 0 || (collections.count ?? 0) > 0 ||
       (legacyImages.count ?? 0) > 0 || (legacyVideo.count ?? 0) > 0 ||
       referencedByHome) {
-    return json(409, { error: 'Remove this image from published products, homepage and collections before revoking approval' })
+    return json(409, { error: 'Remove this asset from published products, homepage and collections before revoking or deleting' })
+  }
+
+  if(action==='delete') {
+    // The metadata row is deliberately deleted last. Any Storage failure
+    // keeps a server-side record that an owner can retry/reconcile.
+    // Associations (including archived products) must be removed first.
+    if(asset.approved){
+      const {error}=await ctx.supabaseAdmin.from('nb_media').update({approved:false}).eq('id',id)
+      if(error)return json(409,{error:'Could not safely revoke approval before deleting'})
+    }
+    const {error:publicError}=await publicBucket.remove([path])
+    if(publicError)return json(502,{error:'Could not remove the public file; deletion incomplete'})
+    const {error:stagingError}=await ctx.supabaseAdmin.storage.from('nb-media-staging').remove([path])
+    if(stagingError)return json(502,{error:'Could not remove the original file; deletion incomplete'})
+    const {error:recordError}=await ctx.supabaseAdmin.from('nb_media').delete().eq('id',id)
+    if(recordError)return json(409,{error:'File copies removed, but a database reference prevents record deletion; review dependent drafts'})
+    return json(200,{ok:true,deleted:true})
   }
 
   // No currently published content depends on this image. Unpublish metadata
