@@ -25,6 +25,7 @@
   },
   "exclude": [
     "tests",
+    "supabase/functions",
     "node_modules",
     "dist"
   ]
