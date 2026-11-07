@@ -8,18 +8,20 @@ This checklist separates **implementation** from **real-world production readine
 | Published catalogue adapter | Implemented | Dedicated live Supabase data |
 | Supabase migration, RLS, publishing | Committed | Fresh real-project security tests/advisors |
 | Private staff studio | Implemented | Invited owner/editor login |
-| Image uploads and approvals | Implemented | Live Storage + MIME/path/permission checks |
+| Image uploads and approvals | Private staging and approval candidate coded | Live Storage + MIME/path/permission, revocation and concurrency tests |
 | Resumable short video upload | Implemented | Live TUS resume smoke test |
 | Homepage drafts and publish | Implemented | Owner authorization + version rollback test |
-| Product drafts and publish | Implemented | Real sample publish and revisions |
+| Product drafts and publish | Candidate code implemented | Real sample publish, negative role tests, media dependency checks and revisions |
 | Source, TypeScript and SQL CI | Run on every push | Latest commit passing |
 | Legacy Firebase retirement | Not remotely applied | Export data, deployed-rules inspection |
-| SEO prerender/SSR | Not yet implemented | Indexability strategy and tests |
+| SEO prerender/SSR | Candidate code implemented | Verify deployed Vercel routing, product HTML, 404s, sitemaps and Core Web Vitals |
 | Accurate store content | Pending | Approved catalogue, photos, contact |
-| Operations | Pending | Monitor costs, quotas, backup restore |
+| Operations | Runbooks drafted; no live proof | Monitor costs, quotas, backup restore and rehearse recovery |
 | Production merge | Not authorized | Client and AGM signoff |
 
 ## Hard blockers
+
+**Phase 6 CI passing is not production sign-off.** Review each stacked PR and execute integration tests in a dedicated client-owned Supabase project. Release remains blocked until the independent Vercel staging acceptance, private/public Storage lifecycle, role revocation, scale benchmarking, and backup restoration are evidenced.
 
 Do not publish if the new Nomaan-owned Supabase project is not configured, if RLS fails any negative test, if owner's role is not properly provisioned, or if photographs/WhatsApp details have not been approved.
 
