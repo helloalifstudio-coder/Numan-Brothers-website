@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { ImagePlus, CheckCircle2, Upload } from 'lucide-react';
+import {ImagePlus,CheckCircle2,Upload,Archive,Trash2,RotateCcw} from 'lucide-react';
+import {COLLECTION_ROUTES} from '../../storefront/navigation';
+import CmsImports from './CmsImports';
 import { type CmsMediaRow, mediaPublicUrl } from '../../lib/cmsData';
 import { uploadCmsFile, MAX_MEDIA_SIZE } from '../../lib/cmsUpload';
 import { ErrorText, inputClass, outlineClass, primaryClass } from './StudioShared';
@@ -16,6 +18,13 @@ export default function CmsMedia({client,userId,canPublish,onMediaChange}:Props)
   const [busyId,setBusyId] = useState<string|null>(null);
   const [altDrafts,setAltDrafts] = useState<Record<string,string>>({});
   const [nameDrafts,setNameDrafts] = useState<Record<string,string>>({});
+  const [tags,setTags] = useState<Record<string,{department:'men'|'kids'|null;category_path:string|null}>>({});
+  const [uploadDept,setUploadDept] = useState<'men'|'kids'|''>('');
+  const [uploadCategory,setUploadCategory] = useState('');
+  const [filterDept,setFilterDept] = useState<'men'|'kids'|''>('');
+  const [filterCategory,setFilterCategory] = useState('');
+  const [archivedFilter,setArchivedFilter] = useState<'active'|'archived'>('active');
+  const [showBulk,setShowBulk] = useState(false);
   const [privatePreviews,setPrivatePreviews] = useState<Record<string,string>>({});
   const [search,setSearch] = useState('');
   const [approvalFilter,setApprovalFilter] = useState('all');
@@ -24,11 +33,15 @@ export default function CmsMedia({client,userId,canPublish,onMediaChange}:Props)
   const refresh = async () => {
     setLoading(true);
     let request=client.from('nb_media')
-      .select('id,storage_path,original_name,mime_type,size_bytes,alt_text,approved,uploaded_by,created_at',{count:'exact'});
+      .select('id,storage_path,original_name,mime_type,size_bytes,alt_text,department,category_path,archived_at,approved,uploaded_by,created_at',{count:'exact'});
     const term=search.replace(/[^a-zA-Z0-9 _.-]/g,' ').trim().slice(0,60);
     if(term)request=request.ilike('original_name','%'+term+'%');
     if(approvalFilter==='approved')request=request.eq('approved',true);
     if(approvalFilter==='pending')request=request.eq('approved',false);
+    if(filterDept)request=request.eq('department',filterDept);
+    if(filterCategory)request=request.eq('category_path',filterCategory);
+    if(archivedFilter==='archived')request=request.not('archived_at','is',null);
+    else request=request.is('archived_at',null);
     const {data,count,error} = await request.order('created_at',{ascending:false})
       .range(page*30,page*30+29);
     setTotal(count||0);
@@ -37,10 +50,11 @@ export default function CmsMedia({client,userId,canPublish,onMediaChange}:Props)
     setPrivatePreviews({});
     setAltDrafts(Object.fromEntries(assets.map(a=>[a.id,a.alt_text])));
     setNameDrafts(Object.fromEntries(assets.map(a=>[a.id,a.original_name])));
+    setTags(Object.fromEntries(assets.map(a=>[a.id,{department:a.department,category_path:a.category_path}])));
     setError(error?.message || null);
     setLoading(false);
   };
-  useEffect(()=>{const timer=setTimeout(()=>void refresh(),220);return()=>clearTimeout(timer)},[client,page,search,approvalFilter]);
+  useEffect(()=>{const timer=setTimeout(()=>void refresh(),220);return()=>clearTimeout(timer)},[client,page,search,approvalFilter,filterDept,filterCategory,archivedFilter]);
 
   const upload = async () => {
     if (!selection?.length || uploading) return;
@@ -48,7 +62,7 @@ export default function CmsMedia({client,userId,canPublish,onMediaChange}:Props)
     try {
       for (const file of Array.from(selection)) {
         setProgress(0);
-        await uploadCmsFile(client,file,userId,setProgress);
+        await uploadCmsFile(client,file,userId,setProgress,{department:uploadDept||null,categoryPath:uploadCategory||null});
       }
       setSelection(null);
       await refresh();
@@ -82,15 +96,17 @@ export default function CmsMedia({client,userId,canPublish,onMediaChange}:Props)
     const value=(altDrafts[asset.id]||'').trim().slice(0,400);
     const filename=(nameDrafts[asset.id]||'').trim().slice(0,220);
     if(!filename){setError('Enter a media display name.');setBusyId(null);return;}
+    const tag=tags[asset.id]||{department:asset.department,category_path:asset.category_path};
     const {data,error}=await client.from('nb_media')
-      .update({alt_text:value,original_name:filename}).eq('id',asset.id).select('id').maybeSingle();
+      .update({alt_text:value,original_name:filename,department:tag.department,category_path:tag.category_path})
+      .eq('id',asset.id).select('id').maybeSingle();
     if(error||!data)setError(error?.message||'Asset description could not be saved.');
     else {await refresh();onMediaChange();}
     setBusyId(null);
   };
   const deleteMedia=async(asset:CmsMediaRow)=>{
-    if(!canPublish||asset.approved)return;
-    if(!window.confirm('Permanently delete this unapproved file? This cannot be undone.'))return;
+    if(!canPublish)return;
+    if(!window.confirm('Permanently erase this image/video from Supabase Storage AND its database record? This cannot be undone. Referenced live assets cannot be erased.'))return;
     setBusyId(asset.id);setError(null);
     try{
       const {data,error}=await client.functions.invoke('nb-media-approval',{
@@ -101,13 +117,35 @@ export default function CmsMedia({client,userId,canPublish,onMediaChange}:Props)
     }catch(cause){setError(cause instanceof Error?cause.message:'File deletion failed.');}
     finally{setBusyId(null);}
   };
+  const toggleArchive=async(asset:CmsMediaRow)=>{
+    if(!canPublish)return;
+    const verb=asset.archived_at?'restore':'archive';
+    if(!window.confirm(verb==='archive'?'Archive this asset? It stays stored and can be restored.':'Restore this media asset to the library?'))return;
+    setBusyId(asset.id);setError(null);
+    const {data,error}=await client.functions.invoke('nb-media-approval',{body:{id:asset.id,action:verb}});
+    if(error||!data?.ok)setError(error?.message||data?.error||'Archive operation failed.');
+    else{await refresh();onMediaChange();}
+    setBusyId(null);
+  };
+  const collectionsFor=(department:'men'|'kids'|'')=>
+    COLLECTION_ROUTES.filter(c=>!c.isDepartment&&!c.isGroup&&(!department||c.department===department));
   return <section className="space-y-7">
     <div>
       <h2 className="font-serif text-3xl">Media library</h2>
-      <p className="mt-2 max-w-2xl text-sm text-stone-600">Upload real garment photographs or MP4/WebM videos. Only approved images can be published on products or the homepage. Large files use resumable uploads.</p>
+      <p className="mt-2 max-w-2xl text-sm text-stone-600">Organize images and videos by Men’s or Kids’ Wear and by garment type. Upload individually or in bulk, edit names, then approve before publishing. Archived files remain recoverable; Delete permanently removes unused file bytes and its database record.</p>
     </div>
     <div className="rounded-lg border border-stone-200 bg-stone-50 p-5 space-y-4">
       <div className="flex items-center gap-2"><ImagePlus size={20}/><h3 className="font-semibold">Upload assets</h3></div>
+      <div className="grid gap-3 md:grid-cols-2">
+        <label className="block text-xs font-semibold">1. Department
+          <select className={inputClass+' mt-1'} value={uploadDept} onChange={e=>{setUploadDept(e.target.value as 'men'|'kids'|'');setUploadCategory('')}}>
+            <option value="">General website assets</option><option value="men">Men’s Wear</option><option value="kids">Kids Wear</option>
+          </select></label>
+        <label className="block text-xs font-semibold">2. Garment category
+          <select className={inputClass+' mt-1'} value={uploadCategory} onChange={e=>setUploadCategory(e.target.value)}>
+            <option value="">All / general</option>{collectionsFor(uploadDept).map(c=><option key={c.path} value={c.path}>{c.title}</option>)}
+          </select></label>
+      </div>
       <input aria-label="Choose photos or videos" type="file" multiple
         accept="image/jpeg,image/png,image/webp,image/avif,image/gif,video/mp4,video/webm"
         className={inputClass} onChange={(e)=>setSelection(e.currentTarget.files)}/>
@@ -117,7 +155,13 @@ export default function CmsMedia({client,userId,canPublish,onMediaChange}:Props)
       </button>
       {uploading && <progress aria-label="Upload progress" max={100} value={progress} className="block w-full"/>}
     </div>
-    <div className="grid gap-3 rounded-md border border-stone-200 bg-white p-4 sm:grid-cols-[1fr_auto]">
+    <div className="flex flex-wrap gap-3">
+      <button type="button" className={showBulk?primaryClass:outlineClass} onClick={()=>setShowBulk(x=>!x)}>
+        {showBulk?'Close bulk import':'Bulk upload & product CSV imports'}
+      </button>
+    </div>
+    {showBulk&&<div className="rounded-xl border border-amber-200 bg-[#fffcf7] p-4"><CmsImports client={client} userId={userId} onMediaChange={onMediaChange}/></div>}
+    <div className="grid gap-3 rounded-md border border-stone-200 bg-white p-4 sm:grid-cols-2 xl:grid-cols-4">
       <input className={inputClass} type="search" aria-label="Search media filename or SKU"
         placeholder="Search photos by name or SKU…" value={search}
         onChange={e=>{setSearch(e.target.value);setPage(0);}}/>
@@ -126,7 +170,14 @@ export default function CmsMedia({client,userId,canPublish,onMediaChange}:Props)
         <option value="all">All assets</option><option value="pending">Pending approval</option>
         <option value="approved">Approved</option>
       </select>
-      <p className="text-xs text-stone-500 sm:col-span-2">{total.toLocaleString('en-IN')} media records · 30 per page</p>
+      <select className={inputClass} aria-label="Filter media department" value={filterDept}
+        onChange={e=>{setFilterDept(e.target.value as 'men'|'kids'|'');setFilterCategory('');setPage(0)}}>
+        <option value="">All departments</option><option value="men">Men’s Wear</option><option value="kids">Kids Wear</option></select>
+      <select className={inputClass} aria-label="Filter media collection" value={filterCategory} onChange={e=>{setFilterCategory(e.target.value);setPage(0)}}>
+        <option value="">All garment types</option>{collectionsFor(filterDept).map(c=><option key={c.path} value={c.path}>{c.title}</option>)}</select>
+      <select className={inputClass} aria-label="Media archive status" value={archivedFilter} onChange={e=>{setArchivedFilter(e.target.value as 'active'|'archived');setPage(0)}}>
+        <option value="active">Active media</option><option value="archived">Archived media</option></select>
+      <p className="text-xs text-stone-500 sm:col-span-2 xl:col-span-4">{total.toLocaleString('en-IN')} media records · 30 per page</p>
     </div>
     <ErrorText message={error}/>
     {loading ? <p className="text-sm text-stone-500">Loading media…</p> :
@@ -143,7 +194,8 @@ export default function CmsMedia({client,userId,canPublish,onMediaChange}:Props)
               </div>}
             <div className="space-y-2 p-4">
               <p className="truncate text-sm font-semibold" title={asset.original_name}>{asset.original_name}</p>
-              <p className="text-xs text-stone-500">{(asset.size_bytes/1024/1024).toFixed(2)} MB · {asset.mime_type}</p>
+              <p className="text-xs text-stone-500">{(asset.size_bytes/1024/1024).toFixed(2)} MB · {asset.mime_type} · {asset.department||'General'} / {asset.category_path||'Unsorted'}</p>
+              {asset.archived_at&&<p className="text-xs font-bold text-amber-800">Archived (not available in asset pickers)</p>}
               <p className={'text-xs font-semibold ' + (asset.approved?'text-emerald-700':'text-amber-700')}>
                 {asset.approved?'Approved for publication':'Awaiting approval'}
               </p>
@@ -154,6 +206,19 @@ export default function CmsMedia({client,userId,canPublish,onMediaChange}:Props)
                   disabled={!canPublish && (asset.approved || asset.uploaded_by!==userId)}
                   onChange={e=>setNameDrafts(current=>({...current,[asset.id]:e.target.value}))}/>
               </label>
+              <div className="grid gap-2 sm:grid-cols-2">
+                <label className="text-xs font-semibold">Department
+                  <select className={inputClass+' mt-1'} value={tags[asset.id]?.department||''}
+                    disabled={!canPublish && (asset.approved || asset.uploaded_by!==userId)}
+                    onChange={e=>setTags(current=>({...current,[asset.id],department:(e.target.value||null) as 'men'|'kids'|null,category_path:null}))}>
+                    <option value="">General</option><option value="men">Men’s Wear</option><option value="kids">Kids Wear</option></select></label>
+                <label className="text-xs font-semibold">Garment type
+                  <select className={inputClass+' mt-1'} value={tags[asset.id]?.category_path||''}
+                    disabled={!canPublish && (asset.approved || asset.uploaded_by!==userId)}
+                    onChange={e=>setTags(current=>({...current,[asset.id],category_path:e.target.value||null}))}>
+                    <option value="">Unsorted</option>{collectionsFor(tags[asset.id]?.department||'').map(c=><option key={c.path} value={c.path}>{c.title}</option>)}
+                  </select></label>
+              </div>
               <label className="block text-xs font-semibold text-stone-700">
                 {asset.mime_type.startsWith('video/')?'Video description':'Image alternative text'}
                 <input type="text" maxLength={400} className={inputClass+' mt-2'} value={altDrafts[asset.id]??asset.alt_text}
@@ -162,14 +227,18 @@ export default function CmsMedia({client,userId,canPublish,onMediaChange}:Props)
               </label>
               <div className="flex flex-wrap gap-2">
                 {(canPublish || (!asset.approved && asset.uploaded_by===userId)) && <button type="button"
-                  disabled={busyId===asset.id || ((altDrafts[asset.id]??asset.alt_text)===asset.alt_text && (nameDrafts[asset.id]??asset.original_name)===asset.original_name)}
+                  disabled={busyId===asset.id || ((altDrafts[asset.id]??asset.alt_text)===asset.alt_text && (nameDrafts[asset.id]??asset.original_name)===asset.original_name
+                    && (tags[asset.id]?.department??null)===asset.department && (tags[asset.id]?.category_path??null)===asset.category_path)}
                   onClick={()=>void saveDescription(asset)} className={outlineClass}>Save edits</button>}
                 {canPublish && <button type="button" disabled={busyId===asset.id} onClick={()=>void approve(asset)} className={outlineClass}>
                   <CheckCircle2 size={15}/>{asset.approved?'Revoke approval':'Approve'}
                 </button>}
-                {canPublish&&!asset.approved&&<button type="button" disabled={busyId===asset.id}
+                {canPublish&&<button type="button" disabled={busyId===asset.id} onClick={()=>void toggleArchive(asset)} className={outlineClass}>
+                  {asset.archived_at?<RotateCcw size={15}/>:<Archive size={15}/>} {asset.archived_at?'Restore':'Archive'}
+                </button>}
+                {canPublish&&<button type="button" disabled={busyId===asset.id}
                   onClick={()=>void deleteMedia(asset)} className={outlineClass+' border-red-300 text-red-800'}>
-                  Delete file
+                  <Trash2 size={15}/> Delete permanently
                 </button>}
                 {asset.approved && <button type="button" className={outlineClass} onClick={()=>void navigator.clipboard.writeText(url)}>Copy public URL</button>}
               </div>
