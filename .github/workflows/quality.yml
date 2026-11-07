@@ -37,7 +37,9 @@ jobs:
       - name: TypeScript checks
         run: bun run lint
       - name: Navigation and catalogue tests
-        run: bun test tests/navigation.test.ts tests/cms-security.test.ts tests/cms-data.test.ts tests/metadata.test.ts tests/catalog-queries.test.ts tests/bulk-csv.test.ts
+        run: bun test tests/navigation.test.ts tests/cms-security.test.ts tests/cms-data.test.ts tests/metadata.test.ts tests/catalog-queries.test.ts tests/bulk-csv.test.ts tests/seo-routes.test.ts
+      - name: SEO markup injection and sitemap manifest tests
+        run: node --test tests/seo.test.mjs
       - name: Client onboarding preflight contract tests
         run: node --test tests/client-preflight.test.mjs
       - name: PostgreSQL CMS role and publishing test
@@ -63,3 +65,6 @@ jobs:
           fi
       - name: Production build
         run: bun run build
+      - name: Verify crawlable pre-rendered category output
+        run: |
+          node -e "const fs=require('fs');for(const path of ['dist/men/index.html','dist/men/sherwani/index.html','dist/kids/index.html']){const html=fs.readFileSync(path,'utf8');if(!/<h1>/.test(html))process.exit(1)}"
