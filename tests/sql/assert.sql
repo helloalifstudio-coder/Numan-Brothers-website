@@ -60,11 +60,16 @@ end;
 $$;
 -- An editor must not be able to approve media or write a published product.
 do $$
-declare changed integer;
+declare changed integer := 0; denied boolean := false;
 begin
-  update public.nb_media set approved = true;
-  get diagnostics changed = row_count;
-  if changed <> 0 then raise exception 'Editor approved media'; end if;
+  begin
+    update public.nb_media set approved = true;
+    get diagnostics changed = row_count;
+    if changed = 0 then denied := true; end if;
+  exception when insufficient_privilege or check_violation then
+    denied := true;
+  end;
+  if not denied then raise exception 'Editor approved media'; end if;
 end;
 $$;
 reset role;
