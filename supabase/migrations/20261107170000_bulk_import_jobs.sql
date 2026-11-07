@@ -36,6 +36,7 @@ create table public.nb_import_rows (
   status text not null default 'pending'
     check (status in ('pending','imported','skipped','failed')),
   product_id uuid,
+  media_id uuid references public.nb_media(id) on delete restrict,
   message text not null default '' check (char_length(message) <= 1000),
   created_at timestamptz not null default now(),
   primary key(job_id,row_number)
