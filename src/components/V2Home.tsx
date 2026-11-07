@@ -6,6 +6,7 @@ import { type CmsHome } from '../lib/cmsData';
 import { productsForCollection, productImage } from '../storefront/catalog';
 import V2Link from './V2Link';
 import V2Reveal from './V2Reveal';
+import V2HomeDiscovery from './V2HomeDiscovery';
 
 interface Props { products: Product[]; home: CmsHome; onNavigate: (path: string) => void; }
 
@@ -74,12 +75,17 @@ export default function V2Home({ products, home, onNavigate }: Props) {
       </div>
     </section>
 
-    <div className="border-b border-[#e7dccc] px-6 py-6 md:px-10">
-      <div className="mx-auto flex max-w-[1330px] flex-wrap items-center justify-between gap-3 text-[10px] font-semibold uppercase tracking-[.19em] text-[#806d53]">
-        <span>For weddings & celebrations</span><span className="hidden h-px w-24 bg-[#bc9b6c] md:block"/><span>Men's Wear / Kids Wear</span>
-        <span className="hidden h-px w-24 bg-[#bc9b6c] md:block"/><span>Mandi Bazar, Warangal</span>
+    <nav aria-label="Explore popular collections" className="border-b border-[#e0d4c2] bg-[#f2eadd] px-5 md:px-12 lg:px-20">
+      <div className="mx-auto flex max-w-[1330px] items-center gap-5 overflow-x-auto py-4 md:gap-8">
+        <span className="shrink-0 text-[10px] font-bold uppercase tracking-[.18em] text-[#8d704d]">Explore quickly</span>
+        <div className="h-6 w-px shrink-0 bg-[#d2c2ac]" aria-hidden="true"/>
+        <V2Link href="/men/sherwani" onNavigate={onNavigate} className="inline-flex min-h-11 shrink-0 items-center gap-2 text-xs font-semibold text-[#4b3827] hover:text-[#a17848]">Sherwani <ArrowUpRight size={15}/></V2Link>
+        <V2Link href="/men/kurta-pyjama" onNavigate={onNavigate} className="inline-flex min-h-11 shrink-0 items-center gap-2 text-xs font-semibold text-[#4b3827] hover:text-[#a17848]">Kurta Pyjama <ArrowUpRight size={15}/></V2Link>
+        <V2Link href="/men/marriage" onNavigate={onNavigate} className="inline-flex min-h-11 shrink-0 items-center gap-2 text-xs font-semibold text-[#4b3827] hover:text-[#a17848]">Wedding Edit <ArrowUpRight size={15}/></V2Link>
+        <V2Link href="/kids" onNavigate={onNavigate} className="inline-flex min-h-11 shrink-0 items-center gap-2 text-xs font-semibold text-[#4b3827] hover:text-[#a17848]">Kids Wear <ArrowUpRight size={15}/></V2Link>
+        <a href="#collection-directory" className="inline-flex min-h-11 shrink-0 items-center gap-2 border-b border-[#a17b4b] text-xs font-semibold text-[#70512e] hover:text-[#a17848]">All categories <ArrowRight size={16}/></a>
       </div>
-    </div>
+    </nav>
 
     <section className="mx-auto max-w-[1440px] px-5 pb-20 pt-24 md:px-12 md:pb-28 md:pt-32 lg:px-20" aria-labelledby="departments-title">
       <V2Reveal className="mb-10 flex flex-wrap items-end justify-between gap-4 md:mb-16">
@@ -125,6 +131,8 @@ export default function V2Home({ products, home, onNavigate }: Props) {
         </V2Reveal>
       </div>
     </section>
+
+    <V2HomeDiscovery products={products} home={home} onNavigate={onNavigate}/>
 
     <section className="bg-[#eee7db] px-5 py-24 md:px-12 md:py-28 lg:px-20" aria-labelledby="featured-title">
       <div className="mx-auto max-w-[1330px]">
