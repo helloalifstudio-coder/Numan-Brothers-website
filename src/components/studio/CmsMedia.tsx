@@ -210,12 +210,12 @@ export default function CmsMedia({client,userId,canPublish,onMediaChange}:Props)
                 <label className="text-xs font-semibold">Department
                   <select className={inputClass+' mt-1'} value={tags[asset.id]?.department||''}
                     disabled={!canPublish && (asset.approved || asset.uploaded_by!==userId)}
-                    onChange={e=>setTags(current=>({...current,[asset.id],department:(e.target.value||null) as 'men'|'kids'|null,category_path:null}))}>
+                    onChange={e=>setTags(current=>({...current,[asset.id]:{...current[asset.id],department:(e.target.value||null) as 'men'|'kids'|null,category_path:null}}))}>
                     <option value="">General</option><option value="men">Men’s Wear</option><option value="kids">Kids Wear</option></select></label>
                 <label className="text-xs font-semibold">Garment type
                   <select className={inputClass+' mt-1'} value={tags[asset.id]?.category_path||''}
                     disabled={!canPublish && (asset.approved || asset.uploaded_by!==userId)}
-                    onChange={e=>setTags(current=>({...current,[asset.id],category_path:e.target.value||null}))}>
+                    onChange={e=>setTags(current=>({...current,[asset.id]:{...current[asset.id],category_path:e.target.value||null}}))}>
                     <option value="">Unsorted</option>{collectionsFor(tags[asset.id]?.department||'').map(c=><option key={c.path} value={c.path}>{c.title}</option>)}
                   </select></label>
               </div>
