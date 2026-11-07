@@ -93,3 +93,6 @@ jobs:
       - name: Verify crawlable pre-rendered category output
         run: |
           node -e "const fs=require('fs');for(const path of ['dist/men/index.html','dist/men/sherwani/index.html','dist/kids/index.html']){const html=fs.readFileSync(path,'utf8');if(!/<h1>/.test(html))process.exit(1)}"
+      - name: Verify unconfigured review build is not search-indexable
+        run: |
+          node -e "const fs=require('fs');const html=fs.readFileSync('dist/index.html','utf8');const robots=fs.readFileSync('dist/robots.txt','utf8');if(!html.includes('name=\"robots\" content=\"noindex')||!robots.includes('Disallow: /'))process.exit(1)"
