@@ -28,10 +28,18 @@ This guide applies to a **dedicated client-owned Supabase project** and its own 
 ## CSV/import lifecycle
 
 - Jobs record a stable file fingerprint, creator, total, processed/imported/skipped/error counts, and per-row audit entries. Do not run the same CSV concurrently.
-- Interrupted imports may leave uploaded media or inserted drafts before the audit row commits. Reconcile against SKU/metadata, then resume only after checking the last successful page.
+- CSV draft identities are deterministic per job/row; on retry the importer recognizes its existing draft even if the row-audit insert failed. Image batch paths are also deterministic, allowing recovery of prior uploaded Storage objects and missing metadata. This reduces duplicates but does **not** make Storage and SQL writes atomic. Inspect the job/audit state after browser interruption, concurrent-session conflict or quota errors.
+- Import fingerprints are scoped to each authenticated staff member. Two employees can process the same source file without sharing mutable job records.
+- Interrupted multipart/TUS transfers may still require manual reconciliation of incomplete upload sessions or expiry. Do not promise background processing after a browser tab is closed.
 - SKU matching only attaches approved assets to empty draft galleries and never publishes them.
 - Examine failed-row report; do not blindly retry huge batches on authentication/quota errors.
 - Validate and monitor Storage size, bandwidth, PostgREST limits, per-query response time, file upload success/timeout rate and Supabase billing.
+
+## Published media revocation
+
+- Media approval/revocation uses a privileged Edge Function that refreshes the owner's role from Auth rather than trusting a stale browser JWT.
+- A currently published product gallery, video, homepage or category banner blocks removal of its public asset. Editors must first replace references and publish the updated content. Stale CDN copies may remain externally cached for a limited period.
+- Reconcile partial public-copy/metadata failures before declaring approval or revocation complete.
 
 ## Deployment/change control
 
