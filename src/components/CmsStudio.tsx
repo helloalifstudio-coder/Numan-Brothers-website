@@ -3,7 +3,8 @@ import { Helmet } from 'react-helmet-async';
 import { ArrowUpRight, Database, FolderOpen, Image, LayoutDashboard, LockKeyhole, LogOut, Package, FileUp } from 'lucide-react';
 import type { SupabaseClient, User } from '@supabase/supabase-js';
 import { getCmsClient } from '../lib/supabaseClient';
-import { allowedCmsRole, canPublishRole, type CmsMediaRow } from '../lib/cmsData';
+import { canPublishRole, type CmsMediaRow } from '../lib/cmsData';
+import { cmsRole, cmsRoleHelp, cmsSignInError } from '../lib/cmsAuth';
 import { ErrorText, Field, inputClass, primaryClass } from './studio/StudioShared';
 import CmsMedia from './studio/CmsMedia';
 import CmsProducts from './studio/CmsProducts';
@@ -27,6 +28,8 @@ export default function CmsStudio(){
   const [staff,setStaff]=useState<CmsUser|null>(null);
   const [checking,setChecking]=useState(true);
   const [authError,setAuthError]=useState<string|null>(null);
+  const [unprovisionedEmail,setUnprovisionedEmail]=useState<string|null>(null);
+  const [serviceStatus,setServiceStatus]=useState<{auth:boolean;catalogue:boolean}|null>(null);
   const [email,setEmail]=useState('');
   const [password,setPassword]=useState('');
   const [signingIn,setSigningIn]=useState(false);
@@ -36,36 +39,77 @@ export default function CmsStudio(){
   const [stats,setStats]=useState<{published:number;drafts:number;assets:number}|null>(null);
   const canPublish=canPublishRole(staff?.role);
 
+  const applyIdentity=(user:User|null)=>{
+    const role=cmsRole(user?.app_metadata?.nb_role);
+    if(user && role){
+      setStaff({id:user.id,email:user.email||'',role});
+      setUnprovisionedEmail(null);
+      setAuthError(null);
+    }else if(user){
+      setStaff(null);
+      setUnprovisionedEmail(user.email||'Signed-in account');
+      setAuthError(cmsRoleHelp());
+    }else{
+      setStaff(null);
+      setUnprovisionedEmail(null);
+    }
+  };
+
   useEffect(()=>{
     if(!client){setChecking(false);return;}
     let active=true;
-    const applyIdentity=(user:User|null)=>{
-      if(!active)return;
-      const role=user?.app_metadata?.nb_role;
-      if(user && allowedCmsRole(role)){
-        setStaff({id:user.id,email:user.email||'',role});
-        setAuthError(null);
-      }else{
-        setStaff(null);
-        if(user)setAuthError('This account does not have an approved CMS role. Ask the owner to provision access.');
+    let eventVersion=0;
+    const initialize=async()=>{
+      // No session? Show the login form immediately, without a misleading
+      // "verification failed" error or blocking an unauthenticated visitor.
+      const currentVersion=eventVersion;
+      try {
+        const {data:local,error:sessionError}=await client.auth.getSession();
+        if(!active||currentVersion!==eventVersion)return;
+        if(sessionError)throw sessionError;
+        if(!local.session){
+          applyIdentity(null);
+          setChecking(false);
+          return;
+        }
+        const {data,error}=await client.auth.getUser();
+        if(!active||currentVersion!==eventVersion)return;
+        applyIdentity(error?null:data.user);
+        if(error)setAuthError(cmsSignInError(error));
+      }catch(error){
+        if(!active||currentVersion!==eventVersion)return;
+        applyIdentity(null);
+        setAuthError(cmsSignInError(error));
+      }finally{
+        if(active&&currentVersion===eventVersion)setChecking(false);
       }
     };
-    const fetchIdentity=async()=>{
-      const {data,error}=await client.auth.getUser();
-      if(!active)return;
-      applyIdentity(error ? null : data.user);
-      if(error)setAuthError('Session verification failed. Please sign in again.');
-      setChecking(false);
-    };
-    // Auth callbacks execute inside Supabase's session lock. Never call
-    // another auth method from here: doing so can deadlock token refresh.
+    // Never await or invoke another auth method inside a Supabase auth listener:
+    // that listener runs inside the SDK's session lock.
     const {data:{subscription}}=client.auth.onAuthStateChange((event,session)=>{
-      if(!active || event==='INITIAL_SESSION')return;
-      applyIdentity(session?.user || null);
+      if(!active||event==='INITIAL_SESSION')return;
+      eventVersion++;
+      applyIdentity(session?.user||null);
       setChecking(false);
     });
-    void fetchIdentity();
+    void initialize();
     return()=>{active=false;subscription.unsubscribe()};
+  },[client]);
+
+  useEffect(()=>{
+    if(!client)return;
+    let active=true;
+    const status=async()=>{
+      try{
+        const response=await fetch('/api/cms-status',{cache:'no-store',headers:{Accept:'application/json'}});
+        const result=await response.json() as {auth?:{ok:boolean};catalogue?:{ok:boolean}};
+        if(active)setServiceStatus({auth:result.auth?.ok===true,catalogue:result.catalogue?.ok===true});
+      }catch{
+        if(active)setServiceStatus({auth:false,catalogue:false});
+      }
+    };
+    void status();
+    return()=>{active=false};
   },[client]);
 
   const loadMedia=async()=>{
@@ -91,13 +135,36 @@ export default function CmsStudio(){
     event.preventDefault();if(!client)return;
     setAuthError(null);setSigningIn(true);
     try{
-      const {error}=await client.auth.signInWithPassword({email:email.trim(),password});
+      const {data,error}=await client.auth.signInWithPassword({email:email.trim(),password});
       if(error)throw error;
+      if(!data.user)throw new Error('No session was returned');
+      // Auth state events will also fire, but apply the returned role now so
+      // users never mistake a successful login for a stalled submission.
+      applyIdentity(data.user);
       setPassword('');
-    }catch(cause){setAuthError(cause instanceof Error?cause.message:'Unable to sign in.');}
+    }catch(cause){setAuthError(cmsSignInError(cause));}
     finally{setSigningIn(false)}
   };
-  const logout=async()=>{if(!client)return;await client.auth.signOut();setStaff(null);setPassword('');setSection('dashboard')};
+  const logout=async()=>{
+    if(!client)return;
+    const {error}=await client.auth.signOut();
+    if(error){setAuthError(cmsSignInError(error));return;}
+    applyIdentity(null);
+    setAuthError(null);
+    setPassword('');
+    setSection('dashboard');
+  };
+  const refreshPermissions=async()=>{
+    if(!client)return;
+    setChecking(true);setAuthError(null);
+    try{
+      const {data,error}=await client.auth.refreshSession();
+      if(error)throw error;
+      if(!data.user)throw new Error('No active session');
+      applyIdentity(data.user);
+    }catch(error){setAuthError(cmsSignInError(error))}
+    finally{setChecking(false)}
+  };
 
   return <div className="min-h-svh bg-[#f7f3ec] text-[#29221b]">
     <Helmet><title>Nomaan Brothers | Private Content Studio</title>
@@ -113,13 +180,26 @@ export default function CmsStudio(){
         <div className="text-center"><p className="text-xs font-bold uppercase tracking-[.24em] text-amber-800">Private access</p>
           <h1 className="mt-4 font-serif text-4xl">Nomaan Brothers Studio</h1>
           <p className="mt-4 text-sm leading-7 text-stone-600">Authorized staff only. Your account must be provisioned by the store owner in Supabase Auth.</p></div>
-        <form onSubmit={(event)=>void login(event)} className="space-y-5 rounded-xl border border-stone-200 bg-white p-7 shadow-sm">
+        {unprovisionedEmail ? <section className="space-y-4 rounded-xl border border-amber-300 bg-white p-7 shadow-sm" aria-label="CMS role required">
+          <h2 className="font-serif text-2xl">Sign-in succeeded · Role needed</h2>
+          <p className="text-sm leading-7 text-stone-700">Signed in as <strong>{unprovisionedEmail}</strong>. The account needs an authorized CMS role from the store owner; a Supabase Auth user alone cannot edit products.</p>
+          <ErrorText message={authError}/>
+          <p className="text-xs leading-6 text-stone-600">In the Noman Supabase project, set <code>app_metadata.nb_role</code> to <code>owner</code>, <code>admin</code>, or <code>editor</code>. Don't set <code>user_metadata</code>. Then refresh the session.</p>
+          <button type="button" onClick={()=>void refreshPermissions()} className={primaryClass+' w-full'}>Refresh CMS permissions</button>
+          <button type="button" onClick={()=>void logout()} className="w-full min-h-11 rounded-md border border-stone-300 text-sm font-semibold">Sign out / use another account</button>
+        </section> : <form onSubmit={(event)=>void login(event)} className="space-y-5 rounded-xl border border-stone-200 bg-white p-7 shadow-sm">
           <Field label="Staff email"><input className={inputClass} type="email" autoComplete="username" value={email} required onChange={e=>setEmail(e.target.value)}/></Field>
           <Field label="Password"><input className={inputClass} type="password" autoComplete="current-password" value={password} required onChange={e=>setPassword(e.target.value)}/></Field>
           <button type="submit" disabled={signingIn} className={primaryClass+' w-full'}>{signingIn?'Signing in…':'Sign in securely'}</button>
           <ErrorText message={authError}/>
           <p className="text-xs text-stone-500">There is no public self-registration or demo PIN. Ask the owner to invite staff or reset credentials in the Supabase dashboard.</p>
-        </form>
+        </form>}
+        {serviceStatus && <div role="status" className="rounded-md border border-stone-200 bg-[#fffcf7] px-4 py-3 text-xs leading-6 text-stone-600">
+          <p className="font-semibold text-stone-800">Connection checks</p>
+          <p>Supabase Auth: {serviceStatus.auth?'reachable':'unavailable or unverified'}</p>
+          <p>Published catalogue: {serviceStatus.catalogue?'database API reachable':'migrations or API permissions need checking'}</p>
+          {(!serviceStatus.auth||!serviceStatus.catalogue)&&<p>These checks never test your password or CMS role. Review the linked project's Auth and SQL setup.</p>}
+        </div>}
         <a href="/" className="text-center text-xs font-semibold text-stone-600">Return to public site <ArrowUpRight size={13} className="inline"/></a>
       </div>:
       <div className="min-h-svh lg:grid lg:grid-cols-[245px_1fr]">
