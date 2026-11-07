@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 import { readFileSync } from 'node:fs';
 const sql = readFileSync(new URL('../supabase/migrations/20261107060000_nomaan_cms.sql', import.meta.url),'utf8');
+const phase2 = readFileSync(new URL('../supabase/migrations/20261107130000_catalogue_private_media.sql', import.meta.url),'utf8');
 describe('CMS migration guardrails (static checks; deploy requires live RLS verification)', () => {
   test('has RLS on every public CMS table', () => {
     for (const table of ['nb_products','nb_categories','nb_media','nb_product_drafts','nb_product_revisions','nb_home_drafts','nb_home_public','nb_home_revisions']) {
@@ -27,6 +28,20 @@ describe('CMS migration guardrails (static checks; deploy requires live RLS veri
     expect(sql).toContain("public.nb_require_publish_scope('home')");
     expect(sql).not.toMatch(/grant delete on public\.nb_products/i);
     expect(sql).not.toMatch(/grant delete on public\.nb_media/i);
+  });
+  test('prohibits public pending media and exposes approved delivery separately', () => {
+    expect(phase2).toContain("update storage.buckets set public = false where id = 'nb-media'");
+    expect(phase2).toContain("'nb-media-staging','nb-media-staging',false");
+    expect(phase2).toContain("'nb-media-public','nb-media-public',true");
+    expect(phase2).toContain('revoke update on public.nb_media from authenticated');
+    expect(phase2).toContain('grant update (alt_text) on public.nb_media to authenticated');
+    expect(phase2).not.toMatch(/nb_public_media_staff_insert/);
+  });
+  test('publishing associations are gated by the publish transaction', () => {
+    expect(phase2).toContain('alter table public.nb_product_media enable row level security');
+    expect(phase2).toContain('alter table public.nb_product_categories enable row level security');
+    expect(phase2).toContain('create trigger nb_product_media_guard');
+    expect(phase2).toContain('create trigger nb_product_associations_sync');
   });
   test('scopes storage uploads to authenticated user and dedicated bucket', () => {
     expect(sql).toContain("bucket_id = 'nb-media'");
