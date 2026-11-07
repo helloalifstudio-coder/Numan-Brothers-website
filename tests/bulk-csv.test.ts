@@ -36,5 +36,7 @@ describe('Catalogue onboarding CSV parser',()=>{
   test('quotes failure reports',()=>{
     expect(downloadCsvErrors([{rowNumber:2,sku:'NB-01',message:'Invalid "price"'}]))
       .toContain('"Invalid ""price"""');
+    expect(downloadCsvErrors([{rowNumber:3,sku:'NB-02',message:'=HYPERLINK(1)'}]))
+      .toContain('"\'=HYPERLINK(1)"');
   });
 });
