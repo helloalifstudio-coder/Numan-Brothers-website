@@ -98,3 +98,13 @@ a { text-decoration: none; }
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Product photography becomes an atmospheric backdrop without moving content.
+   The animation only runs for visitors who have not requested reduced motion. */
+@keyframes nb-ambient-arrival {
+  from { opacity: .12; transform: scale(1.04); }
+  to { opacity: .55; transform: scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .motion-safe\\:animate-\\[nb-ambient-arrival_850ms_ease-out_both\\] { animation: none !important; }
+}
