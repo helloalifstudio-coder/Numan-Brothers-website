@@ -48,6 +48,12 @@ Source-only GitHub CI is necessary but not sufficient. Client domain and product
 - [ ] Verify Vercel env keys `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`; add owner-verified `SITE_CANONICAL_URL` only after domain confirmation.
 - [ ] Only then authorize and apply a controlled production deploy, test real public browsing and studio auth. Keep the known-good rollback target until successful handover.
 
+## Exact-commit release evidence gate
+
+Copy `docs/RELEASE_EVIDENCE_TEMPLATE.json` to a client-controlled **untracked local** file. Fill each gate only after independently reviewing its actual evidence (GitHub Actions run, Supabase RLS/Storage tests, staged Vercel HTTP output, measured performance, restored database/media and owner sign-off). Never put API tokens, passwords or personal data in the ledger.
+
+Run `node scripts/release-gate.mjs /path/to/verified-release-evidence.json`. It exits **nonzero** by default; an explicit reviewer, HTTPS evidence reference, timestamp and **the same exact SHA for each gate** are required before it prints GO. The script validates the evidence structure, not the factual correctness of remote artifacts: reviewers must independently inspect every link. The final production release still requires a separate controlled deployment.
+
 ## Reviewer log (must be filled at actual release, not guessed)
 
 | Item | Verified value |
