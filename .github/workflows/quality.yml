@@ -67,8 +67,10 @@ jobs:
           psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261107172000_match_approved_media.sql
           psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261107195000_studio_index_role_gate.sql
           psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261107199000_import_owner_idempotency.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261107210000_catalogue_integrity_audit.sql
           psql -v ON_ERROR_STOP=1 -f tests/sql/assert.sql
           psql -v ON_ERROR_STOP=1 -f tests/sql/assert_imports.sql
+          psql -v ON_ERROR_STOP=1 -f tests/sql/assert_staging_integrity.sql
       - name: Reject production deployments without client CMS credentials
         run: |
           if env VERCEL_ENV=production VITE_SUPABASE_URL= VITE_SUPABASE_PUBLISHABLE_KEY= VITE_SUPABASE_ANON_KEY= bun run build; then
