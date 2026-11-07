@@ -73,10 +73,10 @@ $inventory$;
 
 select
   (select count(*) from pg_class c join pg_namespace ns on ns.oid=c.relnamespace
-    where ns.nspname='public' and c.relname like 'nb\\_%' escape '\\'
+    where ns.nspname='public' and left(c.relname,3)='nb_' 
       and c.relkind='r') as catalogue_tables,
   (select count(*) from pg_policies where schemaname='public'
-    and tablename like 'nb\\_%' escape '\\') as catalogue_rls_policies,
+    and left(tablename,3)='nb_') as catalogue_rls_policies,
   (select count(*) from storage.buckets where id in
     ('nb-media-staging','nb-media-public','nb-media')) as storage_buckets,
   'INSTALLATION INVENTORY OK' as status;
