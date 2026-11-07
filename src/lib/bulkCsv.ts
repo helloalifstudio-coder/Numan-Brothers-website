@@ -91,6 +91,11 @@ export function skuFromImageFilename(name:string):{sku:string;order:number}|null
   return {sku:match[1].toUpperCase(),order};
 }
 export function downloadCsvErrors(rows:{rowNumber:number;sku:string;message:string}[]):string{
-  const esc=(value:string|number)=>'"'+String(value).replace(/"/g,'""')+'"';
+  // Quoting alone does not prevent CSV formula injection in spreadsheet apps.
+  const esc=(value:string|number)=>{
+    const text=String(value);
+    const safe=/^[\\t\\r\\n ]*[=+@-]/.test(text)?"'"+text:text;
+    return '"'+safe.replace(/"/g,'""')+'"';
+  };
   return ['row,sku,error',...rows.map(x=>[x.rowNumber,x.sku,x.message].map(esc).join(','))].join('\r\n');
 }
