@@ -74,8 +74,7 @@ jobs:
       - name: Production build
         run: bun run build
       - name: Verify preserved shell for product SEO function
-        run: |
-          node -e "const fs=require('fs'); const a=fs.readFileSync('dist/_shell.html','utf8');const b=fs.readFileSync('dist/index.html','utf8');if(!/<div id=\\\"root\\\"><\\/div>/.test(a)||!/<h1>/.test(b))process.exit(1)"
+        run: node scripts/check-ssr-shell.mjs
       - name: Verify crawlable pre-rendered category output
         run: |
           node -e "const fs=require('fs');for(const path of ['dist/men/index.html','dist/men/sherwani/index.html','dist/kids/index.html']){const html=fs.readFileSync(path,'utf8');if(!/<h1>/.test(html))process.exit(1)}"
