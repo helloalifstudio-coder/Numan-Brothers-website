@@ -268,6 +268,16 @@ begin
   if jsonb_typeof(draft) <> 'object' or length(trim(coalesce(draft ->> 'heroTitle',''))) < 4 then
     raise exception 'Homepage draft requires a valid hero title';
   end if;
+  if exists (
+    select 1 from (values (draft->>'heroImage'), (draft->>'menImage'),
+      (draft->>'kidsImage'), (draft->>'storyImage')) as urls(photo)
+    where coalesce(photo,'') <> '' and not exists (
+      select 1 from public.nb_media m
+        where m.approved and photo like '%/storage/v1/object/public/nb-media/' || m.storage_path
+    )
+  ) then
+    raise exception 'Homepage images must come from approved media';
+  end if;
   select version + 1 into next_version from public.nb_home_public
     where key = 'home' for update;
   next_version := coalesce(next_version, 1);

@@ -68,7 +68,8 @@ export const cleanHome = (value: unknown): CmsHome => {
   const record = value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {};
   return homeKeys.reduce((next, key) => {
     const raw = record[key];
-    next[key] = typeof raw === 'string' ? raw.slice(0, key.includes('Description') || key.includes('Subtitle') ? 900 : 300) : HOME_TEMPLATE[key];
+    const value = typeof raw === 'string' ? raw.slice(0, key.includes('Description') || key.includes('Subtitle') ? 900 : 300) : HOME_TEMPLATE[key];
+    next[key] = key.toLowerCase().includes('image') ? (value && isSafeHttps(value) ? value : '') : value;
     return next;
   }, { ...HOME_TEMPLATE });
 };

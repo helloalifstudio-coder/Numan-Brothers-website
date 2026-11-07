@@ -14,7 +14,8 @@ describe('CMS migration guardrails (static checks; deploy requires live RLS veri
   });
   test('requires server-controlled role for writes and draft-before-publish', () => {
     expect(sql).toContain("auth.jwt()) -> 'app_metadata'");
-    expect(sql).toContain("status = 'draft'");
+    expect(sql).toContain('nb_product_drafts_editor_insert');
+    expect(sql).toContain('nb_products_publisher_update');
     expect(sql).toContain("public.nb_can_publish()");
     expect(sql).toContain('returns integer language plpgsql security invoker');
     expect(sql).toContain('public.nb_publish_product');
