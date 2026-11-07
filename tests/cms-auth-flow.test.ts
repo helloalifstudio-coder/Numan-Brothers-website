@@ -38,6 +38,11 @@ describe('Noman CMS authentication and role recovery',()=>{
     const api=readFileSync(new URL('../api/cms-status.ts',import.meta.url),'utf8');
     expect(api).toContain('/auth/v1/health');
     expect(api).toContain('/rest/v1/nb_categories?select=path&limit=1');
+    expect(api).toContain('/rest/v1/nb_products?select=id,status&limit=3');
+    expect(api).toContain('/rest/v1/nb_home_public?select=key&limit=1');
+    expect(api).toContain('/rest/v1/nb_product_drafts?select=product_id&limit=1');
+    expect(api).toContain('/rest/v1/nb_media?select=id&limit=1');
+    expect(api).toContain('privateAccess:{ok:drafts.ok&&media.ok&&revisions.ok}');
     expect(api).not.toContain('service_role');
     expect(api).not.toContain('supabaseAdmin');
     expect(api).toContain('Cache-Control');
