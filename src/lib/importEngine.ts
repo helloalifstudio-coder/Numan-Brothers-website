@@ -15,9 +15,23 @@ export async function sha256(value:BufferSource):Promise<string>{
   const digest=await crypto.subtle.digest('SHA-256',value);
   return [...new Uint8Array(digest)].map(x=>x.toString(16).padStart(2,'0')).join('');
 }
+/**
+ * Stable UUID for an import-job row, allowing safe reconciliation if the
+ * product draft was created but its audit row was not committed.
+ */
+export async function stableImportId(jobId:string,rowNumber:number):Promise<string>{
+  if(!/^[0-9a-f-]{36}$/i.test(jobId) || !Number.isInteger(rowNumber) || rowNumber<1)
+    throw new Error('Invalid import job identity');
+  const bytes=await sha256(new TextEncoder().encode('nomaan-import-row:'+jobId+':'+rowNumber));
+  const chars=bytes.slice(0,32).split('');
+  chars[12]='5';
+  chars[16]=((parseInt(chars[16],16)&3)|8).toString(16);
+  const id=chars.join('');
+  return [id.slice(0,8),id.slice(8,12),id.slice(12,16),id.slice(16,20),id.slice(20,32)].join('-');
+}
 async function getJob(client:SupabaseClient,userId:string,key:string,kind:JobKind,filename:string,total:number):Promise<Job>{
   const old=await client.from('nb_import_jobs').select('id,total_count,status')
-    .eq('import_key',key).maybeSingle();
+    .eq('import_key',key).eq('created_by',userId).maybeSingle();
   if(old.error)throw new Error(old.error.message);
   if(old.data){
     if(old.data.total_count!==total)throw new Error('Import fingerprint collision: row count differs');
@@ -88,12 +102,23 @@ export async function importCatalogueFile(
       if(error)throw new Error('Could not check existing SKUs: '+error.message);
       for(const item of data||[])found.add(String(item.sku).toUpperCase());
     }
-    const newRows=valid.filter(row=>!found.has(row.sku));
     const ids=new Map<number,string>();
-    const drafts=newRows.map(row=>{
-      const productId=crypto.randomUUID();ids.set(row.rowNumber,productId);
-      return {product_id:productId,content:row.draft,updated_by:userId};
-    });
+    for(const row of valid)ids.set(row.rowNumber,await stableImportId(job.id,row.rowNumber));
+    const existingIds=[...ids.values()];
+    let previouslyInserted=new Set<string>();
+    if(existingIds.length){
+      const {data,error}=await client.from('nb_product_drafts')
+        .select('product_id').in('product_id',existingIds);
+      if(error)throw new Error('Cannot reconcile existing draft products: '+error.message);
+      previouslyInserted=new Set((data||[]).map(x=>String(x.product_id)));
+    }
+    // A prior run may have committed the product before recording the job
+    // result. Mark that exact deterministic record imported, not skipped.
+    const newRows=valid.filter(row=>!found.has(row.sku) &&
+      !previouslyInserted.has(ids.get(row.rowNumber)!));
+    const drafts=newRows.map(row=>({
+      product_id:ids.get(row.rowNumber)!,content:row.draft,updated_by:userId,
+    }));
     let draftError:string|null=null;
     if(drafts.length){
       const {error}=await client.from('nb_product_drafts').insert(drafts);
@@ -102,6 +127,9 @@ export async function importCatalogueFile(
     const updates=todo.map(row=>{
       let status:ItemStatus='imported',message='';
       if(row.error){status='failed';message=row.error;}
+      else if(previouslyInserted.has(ids.get(row.rowNumber)!)){
+        status='imported';message='Recovered draft created by an interrupted import';
+      }
       else if(found.has(row.sku)){status='skipped';message='Existing SKU; no overwrite';}
       else if(draftError){status='failed';message='Draft batch failed: '+draftError;}
       if(status==='failed')failures.push({rowNumber:row.rowNumber,sku:row.sku,message});
@@ -145,8 +173,10 @@ export async function importImageFiles(
     if(validation){status='failed';message=validation;}
     else{
       try{
+        const deterministicId=await stableImportId(job.id,index);
         const asset=await uploadCmsFile(client,file,userId,percent=>
-          progress(snapshot(job.id,files.length,counters,failures),file.name,percent));
+          progress(snapshot(job.id,files.length,counters,failures),file.name,percent),
+          {stableObjectId:deterministicId});
         mediaId=asset.id;
       }catch(error){status='failed';message=error instanceof Error?error.message:'Upload failed';}
     }
