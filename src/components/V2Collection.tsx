@@ -5,7 +5,7 @@ import { CollectionRoute, getDepartment, getRelatedCollectionLinks } from '../st
 import V2Link from './V2Link';
 import V2Reveal from './V2Reveal';
 
-interface Props { route: CollectionRoute; products: CatalogProduct[]; totalCount?:number;
+interface Props { route: CollectionRoute; products: CatalogProduct[]; bannerImage?:string; totalCount?:number;
   page?:number;pageSize?:number;onPageChange?:(page:number)=>void;
   onNavigate: (path: string) => void; }
 export function V2ProductGrid({ products, onNavigate }: { products: CatalogProduct[]; onNavigate: (path: string) => void }) {
@@ -29,12 +29,15 @@ export function V2ProductGrid({ products, onNavigate }: { products: CatalogProdu
   </div>;
 }
 
-export default function V2Collection({ route, products, totalCount, page = 0, pageSize = 24, onPageChange, onNavigate }: Props) {
+export default function V2Collection({ route, products, bannerImage, totalCount, page = 0, pageSize = 24, onPageChange, onNavigate }: Props) {
   const department = getDepartment(route.department);
   const links = getRelatedCollectionLinks(route.path).filter((item) => item.path !== route.path);
   const matches = productsForCollection(products, route.path);
   return <div className="min-h-[70vh] bg-[#fbf8f2] pb-24">
-    <section className="relative overflow-hidden bg-[#2b241e] px-5 py-20 text-[#f7edde] md:px-12 md:py-28 lg:px-20">
+    <section className="relative isolate overflow-hidden bg-[#2b241e] px-5 py-20 text-[#f7edde] md:px-12 md:py-28 lg:px-20">
+      {bannerImage && <img src={bannerImage} alt="" aria-hidden="true" loading="eager" decoding="async"
+        className="pointer-events-none absolute inset-0 h-full w-full object-cover object-center opacity-35 blur-[36px] saturate-75 md:blur-[54px]"/>}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#261b16]/95 via-[#271e18]/85 to-[#271e18]/60" aria-hidden="true"/>
       <div className="pointer-events-none absolute -right-24 -top-32 h-[510px] w-[510px] rounded-full border border-[#a28a6c]/20 bg-[radial-gradient(circle_at_center,#65513c,transparent_66%)]" aria-hidden="true"/>
       <div className="relative mx-auto max-w-[1330px]">
         <nav aria-label="Breadcrumb" className="mb-11 flex flex-wrap gap-2 text-[11px] uppercase tracking-[.15em] text-[#c6b59b]">
