@@ -6,6 +6,9 @@ import { canonicalOrigin, escapeHtml } from '../api/_seo.mjs';
 
 const dist=resolve(process.cwd(),'dist');
 const template=readFileSync(resolve(dist,'index.html'),'utf8');
+// Preserve the unmodified built Vite shell for the dynamic product SEO function.
+// Homepage prerender below replaces the root with semantic static content.
+writeFileSync(resolve(dist,'_shell.html'),template);
 const raw=process.env.SITE_CANONICAL_URL||'';
 const site=raw?canonicalOrigin(raw):null;
 if(raw&&!site)throw new Error('SITE_CANONICAL_URL must be a verified HTTPS origin');
