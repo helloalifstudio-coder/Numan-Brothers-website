@@ -5,7 +5,7 @@
  *
  * Deploy only after reviewing the Phase 2 migration and Edge Function tests.
  */
-import { withSupabase } from 'npm:@supabase/server'
+import { withSupabase } from 'npm:@supabase/server@1'
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
