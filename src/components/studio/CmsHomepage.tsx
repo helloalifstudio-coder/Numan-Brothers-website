@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { type CmsHome, type CmsMediaRow, HOME_TEMPLATE, cleanHome } from '../../lib/cmsData';
+import {type CmsHome,type CmsMediaRow,HOME_TEMPLATE,cleanHome,isSafeHttps} from '../../lib/cmsData';
 import { SITE_PAGES,SITE_FIELDS,siteText,HOME_SECTIONS,FEATURED_CARDS,normalizeOrder,type SitePage } from '../../lib/siteContent';
 import {ErrorText,Field,inputClass,outlineClass,primaryClass} from './StudioShared';
 import AssetEditor from './AssetEditor';
@@ -8,6 +8,8 @@ import AssetEditor from './AssetEditor';
 interface Props {client:SupabaseClient; userId:string; canPublish:boolean; media:CmsMediaRow[];}
 export default function CmsHomepage({client,userId,canPublish,media}:Props) {
   const [form,setForm]=useState<CmsHome>(HOME_TEMPLATE);
+  const [publishedForm,setPublishedForm]=useState<CmsHome>(HOME_TEMPLATE);
+  const [videoEditor,setVideoEditor]=useState<string|null>(null);
   const [page,setPage]=useState<SitePage>('home');
   const [dragged,setDragged]=useState<string|null>(null);
   const [version,setVersion]=useState<number|null>(null);
@@ -29,12 +31,13 @@ export default function CmsHomepage({client,userId,canPublish,media}:Props) {
       setError(draft.error?.message || published.error?.message || revisions.error?.message || null);
       setHistory((revisions.data||[]) as {id:number;version:number;published_at:string}[]);
       setForm(cleanHome(draft.data?.content ?? published.data?.content));
+      setPublishedForm(cleanHome(published.data?.content));
       setVersion(typeof published.data?.version==='number'?published.data.version:null);
       setLoading(false);
     };
     void load();return()=>{active=false};
   },[client]);
-  type HomeTextKey='heroTitle'|'heroEyebrow'|'heroSubtitle'|'heroImage'|'menImage'|'kidsImage'|'storyTitle'|'storyDescription'|'storyImage'|'contactWhatsapp';
+  type HomeTextKey='heroTitle'|'heroEyebrow'|'heroSubtitle'|'heroImage'|'menImage'|'kidsImage'|'storyTitle'|'storyDescription'|'storyImage'|'contactWhatsapp'|'contactPhone'|'customizationImage';
   const update=(key:HomeTextKey,value:string)=>setForm(current=>({...current,[key]:value}));
   const updateCopy=(key:string,value:string)=>setForm(current=>({...current,siteText:{...current.siteText,[key]:value}}));
   const move=(field:'sectionOrder'|'featuredOrder',source:string,target:string)=>{
@@ -44,6 +47,34 @@ export default function CmsHomepage({client,userId,canPublish,media}:Props) {
       next.splice(from,1);next.splice(to,0,source);
       return {...current,[field]:next};
     });
+  };
+  const resetSection=(id:string,kind:'published'|'original')=>{
+    const source=kind==='published'?publishedForm:HOME_TEMPLATE;
+    const groups:Record<string,string[]>={
+      hero:['Hero'],quick:['Quick links'],departments:['Department tiles'],
+      directory:['Directory'],featured:['Featured cards'],story:['Story'],
+      customization:['Customization'],visit:['Visit'],
+    };
+    const core:Record<string,HomeTextKey[]>={
+      hero:['heroTitle','heroEyebrow','heroSubtitle','heroImage'],
+      departments:['menImage','kidsImage'],story:['storyTitle','storyDescription','storyImage'],
+      customization:['customizationImage'],visit:['contactWhatsapp','contactPhone'],
+    };
+    setForm(current=>{
+      const text={...current.siteText};
+      for(const field of SITE_FIELDS.home){
+        if(!groups[id]?.includes(field.section))continue;
+        if(Object.hasOwn(source.siteText,field.key))text[field.key]=source.siteText[field.key];
+        else delete text[field.key];
+      }
+      const sectionVideos={...current.sectionVideos};
+      if(source.sectionVideos[id])sectionVideos[id]=source.sectionVideos[id];
+      else delete sectionVideos[id];
+      const updated={...current,siteText:text,sectionVideos};
+      for(const key of core[id]||[])Object.assign(updated,{[key]:source[key]});
+      return updated;
+    });
+    setMessage('Section reset to '+(kind==='published'?'last published':'original template')+' content. Save and publish to update the website.');
   };
   const toggle=(id:string)=>setForm(current=>({...current,
     hiddenSections:current.hiddenSections.includes(id)?current.hiddenSections.filter(x=>x!==id):[...current.hiddenSections,id],
@@ -63,6 +94,25 @@ export default function CmsHomepage({client,userId,canPublish,media}:Props) {
           {field==='sectionOrder'&&id!=='hero'&&<button type="button" className={outlineClass}
             aria-pressed={!form.hiddenSections.includes(id)} onClick={()=>toggle(id)}>
             {form.hiddenSections.includes(id)?'Show':'Hide'}</button>}
+          {field==='sectionOrder'&&<>
+            <div className="flex w-full flex-wrap gap-2 border-t border-stone-100 pt-2">
+              <button type="button" className={outlineClass} onClick={()=>resetSection(id,'published')}>Revert section to live</button>
+              <button type="button" className={outlineClass} onClick={()=>resetSection(id,'original')}>Restore original</button>
+              <button type="button" className={outlineClass} onClick={()=>setVideoEditor(x=>x===id?null:id)}>
+                {form.sectionVideos[id]?'Edit / remove video':'Add video'}
+              </button>
+            </div>
+            {videoEditor===id&&<div className="w-full">
+              <AssetEditor client={client} userId={userId} canPublish={canPublish}
+                label={item.title+' · section video'} allowVideo media={media}
+                selected={form.sectionVideos[id]?[form.sectionVideos[id]]:[]}
+                onChange={urls=>setForm(current=>{
+                  const sectionVideos={...current.sectionVideos};
+                  if(urls[0])sectionVideos[id]=urls[0];else delete sectionVideos[id];
+                  return {...current,sectionVideos};
+                })}/>
+            </div>}
+          </>}
         </li>;
       })}
     </ol>;
@@ -71,6 +121,10 @@ export default function CmsHomepage({client,userId,canPublish,media}:Props) {
     try {
       if(form.heroTitle.trim().length<4)throw new Error('Hero headline must have at least four characters.');
       if(form.contactWhatsapp && !/^[1-9][0-9]{9,14}$/.test(form.contactWhatsapp))throw new Error('WhatsApp must be a verified international number (10–15 digits, including country code).');
+      if(form.contactPhone && !/^[1-9][0-9]{9,14}$/.test(form.contactPhone))
+        throw new Error('Phone number must contain an international country code, digits only.');
+      if(Object.values(form.socialLinks).some(x=>x.trim()&&!isSafeHttps(x.trim())))
+        throw new Error('Social links must be complete HTTPS links.');
       const content=cleanHome(form);
       const byteCount=new TextEncoder().encode(JSON.stringify(content)).length;
       if(byteCount>28000)throw new Error('Website content is too long ('+byteCount+' bytes). Shorten long paragraphs before saving.');
@@ -91,13 +145,14 @@ export default function CmsHomepage({client,userId,canPublish,media}:Props) {
     setSaving(false);
     if(error){setError(error.message);return;}
     setVersion(Number(data));
+    setPublishedForm(cleanHome(form));
     const latest=await client.from('nb_home_revisions')
       .select('id,version,published_at').eq('key','home').order('version',{ascending:false}).limit(15);
     if(latest.error)setError(latest.error.message);
     else setHistory((latest.data||[]) as {id:number;version:number;published_at:string}[]);
     setMessage('Website content version '+data+' is published. Reload the public pages to see it.');
   };
-  const assets = (key:'heroImage'|'menImage'|'kidsImage'|'storyImage',label:string)=>
+  const assets = (key:'heroImage'|'menImage'|'kidsImage'|'storyImage'|'customizationImage',label:string)=>
     <AssetEditor client={client} userId={userId} canPublish={canPublish} label={label} media={media}
       selected={form[key]?[form[key]]:[]} onChange={urls=>update(key,urls[0]||'')}/>;
 
@@ -117,6 +172,12 @@ export default function CmsHomepage({client,userId,canPublish,media}:Props) {
         {ordered('sectionOrder',HOME_SECTIONS)}
         <div className="border-t border-[#e0cfb7] pt-4"><h4 className="mb-4 font-semibold">Featured garment cards</h4>
           {ordered('featuredOrder',FEATURED_CARDS)}</div>
+        <div className="flex flex-wrap gap-3 border-t border-stone-300 pt-3">
+          <button type="button" className={outlineClass} onClick={()=>setForm(current=>({...current,sectionOrder:[...publishedForm.sectionOrder],featuredOrder:[...publishedForm.featuredOrder],hiddenSections:[...publishedForm.hiddenSections]}))}>
+            Revert layout to published</button>
+          <button type="button" className={outlineClass} onClick={()=>setForm(current=>({...current,sectionOrder:[...HOME_TEMPLATE.sectionOrder],featuredOrder:[...HOME_TEMPLATE.featuredOrder],hiddenSections:[]}))}>
+            Restore original layout</button>
+        </div>
       </section>}
       {page==='home'&&<div className="grid gap-5 rounded-lg border border-stone-200 bg-white p-5 md:grid-cols-2 md:p-7">
         <div className="md:col-span-2"><h3 className="font-serif text-2xl">Main hero</h3></div>
@@ -131,13 +192,30 @@ export default function CmsHomepage({client,userId,canPublish,media}:Props) {
         <Field label="Section heading"><input className={inputClass} value={form.storyTitle} onChange={e=>update('storyTitle',e.target.value)} maxLength={180}/></Field>
         <div className="md:col-span-2"><Field label="Short story"><textarea rows={4} className={inputClass} value={form.storyDescription} onChange={e=>update('storyDescription',e.target.value)}/></Field></div>
         <div className="md:col-span-2">{assets('storyImage','Story photograph')}</div>
+        <div className="md:col-span-2 border-t border-stone-200 pt-6"><h3 className="font-serif text-2xl">Customization section artwork</h3></div>
+        <div className="md:col-span-2">{assets('customizationImage','Tailoring and customization photograph')}</div>
         <div className="md:col-span-2 border-t border-stone-200 pt-6"><h3 className="font-serif text-2xl">Contact information</h3>
           <p className="mt-2 text-xs leading-6 text-stone-600">Add the verified business WhatsApp number only after the shop owner approves it. Leave blank to hide all WhatsApp buttons.</p></div>
         <div className="md:col-span-2"><Field label="Verified WhatsApp number including country code (digits only, e.g. 91XXXXXXXXXX)">
           <input type="tel" className={inputClass} maxLength={15} value={form.contactWhatsapp}
             onChange={e=>update('contactWhatsapp',e.target.value.replace(/[^0-9]/g,''))} placeholder="Not published"/>
         </Field></div>
+        <div className="md:col-span-2"><Field label="Phone number with country code (e.g. 918XXXXXXXXX)">
+          <input type="tel" className={inputClass} value={form.contactPhone} maxLength={15}
+            onChange={e=>update('contactPhone',e.target.value.replace(/[^0-9]/g,''))}
+            placeholder="Not published until saved and approved"/>
+        </Field></div>
       </div>}
+      {page==='footer'&&<section className="rounded-lg border border-stone-200 bg-white p-5 md:p-7">
+        <h3 className="font-serif text-2xl">Social media links</h3>
+        <p className="mt-2 text-xs leading-6 text-stone-600">Paste the real store's full HTTPS profile URLs. Leave blank to hide each icon. The agency attribution uses Alif Growth Media’s verified website and logo.</p>
+        <div className="mt-4 grid gap-4 md:grid-cols-3">
+          {(['instagram','facebook','youtube'] as const).map(key=><Field key={key} label={key[0].toUpperCase()+key.slice(1)+' profile URL'}>
+            <input type="url" className={inputClass} placeholder="https://..." value={form.socialLinks[key]}
+              onChange={e=>setForm(cur=>({...cur,socialLinks:{...cur.socialLinks,[key]:e.target.value}}))}/>
+          </Field>)}
+        </div>
+      </section>}
       <section className="space-y-5 rounded-lg border border-stone-200 bg-white p-5 md:p-7">
         <div><p className="text-[11px] font-semibold uppercase tracking-[.2em] text-amber-800">{SITE_PAGES.find(tab=>tab.id===page)?.title}</p>
           <h3 className="mt-2 font-serif text-2xl">Editable text and card content</h3>
