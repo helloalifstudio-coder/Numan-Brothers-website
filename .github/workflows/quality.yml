@@ -1,0 +1,27 @@
+name: Website quality gate
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - 'agm/**'
+
+permissions:
+  contents: read
+
+jobs:
+  typecheck-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.3.0'
+      - name: Install locked dependencies
+        run: bun install --frozen-lockfile
+      - name: TypeScript checks
+        run: bun run lint
+      - name: Production build
+        run: bun run build
