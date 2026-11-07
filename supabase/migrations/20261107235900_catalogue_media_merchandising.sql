@@ -199,7 +199,7 @@ begin
   perform set_config('app.nb_publish_scope','',true);
   return next_version;
 end;
-$function$
+$function$;
 
 
 CREATE OR REPLACE FUNCTION public.nb_publish_home()
@@ -252,7 +252,7 @@ begin
   perform set_config('app.nb_publish_scope','',true);
   return next_version;
 end;
-$function$
+$function$;
 
 
 update public.nb_categories set label=case
