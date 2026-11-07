@@ -140,6 +140,27 @@ begin
 end;
 $$;
 
+-- Protect the materialized public tables from direct REST writes even by
+-- publishers. Only nb_publish_product()/nb_publish_home() may perform them.
+-- The scope GUC is transaction-local and set only inside role-checked RPCs.
+create or replace function public.nb_require_publish_scope()
+returns trigger language plpgsql security invoker set search_path = ''
+as $
+begin
+  if not public.nb_can_publish() or
+    current_setting('app.nb_publish_scope', true) is distinct from TG_ARGV[0] then
+    raise exception 'Use the publishing workflow' using errcode = '42501';
+  end if;
+  return new;
+end;
+$;
+drop trigger if exists nb_materialized_product_guard on public.nb_products;
+create trigger nb_materialized_product_guard before insert or update on public.nb_products
+  for each row execute function public.nb_require_publish_scope('product');
+drop trigger if exists nb_materialized_home_guard on public.nb_home_public;
+create trigger nb_materialized_home_guard before insert or update on public.nb_home_public
+  for each row execute function public.nb_require_publish_scope('home');
+
 drop trigger if exists nb_touch_product on public.nb_products;
 create trigger nb_touch_product before update on public.nb_products
   for each row execute function public.nb_touch_updated_at();
@@ -178,7 +199,7 @@ grant select on public.nb_categories, public.nb_products, public.nb_product_draf
 grant insert, update on public.nb_products, public.nb_product_drafts, public.nb_media,
   public.nb_home_drafts, public.nb_home_public to authenticated;
 grant insert on public.nb_product_revisions to authenticated;
-grant insert, update on public.nb_home_revisions to authenticated;
+grant insert on public.nb_home_revisions to authenticated;
 grant update on public.nb_categories to authenticated;
 grant delete on public.nb_products, public.nb_media to authenticated;
 grant usage, select on sequence public.nb_home_revisions_id_seq,
@@ -261,6 +282,7 @@ begin
   if not public.nb_can_publish() then
     raise exception 'Not authorized to publish' using errcode = '42501';
   end if;
+  perform set_config('app.nb_publish_scope','home',true);
   select content into draft from public.nb_home_drafts
     where key = 'home' for update;
   if not found then
@@ -291,6 +313,7 @@ begin
       published_at = excluded.published_at;
   insert into public.nb_home_revisions (key, version, content, published_by)
     values ('home', next_version, draft, auth.uid());
+  perform set_config('app.nb_publish_scope','',true);
   return next_version;
 end;
 $$;
@@ -318,6 +341,7 @@ begin
   if not public.nb_can_publish() then
     raise exception 'Not authorized to publish' using errcode = '42501';
   end if;
+  perform set_config('app.nb_publish_scope','product',true);
   select content into draft from public.nb_product_drafts
     where product_id = p_product_id for update;
   if not found then
@@ -393,11 +417,26 @@ begin
     from public.nb_product_revisions where product_id = p_product_id;
   insert into public.nb_product_revisions(product_id,version,content,published_by)
     values (p_product_id,next_version,draft,auth.uid());
+  perform set_config('app.nb_publish_scope','',true);
   return next_version;
 end;
 $$;
 revoke all on function public.nb_publish_product(uuid) from public, anon, authenticated;
 grant execute on function public.nb_publish_product(uuid) to authenticated;
+
+-- Draft editors can revise their own still-unapproved media descriptions
+-- without gaining the right to approve or modify approved assets.
+create policy nb_media_editor_update_pending on public.nb_media for update
+  to authenticated
+  using (
+    not approved and uploaded_by = (select auth.uid())
+    and (select public.nb_can_edit())
+  )
+  with check (
+    not approved and uploaded_by = (select auth.uid())
+    and split_part(storage_path, '/', 1) = (select auth.uid())::text
+    and (select public.nb_can_edit())
+  );
 
 -- Editors may upload; only owners/admins approve, replace or delete.
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
