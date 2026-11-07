@@ -99,7 +99,7 @@ export default function V2Home({ products, home, onNavigate }: Props) {
       </V2Reveal>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
         <V2Reveal className="group relative min-h-[490px] overflow-hidden bg-[#332b24] text-white md:min-h-[620px]">
-          {getImage('/men', home.menImage) && <img src={getImage('/men', home.menImage)} loading="lazy" decoding="async" alt="Traditional menswear collection preview"
+          {home.menImage || getImage('/men') && <img src={home.menImage || getImage('/men')} loading="lazy" decoding="async" alt="Traditional menswear collection preview"
             className="absolute inset-0 h-full w-full object-cover object-top opacity-75 transition-transform duration-700 group-hover:scale-[1.045]"/>}
           <div className="absolute inset-0 bg-gradient-to-t from-[#1b1815]/95 via-[#1b1815]/5 to-black/5"/>
           <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-5 px-7 pb-9 md:px-11 md:pb-12">
