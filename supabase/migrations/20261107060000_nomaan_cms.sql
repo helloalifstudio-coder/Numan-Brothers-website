@@ -300,7 +300,7 @@ grant execute on function public.nb_publish_home() to authenticated;
 -- remain unchanged while editors prepare a new revision.
 create or replace function public.nb_publish_product(p_product_id uuid)
 returns integer language plpgsql security invoker set search_path = ''
-as $
+as $$
 declare
   draft jsonb;
   next_version integer;
@@ -442,7 +442,7 @@ commit;
     values (p_product_id,next_version,draft,auth.uid());
   return next_version;
 end;
-$;
+$$;
 revoke all on function public.nb_publish_product(uuid) from public, anon, authenticated;
 grant execute on function public.nb_publish_product(uuid) to authenticated;
 
