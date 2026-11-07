@@ -4,8 +4,8 @@
  */
 
 import React, { useState } from 'react';
-import { Heart, Star, ChevronLeft, ChevronRight } from 'lucide-react';
-import { motion } from 'motion/react';
+import { Heart, ChevronLeft, ChevronRight } from 'lucide-react';
+import { motion, useReducedMotion } from 'motion/react';
 import { Product } from '../types';
 import LazyImage from './LazyImage';
 
@@ -24,8 +24,9 @@ const ProductCard: React.FC<ProductCardProps> = ({
 }) => {
   const [activeImgIdx, setActiveImgIdx] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  const reducedMotion = useReducedMotion();
 
-  const discountPercent = Math.round(((product.mrp - product.price) / product.mrp) * 100);
+  const discountPercent = product.mrp > 0 ? Math.max(0, Math.round(((product.mrp - product.price) / product.mrp) * 100)) : 0;
 
   const nextImage = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -38,9 +39,22 @@ const ProductCard: React.FC<ProductCardProps> = ({
   };
 
   return (
-    <div
+    <motion.div
       onClick={() => onSelect(product)}
-      className="group cursor-pointer flex flex-col bg-white rounded-xl overflow-hidden border border-stone-100 transition-all duration-300 hover:shadow-md relative"
+      onKeyDown={(event) => {
+        if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) {
+          event.preventDefault();
+          onSelect(product);
+        }
+      }}
+      role="link"
+      tabIndex={0}
+      aria-label={`View ${product.title}`}
+      initial={reducedMotion ? false : { opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.15 }}
+      transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
+      className="group relative flex cursor-pointer flex-col overflow-hidden rounded-md border border-stone-200/70 bg-white transition-[box-shadow,border-color] duration-300 hover:border-amber-700/30 hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-800"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => {
         setIsHovered(false);
@@ -137,10 +151,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
           {/* Vendor & Rating */}
           <div className="flex items-center justify-between text-[11px] text-stone-400 font-sans">
             <span className="uppercase tracking-wider font-semibold">Nomaan Brothers</span>
-            <span className="flex items-center gap-1">
-              <Star className="w-3 h-3 fill-amber-400 stroke-amber-400" />
-              <span className="text-stone-700 font-semibold">{product.rating}</span>
-            </span>
+            <span className="text-[10px] uppercase tracking-wide text-stone-500">Discover</span>
           </div>
 
           {/* Title */}
@@ -179,7 +190,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

@@ -59,3 +59,20 @@ body {
   scrollbar-width: none;  /* Firefox */
 }
 
+
+/* Modern Heritage: polished but accessible interactions. */
+:root { --nb-accent: #967143; }
+html { scroll-behavior: smooth; scroll-padding-top: 6rem; }
+::selection { background: #e8d9bb; color: #211c16; }
+:where(button, a, input, select, textarea, [role="link"]):focus-visible {
+  outline: 2px solid var(--nb-accent) !important;
+  outline-offset: 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

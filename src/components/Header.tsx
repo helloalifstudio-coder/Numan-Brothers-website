@@ -6,7 +6,6 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, Search, ShoppingBag, User, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { TRUST_ANNOUNCEMENTS } from '../data';
 
 interface HeaderProps {
   cartCount: number;
@@ -25,17 +24,17 @@ export default function Header({
   onNavigateHome,
   onOpenAboutModal
 }: HeaderProps) {
-  const [announcementIdx, setAnnouncementIdx] = useState(0);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Rotate announcements every 4 seconds
   useEffect(() => {
-    const timer = setInterval(() => {
-      setAnnouncementIdx((prev) => (prev + 1) % TRUST_ANNOUNCEMENTS.length);
-    }, 4000);
-    return () => clearInterval(timer);
-  }, []);
+    if (!isSearchOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsSearchOpen(false);
+    };
+    document.addEventListener('keydown', closeOnEscape);
+    return () => document.removeEventListener('keydown', closeOnEscape);
+  }, [isSearchOpen]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,22 +44,9 @@ export default function Header({
 
   return (
     <>
-      {/* 1. Announcement Bar */}
-      <div className="bg-stone-900 text-stone-100 py-2.5 text-center text-xs tracking-wider transition-all duration-300">
-        <div className="max-w-7xl mx-auto px-4 flex items-center justify-center min-h-[16px]">
-          <AnimatePresence mode="wait">
-            <motion.p
-              key={announcementIdx}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.3 }}
-              className="font-sans font-medium flex items-center gap-1.5"
-            >
-              {TRUST_ANNOUNCEMENTS[announcementIdx]}
-            </motion.p>
-          </AnimatePresence>
-        </div>
+      {/* A single, stable message avoids distraction and unverified claims. */}
+      <div className="bg-stone-950 px-4 py-2.5 text-center text-[11px] font-medium tracking-[0.12em] text-stone-200">
+        Discover traditional menswear in Mandi Bazar, Warangal
       </div>
 
       {/* 2. Main Sticky Header */}
@@ -79,15 +65,20 @@ export default function Header({
             </button>
           </div>
 
-          {/* Center: Branding (Heritage Serif paired with clean tracked sans-serif) */}
-          <div className="text-center select-none cursor-pointer" onClick={onNavigateHome}>
-            <h1 className="font-serif text-xl md:text-2xl lg:text-3xl font-semibold text-stone-900 tracking-wide leading-none">
+          {/* Accessible brand/home action */}
+          <button
+            type="button"
+            className="min-w-0 flex-1 cursor-pointer select-none text-center md:flex-none"
+            onClick={onNavigateHome}
+            aria-label="Nomaan Brothers - return to home"
+          >
+            <span className="block font-serif text-xl font-semibold leading-none tracking-wide text-stone-900 md:text-2xl lg:text-3xl">
               Nomaan
-            </h1>
-            <p className="font-sans text-[9px] md:text-[10px] uppercase font-semibold text-stone-500 tracking-[0.25em] mt-0.5 md:mt-1">
-              Brothers • The Designer Sherwani House
-            </p>
-          </div>
+            </span>
+            <span className="mt-1 block max-w-[210px] text-[8px] font-semibold uppercase tracking-[0.19em] text-stone-500 md:max-w-none md:text-[10px] md:tracking-[0.25em]">
+              Brothers · The Designer Sherwani House
+            </span>
+          </button>
 
           {/* Right: Actions */}
           <div className="flex items-center gap-1 md:gap-2">
@@ -140,6 +131,9 @@ export default function Header({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Search collections"
             className="fixed inset-0 z-50 bg-stone-900/40 backdrop-blur-sm flex items-start justify-center pt-20 px-4"
           >
             <motion.div
@@ -152,6 +146,7 @@ export default function Header({
                 <span className="font-serif font-medium text-stone-900 text-lg">Search Collections</span>
                 <button
                   id="search-close-btn"
+                  aria-label="Close search"
                   onClick={() => setIsSearchOpen(false)}
                   className="p-1.5 hover:bg-stone-50 rounded-full text-stone-400 hover:text-stone-600 transition-all"
                 >

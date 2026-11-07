@@ -32,12 +32,18 @@ const LazyImage: React.FC<LazyImageProps> = ({ src, alt, className, imgClassName
     };
   }, []);
 
+  useEffect(() => {
+    setHasLoaded(false);
+  }, [src]);
+
   return (
     <div ref={imgRef} className={`w-full h-full overflow-hidden ${className} ${hasLoaded ? '' : 'bg-stone-100 animate-pulse'}`}>
       {(isVisible || hasLoaded) && (
         <img
           src={src}
           alt={alt}
+          loading="lazy"
+          decoding="async"
           className={`w-full h-full object-cover object-top ${imgClassName}`}
           onLoad={() => setHasLoaded(true)}
         />

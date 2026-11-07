@@ -23,6 +23,7 @@ import {
 } from './lib/firestoreService';
 
 import Header from './components/Header';
+import EditorialHero from './components/EditorialHero';
 import MegaMenu from './components/MegaMenu';
 import PLP from './components/PLP';
 import PDP from './components/PDP';
@@ -980,52 +981,16 @@ export default function App() {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
             >
-              {/* 1. Hero Campaign Banner (Only visible when no category is explicitly clicked and search is empty) */}
+              {/* Editorial hero - progressive, motion-aware and LCP-first */}
               {activeCategory === 'all' && !searchQuery && (
-                <div className="relative h-[480px] md:h-[600px] w-full overflow-hidden bg-stone-900 flex items-center justify-center">
-                  {/* Backdrop Background Image */}
-                  <img
-                    src={heroImage}
-                    alt="Nomaan Brothers Groom Collection"
-                    className="absolute inset-0 w-full h-full object-cover object-top opacity-55 hover:scale-102 transition-transform duration-10000"
-                    loading="lazy"
-                    referrerPolicy="no-referrer"
-                  />
-                  {/* Decorative Dark Vignette */}
-                  <div className="absolute inset-0 bg-linear-to-t from-stone-950/80 via-stone-950/20 to-stone-950/40" />
-
-                  {/* Core Content */}
-                  <div className="relative z-10 text-center max-w-2xl px-4 space-y-4 text-stone-100 flex flex-col items-center">
-                    {heroBadge && (
-                      <span className="text-[10px] md:text-xs font-sans font-bold tracking-[0.2em] uppercase text-amber-400 bg-stone-900/60 px-3 py-1 rounded-full border border-stone-800">
-                        {heroBadge}
-                      </span>
-                    )}
-                    <h2 className="font-serif text-3xl md:text-5xl lg:text-6xl font-semibold leading-tight tracking-wide text-white drop-shadow-sm">
-                      {heroTitle || 'The Designer Sherwani House'}
-                    </h2>
-                    <p className="font-sans text-xs md:text-sm text-stone-200 tracking-wider max-w-lg leading-relaxed font-light">
-                      {heroSubtitle || 'Warangal’s premier destination for bespoke groom sherwanis, sequence kurtas, and Arabic thoobs. Opp. Madras Masjid, Mandi Bazar.'}
-                    </p>
-                    
-                    <div className="flex flex-wrap gap-3 pt-3 justify-center">
-                      <button
-                        id="hero-shop-new"
-                        onClick={() => handleSelectCategory('new-arrivals')}
-                        className="px-6 py-3.5 bg-stone-100 text-stone-950 font-sans text-xs font-bold uppercase tracking-wider rounded-lg hover:bg-stone-200 hover:scale-102 transition-all shadow-md focus:outline-none"
-                      >
-                        Shop New Arrivals
-                      </button>
-                      <button
-                        id="hero-shop-sets"
-                        onClick={() => handleSelectCategory('sherwanis')}
-                        className="px-6 py-3.5 bg-transparent text-stone-100 border border-stone-300 font-sans text-xs font-bold uppercase tracking-wider rounded-lg hover:bg-white/10 hover:scale-102 transition-all focus:outline-none"
-                      >
-                        Explore Royal Sherwanis
-                      </button>
-                    </div>
-                  </div>
-                </div>
+                <EditorialHero
+                  image={heroImage}
+                  badge={heroBadge}
+                  title={heroTitle}
+                  subtitle={heroSubtitle}
+                  onExploreCollection={() => handleSelectCategory('new-arrivals')}
+                  onExploreSherwanis={() => handleSelectCategory('sherwanis')}
+                />
               )}
 
               {/* 2. Horizontal circular category navigation quick explore (Only on homepage) */}

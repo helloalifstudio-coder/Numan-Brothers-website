@@ -135,7 +135,7 @@ export default function PLP({
         <title>{activeCategoryName} | Nomaan Brothers — The Designer Sherwani House</title>
         <meta name="description" content={`Explore our curated collection of ${activeCategoryName} at Nomaan Brothers — The Designer Sherwani House, Warangal. High-quality groom sherwanis, festive kurtas & ethnic wear.`} />
       </Helmet>
-      <div className="max-w-7xl mx-auto px-4 py-6 md:py-10">
+      <div id="collections" className="max-w-7xl mx-auto px-4 py-6 md:py-10">
       
       {/* Category Info Header */}
       <div className="mb-6 md:mb-10 text-center md:text-left">
