@@ -14,6 +14,19 @@ jobs:
   typecheck-and-build:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_PASSWORD: cms-ci
+          POSTGRES_DB: nomaan_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d nomaan_ci"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
@@ -25,5 +38,16 @@ jobs:
         run: bun run lint
       - name: Navigation and catalogue tests
         run: bun test tests/navigation.test.ts tests/cms-security.test.ts tests/cms-data.test.ts
+      - name: PostgreSQL CMS role and publishing test
+        env:
+          PGPASSWORD: cms-ci
+          PGHOST: 127.0.0.1
+          PGPORT: '5432'
+          PGUSER: postgres
+          PGDATABASE: nomaan_ci
+        run: |
+          psql -v ON_ERROR_STOP=1 -f tests/sql/bootstrap.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261107060000_nomaan_cms.sql
+          psql -v ON_ERROR_STOP=1 -f tests/sql/assert.sql
       - name: Production build
         run: bun run build
