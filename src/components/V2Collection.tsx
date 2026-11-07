@@ -5,7 +5,9 @@ import { CollectionRoute, getDepartment, getRelatedCollectionLinks } from '../st
 import V2Link from './V2Link';
 import V2Reveal from './V2Reveal';
 
-interface Props { route: CollectionRoute; products: CatalogProduct[]; onNavigate: (path: string) => void; }
+interface Props { route: CollectionRoute; products: CatalogProduct[]; totalCount?:number;
+  page?:number;pageSize?:number;onPageChange?:(page:number)=>void;
+  onNavigate: (path: string) => void; }
 export function V2ProductGrid({ products, onNavigate }: { products: CatalogProduct[]; onNavigate: (path: string) => void }) {
   return <div className="grid grid-cols-2 gap-x-4 gap-y-9 md:grid-cols-3 md:gap-x-6 md:gap-y-12 lg:grid-cols-4">
     {products.map((product, index) => (
@@ -27,7 +29,7 @@ export function V2ProductGrid({ products, onNavigate }: { products: CatalogProdu
   </div>;
 }
 
-export default function V2Collection({ route, products, onNavigate }: Props) {
+export default function V2Collection({ route, products, totalCount, page = 0, pageSize = 24, onPageChange, onNavigate }: Props) {
   const department = getDepartment(route.department);
   const links = getRelatedCollectionLinks(route.path).filter((item) => item.path !== route.path);
   const matches = productsForCollection(products, route.path);
@@ -65,7 +67,7 @@ export default function V2Collection({ route, products, onNavigate }: Props) {
       )}
       <div className="mb-9 flex items-end justify-between gap-5 border-b border-[#e2d7c8] pb-5">
         <h2 className="font-serif text-[31px] tracking-[-.035em] text-[#2a241e] md:text-4xl">The collection</h2>
-        <p className="text-xs text-[#84766a]">{matches.length} {matches.length === 1 ? 'style' : 'styles'}</p>
+        <p className="text-xs text-[#84766a]">{totalCount ?? matches.length} {(totalCount ?? matches.length) === 1 ? 'style' : 'styles'}</p>
       </div>
       {matches.length ? <V2ProductGrid products={matches} onNavigate={onNavigate}/> :
         <V2Reveal className="relative overflow-hidden border border-[#dfd3c2] bg-[#f4ecdf] px-7 py-16 text-center md:py-24">
@@ -77,6 +79,13 @@ export default function V2Collection({ route, products, onNavigate }: Props) {
           </V2Link>
         </V2Reveal>
       }
+      {onPageChange && (totalCount||0)>pageSize && <nav aria-label="Collection pages" className="mt-12 flex justify-center gap-3">
+        <button type="button" className="min-h-11 border border-[#b9a991] px-5 disabled:opacity-40"
+          disabled={page===0} onClick={()=>onPageChange(Math.max(0,page-1))}>Previous</button>
+        <span className="self-center text-sm">Page {page+1} of {Math.ceil((totalCount||0)/pageSize)}</span>
+        <button type="button" className="min-h-11 border border-[#b9a991] px-5 disabled:opacity-40"
+          disabled={(page+1)*pageSize>=(totalCount||0)} onClick={()=>onPageChange(page+1)}>Next</button>
+      </nav>}
     </div>
   </div>;
 }
