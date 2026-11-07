@@ -1,0 +1,92 @@
+name: Website quality gate
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - 'agm/**'
+
+permissions:
+  contents: read
+
+jobs:
+  typecheck-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_PASSWORD: cms-ci
+          POSTGRES_DB: nomaan_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d nomaan_ci"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.0'
+      - name: Install locked dependencies
+        run: bun install --frozen-lockfile
+      - name: TypeScript checks
+        run: bun run lint
+      - name: Navigation and catalogue tests
+        run: bun test tests/navigation.test.ts tests/cms-security.test.ts tests/cms-data.test.ts tests/metadata.test.ts tests/catalog-queries.test.ts tests/bulk-csv.test.ts tests/seo-routes.test.ts tests/catalog-load.test.ts tests/import-recovery.test.ts tests/premium-storefront.test.ts tests/architecture-cms.test.ts tests/cms-auth-flow.test.ts
+      - name: SEO markup injection and sitemap manifest tests
+        run: node --test tests/seo.test.mjs
+      - name: Media approval permission and published-asset contract tests
+        run: node --test tests/media-approval-contract.test.mjs
+      - name: Release evidence gate negative tests
+        run: |
+          node --test tests/release-gate.test.mjs
+          if node scripts/release-gate.mjs docs/RELEASE_EVIDENCE_TEMPLATE.json; then
+            echo "::error::Unverified release template unexpectedly passed the go-live gate."
+            exit 1
+          fi
+      - name: Client onboarding preflight contract tests
+        run: node --test tests/client-preflight.test.mjs
+      - name: Verify complete SQL Editor installer matches all nine source migrations
+        run: node --test tests/sql-editor-bundle.test.mjs
+      - name: PostgreSQL CMS role and publishing test
+        env:
+          PGPASSWORD: cms-ci
+          PGHOST: 127.0.0.1
+          PGPORT: '5432'
+          PGUSER: postgres
+          PGDATABASE: nomaan_ci
+        run: |
+          psql -v ON_ERROR_STOP=1 -f tests/sql/bootstrap.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/sql-editor/NOMAN_BROTHERS_INSTALL_FRESH_PROJECT.sql
+          psql -v ON_ERROR_STOP=1 -f tests/sql/assert.sql
+          psql -v ON_ERROR_STOP=1 -f tests/sql/assert_imports.sql
+          psql -v ON_ERROR_STOP=1 -f tests/sql/assert_staging_integrity.sql
+          psql -v ON_ERROR_STOP=1 -f tests/sql/assert_category_media.sql
+          psql -v ON_ERROR_STOP=1 -f tests/sql/verify_supabase_inventory.sql
+      - name: Reject production deployments without client CMS credentials
+        run: |
+          if env VERCEL_ENV=production VITE_SUPABASE_URL= VITE_SUPABASE_PUBLISHABLE_KEY= VITE_SUPABASE_ANON_KEY= bun run build; then
+            echo "::error::Production build accepted an unconfigured CMS backend."
+            exit 1
+          fi
+      - name: Reject secret-key browser builds
+        run: |
+          if env VERCEL_ENV=production VITE_SUPABASE_URL=https://exampleproject123.supabase.co VITE_SUPABASE_PUBLISHABLE_KEY=sb_secret_not_a_real_key_12345678901234567890 bun run build; then
+            echo "::error::Production bundle accepted a private Supabase API key."
+            exit 1
+          fi
+      - name: Production build
+        run: bun run build
+      - name: Verify preserved shell for product SEO function
+        run: node scripts/check-ssr-shell.mjs
+      - name: Verify crawlable pre-rendered category output
+        run: |
+          node -e "const fs=require('fs');for(const path of ['dist/men/index.html','dist/men/sherwani/index.html','dist/kids/index.html']){const html=fs.readFileSync(path,'utf8');if(!/<h1>/.test(html))process.exit(1)}"
+      - name: Verify unconfigured review build is not search-indexable
+        run: |
+          node -e "const fs=require('fs');const html=fs.readFileSync('dist/index.html','utf8');const robots=fs.readFileSync('dist/robots.txt','utf8');if(!html.includes('name=\"robots\" content=\"noindex')||!robots.includes('Disallow: /'))process.exit(1)"

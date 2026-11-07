@@ -1,0 +1,210 @@
+import React, { useEffect, useRef, useState } from 'react';
+import { AnimatePresence, motion, useReducedMotion, useScroll } from 'motion/react';
+import { ArrowRight, ChevronDown, MapPin, Menu, Search, X } from 'lucide-react';
+import { DEPARTMENTS, DepartmentId, getDepartment } from '../storefront/navigation';
+import V2Link from './V2Link';
+
+interface Props {
+  path: string;
+  onNavigate: (path: string) => void;
+}
+export default function V2Header({ path, onNavigate }: Props) {
+  const [open, setOpen] = useState<DepartmentId | null>(null);
+  const [mobile, setMobile] = useState(false);
+  const [mobileDepartment, setMobileDepartment] = useState<DepartmentId>('men');
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [keyword, setKeyword] = useState('');
+  const reducedMotion = useReducedMotion();
+  const wrapper = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll();
+
+  const closeAll = () => { setOpen(null); setMobile(false); setSearchOpen(false); };
+  const go = (target: string) => { closeAll(); onNavigate(target); };
+
+  useEffect(() => { closeAll(); }, [path]);
+  useEffect(() => {
+    const escape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') closeAll();
+    };
+    const clickAway = (event: PointerEvent) => {
+      if (open && wrapper.current && !wrapper.current.contains(event.target as Node)) setOpen(null);
+    };
+    document.addEventListener('keydown', escape);
+    document.addEventListener('pointerdown', clickAway);
+    return () => {
+      document.removeEventListener('keydown', escape);
+      document.removeEventListener('pointerdown', clickAway);
+    };
+  }, [open]);
+  useEffect(() => {
+    if (!mobile && !searchOpen) return;
+    const old = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = old; };
+  }, [mobile, searchOpen]);
+
+  const submitSearch = (event: React.FormEvent) => {
+    event.preventDefault();
+    if (keyword.trim()) go('/search?q=' + encodeURIComponent(keyword.trim()));
+  };
+
+  return <>
+    <header ref={wrapper} className="sticky top-0 z-50 border-b border-[#e5ddd1] bg-[#fbf8f2]/95 backdrop-blur-xl">
+      <div className="border-b border-[#e7dfd1] bg-[#1d1917] px-4 py-2 text-center text-[9px] font-semibold uppercase tracking-[0.22em] text-[#e7d9bf] md:text-[10px]">
+        Traditional occasionwear · Mandi Bazar, Warangal
+      </div>
+      <div className="relative mx-auto flex h-[76px] max-w-[1440px] items-center justify-between gap-3 px-5 md:h-[90px] md:px-10 xl:px-14">
+        <div className="flex items-center md:hidden">
+          <button type="button" aria-label="Open navigation" onClick={() => { setMobile(true); setOpen(null); }}
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[#ded6c8]">
+            <Menu className="h-5 w-5" />
+          </button>
+        </div>
+        <V2Link href="/" onNavigate={go} className="group flex shrink-0 flex-col items-center justify-center text-center md:items-start md:text-left"
+          aria-label="Nomaan Brothers, return to homepage">
+          <span className="font-serif text-[23px] font-medium leading-[.95] tracking-[-0.03em] text-[#201b17] md:text-[30px]">Nomaan <i className="font-normal">Brothers</i></span>
+          <span className="mt-1.5 text-[8px] font-semibold uppercase tracking-[.22em] text-[#997b56] md:text-[9px]">The Designer Sherwani House</span>
+        </V2Link>
+        <nav className="hidden items-center gap-2 lg:flex" aria-label="Shop departments">
+          {DEPARTMENTS.map((department) => (
+            <div key={department.id} className="flex items-center">
+              <V2Link href={department.path} onNavigate={go}
+                className={'px-4 py-3 text-[11px] font-semibold uppercase tracking-[.14em] transition-colors hover:text-[#a27e50] ' +
+                  (path.startsWith(department.path) ? 'text-[#a27e50]' : 'text-[#29241e]')}>
+                {department.title}
+              </V2Link>
+              <button type="button" aria-expanded={open === department.id}
+                aria-controls={'department-' + department.id}
+                aria-label={'Explore ' + department.title + ' categories'}
+                className="flex h-11 w-8 items-center justify-center"
+                onClick={() => { setOpen(open === department.id ? null : department.id); setSearchOpen(false); }}>
+                <ChevronDown className={'h-4 w-4 transition-transform ' + (open === department.id ? 'rotate-180' : '')} />
+              </button>
+            </div>
+          ))}
+          <V2Link href="/contact" onNavigate={go}
+            className="px-4 py-3 text-[11px] font-semibold uppercase tracking-[.14em] text-[#29241e] hover:text-[#a27e50]">
+            Visit Us
+          </V2Link>
+        </nav>
+        <div className="flex shrink-0 items-center gap-2">
+          <button type="button" onClick={() => { setSearchOpen(true); setOpen(null); }}
+            aria-label="Search collections" className="flex h-11 w-11 items-center justify-center rounded-full text-[#29241e] hover:bg-[#f0e8dc]">
+            <Search className="h-[19px] w-[19px]" strokeWidth={1.7}/>
+          </button>
+          <V2Link href="/contact" onNavigate={go}
+            className="hidden min-h-11 items-center gap-2 border border-[#bea783] px-5 py-2.5 text-[10px] font-semibold uppercase tracking-[.12em] text-[#524029] transition-colors hover:bg-[#efe4d2] md:inline-flex">
+            Visit showroom <ArrowRight className="h-3.5 w-3.5"/>
+          </V2Link>
+        </div>
+      </div>
+      <motion.div className="absolute bottom-0 left-0 h-[2px] w-full origin-left bg-[#af8754]"
+        style={reducedMotion ? undefined : { scaleX: scrollYProgress }} aria-hidden="true" />
+      <AnimatePresence>
+        {open && (
+          <motion.div id={'department-' + open}
+            initial={reducedMotion ? false : { opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.22 }}
+            className="absolute left-0 top-full hidden w-full border-t border-[#e9dfd1] bg-[#fbf8f2] shadow-[0_26px_55px_-25px_rgba(25,20,16,.3)] lg:block">
+            <div className="mx-auto grid max-w-[1380px] grid-cols-[230px_1fr] gap-10 px-12 py-11">
+              <div className="border-r border-[#e5d7c4] pr-9">
+                <span className="text-[10px] font-semibold uppercase tracking-[.25em] text-[#a38053]">Discover</span>
+                <h2 className="mt-4 font-serif text-4xl leading-[1.05] text-[#29221c]">{getDepartment(open).title}</h2>
+                <p className="mt-4 text-sm leading-7 text-[#756e65]">{getDepartment(open).description}</p>
+                <V2Link href={getDepartment(open).path} onNavigate={go}
+                  className="mt-7 inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[.12em] text-[#926c3e]">
+                  View all <ArrowRight className="h-4 w-4" />
+                </V2Link>
+              </div>
+              <div className={'grid gap-9 ' + (open === 'men' ? 'grid-cols-4' : 'grid-cols-2')}>
+                {getDepartment(open).groups.map((group) => (
+                  <div key={group.title}>
+                    <h3 className="mb-4 border-b border-[#ded1bd] pb-3 font-serif text-lg text-[#24201c]">{group.title}</h3>
+                    <ul className="space-y-3.5">
+                      {group.items.map((item) => (
+                        <li key={item.path}>
+                          <V2Link href={item.path} onNavigate={go}
+                            className="text-[13px] text-[#6d655c] transition-colors hover:text-[#936f44]">
+                            {item.label}
+                          </V2Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </header>
+
+    <AnimatePresence>
+      {mobile && (
+        <motion.div className="fixed inset-0 z-[70] lg:hidden" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+          <button aria-label="Close navigation" onClick={closeAll} className="absolute inset-0 h-full w-full bg-black/50" />
+          <motion.div role="dialog" aria-modal="true" aria-label="Browse collections" className="absolute inset-y-0 left-0 flex w-[min(91vw,420px)] flex-col overflow-y-auto bg-[#fbf8f2] p-5 shadow-2xl"
+            initial={reducedMotion ? false : { x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }}
+            transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}>
+            <div className="mb-5 flex items-center justify-between border-b border-[#e7ddd0] pb-5">
+              <span className="font-serif text-2xl">Nomaan Brothers</span>
+              <button type="button" aria-label="Close menu" className="flex h-11 w-11 items-center justify-center" onClick={closeAll}><X/></button>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {DEPARTMENTS.map((department) => (
+                <button key={department.id} type="button" aria-expanded={mobileDepartment === department.id}
+                  className={'min-h-12 border px-2 text-xs font-semibold uppercase tracking-[.08em] ' +
+                    (mobileDepartment === department.id ? 'border-[#9c7949] bg-[#30251c] text-[#f4e9d4]' : 'border-[#dfd4c5] text-[#544b40]')}
+                  onClick={() => setMobileDepartment(department.id)}>{department.title}</button>
+              ))}
+            </div>
+            <V2Link href={getDepartment(mobileDepartment).path} onNavigate={go}
+              className="my-6 flex items-center justify-between border-b border-[#e6dbcc] pb-4 font-serif text-xl">
+              All {getDepartment(mobileDepartment).title}<ArrowRight size={17}/>
+            </V2Link>
+            {getDepartment(mobileDepartment).groups.map((group) => (
+              <section key={group.title} className="mb-6">
+                <h3 className="mb-3 text-[10px] font-bold uppercase tracking-[.2em] text-[#9b794d]">{group.title}</h3>
+                <ul className="space-y-1">
+                  {group.items.map((item) => (
+                    <li key={item.path}>
+                      <V2Link href={item.path} onNavigate={go}
+                        className="flex min-h-11 items-center border-b border-[#ede4d9] py-3 text-sm text-[#3d362e]">
+                        {item.label}
+                      </V2Link>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ))}
+            <V2Link href="/contact" onNavigate={go} className="mt-auto flex min-h-12 items-center gap-2 border-t border-[#e3d7c8] pt-5 text-sm font-semibold">
+              <MapPin size={17}/> Showroom & Contact
+            </V2Link>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+    <AnimatePresence>
+      {searchOpen && (
+        <motion.div role="dialog" aria-modal="true" aria-label="Search clothing collections"
+          className="fixed inset-0 z-[80] flex items-start justify-center bg-[#16110d]/70 px-4 pt-[12vh] backdrop-blur-sm"
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+          <div className="w-full max-w-2xl bg-[#fbf8f2] p-6 shadow-2xl md:p-9">
+            <div className="mb-7 flex items-center justify-between">
+              <h2 className="font-serif text-3xl">Discover your style</h2>
+              <button type="button" aria-label="Close search" onClick={closeAll} className="flex h-11 w-11 items-center justify-center"><X/></button>
+            </div>
+            <form onSubmit={submitSearch} className="flex gap-2 border-b border-[#bda887] pb-3">
+              <input autoFocus aria-label="Search products" placeholder="Sherwani, kurta, jodhpuri..."
+                value={keyword} onChange={(e) => setKeyword(e.target.value)}
+                className="min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-[#998a77]"/>
+              <button type="submit" aria-label="Submit search" className="flex h-11 w-11 items-center justify-center"><ArrowRight/></button>
+            </form>
+            <p className="mt-5 text-xs leading-6 text-[#786d5e]">Search the preview catalogue, or explore Men's Wear and Kids Wear from the navigation.</p>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  </>;
+}

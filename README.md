@@ -1,84 +1,69 @@
-# Nomaan Brothers — The Designer Sherwani House
+# Nomaan Brothers — V2 Storefront & CMS
 
-> **Warangal’s Premier Groom & Ethnic Menswear Boutique**  
-> *Opposite Madras Masjid, Mandi Bazar, JPN Road, Sherpura, Warangal, Telangana - 506002*  
-> *Instagram: [@nomaan_brothers_](https://instagram.com/nomaan_brothers_) | WhatsApp: [+91 99085 97337](https://wa.me/919908597337)*
+A luxury ethnic menswear and kidswear browse-and-enquire catalogue for Nomaan Brothers, Warangal. Maintained by Alif Growth Media.
 
-A high-performance, mobile-first luxury e-commerce and catalog web application engineered for **Nomaan Brothers — The Designer Sherwani House**. Built for seamless groom consultations, festive menswear shopping, custom made-to-measure tailoring, and instant WhatsApp order routing.
+## Current release status
+This source branch is a **production-hardening candidate, not a live production launch**. It has not been connected to a client-owned Supabase project; the actual security policies, data and media must be verified on that project before merging or switching traffic.
 
----
+The separate connected Supabase project named **gym** belongs to another application. It has deliberately **not** been modified or reused.
 
-## 🌟 Key Features
+## Implemented modules
+- Responsive storefront with Men's Wear and Kids Wear hierarchy, shareable product/category URLs and accessible navigation.
+- Motion-driven editorial homepage with reduced-motion alternatives.
+- Authenticated /studio with CMS product drafts, publishing, image/video uploads, media approval, page management and owner/editor role boundaries.
+- Supabase PostgreSQL tables, restricted RLS and Storage policies, atomic homepage/product publication and revision history.
+- Published-content-only storefront reads. No demo catalogue, legacy PIN login, public write APIs, fake discounts or fake rewards.
+- CI: frozen Bun install, TypeScript, Bun unit tests, PostgreSQL role/RLS simulation and Vite build.
 
-1. **Heritage & Luxury Design Language:**
-   - Bespoke typography pairing editorial serif headings with clean tracked sans-serif interfaces.
-   - Fluid responsive layout optimized for mobile screens (touch-friendly swipe cards, sticky bottom action bars, collapsible drawers).
+## Development
 
-2. **Specialized Groom & Menswear Collections:**
-   - **Royal Groom Sherwanis:** Handcrafted Zardozi, dabka, cutdana, and micro-velvet imperial groom sets with matching churidars, stoles, and chunnis.
-   - **Sequence & Festive Kurtas:** Haldi/Sangeet mirror-work and Lucknowi Chikan threadwork kurtas.
-   - **Authentic Arabic Thoobs & Jubbas:** Imported Saudi and Omani style collarless thoobs with detachable tarboosh tassels.
-   - **Indo-Western & Royal Jodhpuris:** Structured Bandhgalas and asymmetric Angrakha silhouettes.
-   - **Groom Accessories:** Pre-tied Chanderi Safas (pagdis), royal pearl malas, Kundan kalgis, and hand-embroidered leather mojaris (juttis).
+Install Bun 1.4.0 and run:
 
-3. **Direct WhatsApp Concierge & Order Routing:**
-   - Every product page features a 1-tap **"Inquire / Order on WhatsApp"** button that pre-populates item details, selected size, chosen colorway, and live link directly to owner WhatsApp (`+91 99085 97337`).
-   - Integrated Cart Drawer generates a structured order receipt for quick WhatsApp dispatch and offline showroom trials.
+    bun install --frozen-lockfile
+    bun run dev
 
-4. **Interactive Size Guide & Measurement Spec:**
-   - Detailed garment sizing (Chest 38" to 46", Length, Shoulder, Waist) with made-to-measure tailoring recommendations.
+Checks:
 
-5. **Customer Loyalty & VIP Club:**
-   - **Nomaan Royal Club**: Earn 10 NB Points per ₹100 spent, redeemable for instant coupons (`NOMAAN10`, `WELCOME100`, `ROYAL250`).
-   - Live rewards bubble and account portal with order history tracking.
+    bun run lint
+    bun test
+    bun run build
+    node --test tests/client-preflight.test.mjs
 
-6. **Admin Control Console:**
-   - Protected 6-digit PIN management portal for live product updates, orders review, and hero banner customizations.
+## Environment
+Create .env locally using .env.example. For Vercel use the two **frontend public values** of the dedicated Nomaan Supabase project:
 
----
+    VITE_SUPABASE_URL=https://NEW_PROJECT_REF.supabase.co
+    VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_NEW_PROJECT_KEY
 
-## 🛠️ Tech Stack
+Never use a secret key or database password as a VITE_ variable. Do not use another client's project.
 
-- **Framework:** React 19 + TypeScript
-- **Bundler:** Vite 6
-- **Styling:** Tailwind CSS v4
-- **Animations:** Motion (Framer Motion)
-- **Icons:** Lucide React
-- **SEO & Meta:** React Helmet Async & Schema.org JSON-LD
+## Database and CMS
+- Schema: supabase/migrations/20261107060000_nomaan_cms.sql
+- Studio: /studio (manual staff provisioning via Supabase Auth)
+- Product drafts/versions: nb_product_drafts, nb_product_revisions, nb_products
+- Homepage drafts/versions: nb_home_drafts, nb_home_revisions, nb_home_public
+- Media: nb_media plus private nb-media-staging and approved nb-media-public Storage buckets (Phase 2; not live-tested)
+- Categories: nb_categories (seeded with user-requested category names, not inventory).
 
----
+Full setup and go/no-go instructions:
+- docs/ARCHITECTURE_FRONTEND_CMS_PAYMENTS.md (live vs candidate systems, frontend/backend map, payments, CMS vs code versions)
+- docs/ACTIVATE_LIVE_CMS.md (new Vercel review URL, nine SQL migrations, Supabase function, Auth owner and Vercel env handover)
+- docs/NOMAN_SQL_EDITOR_COPY_PASTE.md (one-shot fresh Noman Supabase SQL Editor installer, verification and API key setup)
+- docs/SUPABASE_STAGING_INSTALL.md (all nine SQL migrations, Auth, Storage and deployment setup)
+- docs/SUPABASE_STAGING_TEST_MATRIX.md (actual image/video/role/load acceptance evidence)
+- docs/CLIENT_ONBOARDING.md (client-owned fork, new Supabase, Vercel and read-only commissioning)
+- docs/PHASE1_SECURITY_REVIEW.md (Phase 1 audit, controls, unresolved security blockers)
+- docs/CMS_DEPLOYMENT.md
+- docs/CMS_RELEASE_GATE.md
+- docs/RELEASE_ACCEPTANCE.md (hard launch blockers)
+- docs/CMS_USER_GUIDE.md (staff usage and imports)
+- docs/OPERATIONS.md (backups, incidents and recovery)
 
-## 🚀 Quickstart & Development
+## Boundaries and known pending work
+**Production gate:** Phase 2 source introduces private staging and approved-public media promotion, but this has NOT been deployed or validated on a client Supabase project. Treat the old public bucket as insecure until the reviewed migration and real Storage tests prove otherwise. Never use the unrelated gym project.
 
-### 1. Install Dependencies
-```bash
-bun install
-# or
-npm install
-```
+The website is *browse and enquire*, not an online payment system. Future ERP/POS is the authoritative stock, prices and tax source. SEO SSR/prerender code exists but requires real Vercel routing, HTTP-status, crawler and indexing acceptance tests. Real photography, contact numbers and the meanings of "Sadi" and Sherwani "Plain Suits" need owner confirmation.
 
-### 2. Run Development Server
-```bash
-bun run dev
-# or
-npm run dev
-```
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+The legacy Firebase rules in the repository are deny-all, **but that file is not deployed to Firebase**. Back up and secure the old live Firebase project in a controlled migration.
 
-### 3. Build for Production
-```bash
-bun run build
-# or
-npm run build
-```
-
----
-
-## ☁️ Deployment (Vercel)
-
-This application is ready for 1-click deployment on **Vercel**:
-1. Connect this GitHub repository (`sumera_collections`) to Vercel.
-2. Framework Preset: **Vite**.
-3. Build Command: `npm run build` or `bun run build`.
-4. Output Directory: `dist`.
-5. Click **Deploy**. Your custom showroom link will be live in ~30 seconds!
+This CMS uses built-in React components and Supabase rather than integrating external Refine/Puck packages yet. The prior research identified them as candidate enhancements, not current dependencies.

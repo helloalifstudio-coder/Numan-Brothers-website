@@ -59,3 +59,51 @@ body {
   scrollbar-width: none;  /* Firefox */
 }
 
+
+/* Modern Heritage: polished but accessible interactions. */
+:root { --nb-accent: #967143; }
+html { scroll-behavior: smooth; scroll-padding-top: 6rem; }
+::selection { background: #e8d9bb; color: #211c16; }
+:where(button, a, input, select, textarea, [role="link"]):focus-visible {
+  outline: 2px solid var(--nb-accent) !important;
+  outline-offset: 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Nomaan Brothers V2 — editorial, performant storefront defaults. */
+html { scroll-behavior: smooth; scroll-padding-top: 9rem; }
+body { margin: 0; background: #fbf8f2; color: #29221c; }
+#root { min-height: 100svh; }
+h1,h2,h3,h4 { text-wrap: balance; }
+img { display: block; }
+a { text-decoration: none; }
+::selection { background: #dec49b; color: #251b12; }
+:where(button,a,input,textarea):focus-visible {
+  outline: 2px solid #9b7648 !important;
+  outline-offset: 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto !important; }
+  *,*::before,*::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Product photography becomes an atmospheric backdrop without moving content.
+   The animation only runs for visitors who have not requested reduced motion. */
+@keyframes nb-ambient-arrival {
+  from { opacity: .12; transform: scale(1.04); }
+  to { opacity: .55; transform: scale(1); }
+}
+/* Tailwind's motion-safe: utility already suppresses this animation for
+   visitors with prefers-reduced-motion: reduce. */

@@ -1,34 +1,11 @@
+// Legacy Firebase is retired from this branch. Deploy these restrictive rules
+// to the LEGACY Firebase project only after verifying and backing up existing data.
+// Committing this file does not change any remotely deployed Firebase rules.
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // 1. Default Safety Net: Deny everything by default
     match /{document=**} {
       allow read, write: if false;
-    }
-
-    // 2. Products Catalog: Anyone can read, and anyone can write/delete (auth is handled in-app via PIN)
-    match /products/{productId} {
-      allow read, write: if true;
-    }
-
-    // 3. User Specific Private Folders (Cart, Wishlist, Profile, Points, and Local Orders)
-    match /users/{userId}/{document=**} {
-      allow read, write: if true;
-    }
-
-    // 4. Global Orders: Anyone can read, create, or update
-    match /global_orders/{orderId} {
-      allow read, write: if true;
-    }
-
-    // 5. Return Requests: Anyone can read, create, or update
-    match /return_requests/{requestId} {
-      allow read, write: if true;
-    }
-
-    // 6. Settings: Storefront hero and banner settings
-    match /settings/{settingId} {
-      allow read, write: if true;
     }
   }
 }

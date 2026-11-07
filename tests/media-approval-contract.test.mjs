@@ -1,0 +1,29 @@
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+const code=readFileSync('supabase/functions/nb-media-approval/index.ts','utf8');
+
+describe('Server-only media approval contract',()=>{
+  it('uses a signed-in user and rechecks a fresh privileged role',()=>{
+    assert.match(code,/withSupabase\(\{ auth: 'user' \}/);
+    assert.match(code,/auth\.admin\.getUserById\(actorId\)/);
+    assert.match(code,/role !== 'owner' && role !== 'admin'/);
+  });
+  it('cannot publish an unapproved image directly from the browser',()=>{
+    assert.match(code,/nb-media-staging/);
+    assert.match(code,/nb-media-public/);
+    assert.match(code,/await ctx\.supabaseAdmin\.storage/);
+  });
+  it('denies revocation of assets referenced by published pages',()=>{
+    assert.match(code,/from\('nb_product_media'\)/);
+    assert.match(code,/from\('nb_home_public'\)/);
+    assert.match(code,/from\('nb_categories'\)/);
+    assert.match(code,/contains\('image_urls'/);
+    assert.match(code,/eq\('video_url'/);
+    assert.match(code,/status', 'published'/);
+    const references=code.indexOf("from('nb_product_media')");
+    const revocation=code.indexOf('update({ approved: false })');
+    assert.ok(references>0 && revocation>references,'reference checks must precede revocation');
+    assert.match(code,/return json\(409,.*Remove this image/);
+  });
+});
