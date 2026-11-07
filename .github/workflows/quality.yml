@@ -37,7 +37,7 @@ jobs:
       - name: TypeScript checks
         run: bun run lint
       - name: Navigation and catalogue tests
-        run: bun test tests/navigation.test.ts tests/cms-security.test.ts tests/cms-data.test.ts
+        run: bun test tests/navigation.test.ts tests/cms-security.test.ts tests/cms-data.test.ts tests/metadata.test.ts
       - name: PostgreSQL CMS role and publishing test
         env:
           PGPASSWORD: cms-ci
