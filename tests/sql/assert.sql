@@ -2,8 +2,13 @@
 \set ON_ERROR_STOP on
 \echo 'Checking public access does not grant writes'
 set role anon;
-select case when count(*) = 0 then 'ok' else 1/0::text end as empty_catalogue
-from public.nb_products;
+do $$
+begin
+  if (select count(*) from public.nb_products) <> 0 then
+    raise exception 'Catalogue was unexpectedly prepopulated';
+  end if;
+end;
+$$;
 do $$
 declare forbidden boolean := false;
 begin
