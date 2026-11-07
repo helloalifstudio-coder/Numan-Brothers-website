@@ -76,7 +76,7 @@ export function validateCatalogueCsv(csv:string):CsvRow[]{
     const slugBase=title.toLowerCase().normalize('NFKD')
       .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,90)||'garment';
     const slug=slugBase+'-'+sku.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
-    const draft={
+    const draft:CsvRow['draft']={
       sku,slug,title,department:dep,categoryPaths:category?[category]:[],
       description:String(source.description||'').slice(0,2000),fabric:String(source.fabric||'').slice(0,250),
       sizes,imageUrls:[] as string[],videoUrl:'',price,sortRank:0,
