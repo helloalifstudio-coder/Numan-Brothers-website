@@ -52,11 +52,12 @@ const handler = withSupabase({ auth: 'user' }, async (req, ctx) => {
     return json(409, { error: 'Media path requires manual review' })
   }
 
-  if (action === 'archive' || action === 'restore') {
+  // Restoring an archived asset never breaks existing public references.
+  if (action === 'restore') {
     const {error}=await ctx.supabaseAdmin.from('nb_media')
-      .update({archived_at:action==='archive'?new Date().toISOString():null}).eq('id',id)
-    if(error)return json(500,{error:'Unable to update the asset archive status'})
-    return json(200,{ok:true,archived:action==='archive'})
+      .update({archived_at:null}).eq('id',id)
+    if(error)return json(500,{error:'Unable to restore the media asset'})
+    return json(200,{ok:true,archived:false})
   }
 
   const publicBucket = ctx.supabaseAdmin.storage.from('nb-media-public');
@@ -125,8 +126,17 @@ const handler = withSupabase({ auth: 'user' }, async (req, ctx) => {
   if ((products.count ?? 0) > 0 || (collections.count ?? 0) > 0 ||
       (legacyImages.count ?? 0) > 0 || (legacyVideo.count ?? 0) > 0 ||
       (productDraftImages.count ?? 0) > 0 || (productDraftVideo.count ?? 0) > 0 ||
-      referencedByHome || (action==='delete' && referencedByHomeDraft)) {
+      referencedByHome || ((action==='delete'||action==='archive') && referencedByHomeDraft)) {
     return json(409, { error: 'This file is still used by a published page or saved draft. Remove it, save and publish the replacement, then retry deletion.' })
+  }
+
+  if(action==='archive') {
+    // Archiving an in-use file would make the published page impossible to
+    // republish without replacing its image. Reject it like deletion.
+    const {error}=await ctx.supabaseAdmin.from('nb_media')
+      .update({archived_at:new Date().toISOString()}).eq('id',id)
+    if(error)return json(500,{error:'Unable to archive this asset'})
+    return json(200,{ok:true,archived:true})
   }
 
   if(action==='delete') {
