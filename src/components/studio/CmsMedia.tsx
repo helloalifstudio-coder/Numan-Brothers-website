@@ -16,11 +16,21 @@ export default function CmsMedia({client,userId,canPublish,onMediaChange}:Props)
   const [busyId,setBusyId] = useState<string|null>(null);
   const [altDrafts,setAltDrafts] = useState<Record<string,string>>({});
   const [privatePreviews,setPrivatePreviews] = useState<Record<string,string>>({});
+  const [search,setSearch] = useState('');
+  const [approvalFilter,setApprovalFilter] = useState('all');
+  const [page,setPage] = useState(0);
+  const [total,setTotal] = useState(0);
   const refresh = async () => {
     setLoading(true);
-    const {data,error} = await client.from('nb_media')
-      .select('id,storage_path,original_name,mime_type,size_bytes,alt_text,approved,uploaded_by,created_at')
-      .order('created_at',{ascending:false}).limit(150);
+    let request=client.from('nb_media')
+      .select('id,storage_path,original_name,mime_type,size_bytes,alt_text,approved,uploaded_by,created_at',{count:'exact'});
+    const term=search.replace(/[^a-zA-Z0-9 _.-]/g,' ').trim().slice(0,60);
+    if(term)request=request.ilike('original_name','%'+term+'%');
+    if(approvalFilter==='approved')request=request.eq('approved',true);
+    if(approvalFilter==='pending')request=request.eq('approved',false);
+    const {data,count,error} = await request.order('created_at',{ascending:false})
+      .range(page*30,page*30+29);
+    setTotal(count||0);
     const assets=(data||[]) as CmsMediaRow[];
     setRows(assets);
     setPrivatePreviews({});
@@ -28,7 +38,7 @@ export default function CmsMedia({client,userId,canPublish,onMediaChange}:Props)
     setError(error?.message || null);
     setLoading(false);
   };
-  useEffect(()=>{void refresh();},[client]);
+  useEffect(()=>{const timer=setTimeout(()=>void refresh(),220);return()=>clearTimeout(timer)},[client,page,search,approvalFilter]);
 
   const upload = async () => {
     if (!selection?.length || uploading) return;
@@ -89,6 +99,17 @@ export default function CmsMedia({client,userId,canPublish,onMediaChange}:Props)
       </button>
       {uploading && <progress aria-label="Upload progress" max={100} value={progress} className="block w-full"/>}
     </div>
+    <div className="grid gap-3 rounded-md border border-stone-200 bg-white p-4 sm:grid-cols-[1fr_auto]">
+      <input className={inputClass} type="search" aria-label="Search media filename or SKU"
+        placeholder="Search photos by name or SKU…" value={search}
+        onChange={e=>{setSearch(e.target.value);setPage(0);}}/>
+      <select className={inputClass} aria-label="Media approval status" value={approvalFilter}
+        onChange={e=>{setApprovalFilter(e.target.value);setPage(0);}}>
+        <option value="all">All assets</option><option value="pending">Pending approval</option>
+        <option value="approved">Approved</option>
+      </select>
+      <p className="text-xs text-stone-500 sm:col-span-2">{total.toLocaleString('en-IN')} media records · 30 per page</p>
+    </div>
     <ErrorText message={error}/>
     {loading ? <p className="text-sm text-stone-500">Loading media…</p> :
       rows.length===0 ? <p className="rounded-lg bg-stone-100 p-8 text-sm">There are no assets yet. Add the owner's approved product photographs first.</p> :
@@ -127,5 +148,12 @@ export default function CmsMedia({client,userId,canPublish,onMediaChange}:Props)
           </article>;
         })}
       </div>}
+    {total>30&&<nav aria-label="Media pages" className="flex items-center justify-center gap-3">
+      <button type="button" className={outlineClass} disabled={page===0}
+        onClick={()=>setPage(current=>Math.max(0,current-1))}>Previous</button>
+      <span className="text-sm">Page {page+1} / {Math.ceil(total/30)}</span>
+      <button type="button" className={outlineClass} disabled={(page+1)*30>=total}
+        onClick={()=>setPage(current=>current+1)}>Next</button>
+    </nav>}
   </section>;
 }
