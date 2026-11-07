@@ -15,6 +15,7 @@ export default function CmsMedia({client,userId,canPublish,onMediaChange}:Props)
   const [selection,setSelection] = useState<FileList|null>(null);
   const [busyId,setBusyId] = useState<string|null>(null);
   const [altDrafts,setAltDrafts] = useState<Record<string,string>>({});
+  const [nameDrafts,setNameDrafts] = useState<Record<string,string>>({});
   const [privatePreviews,setPrivatePreviews] = useState<Record<string,string>>({});
   const [search,setSearch] = useState('');
   const [approvalFilter,setApprovalFilter] = useState('all');
@@ -35,6 +36,7 @@ export default function CmsMedia({client,userId,canPublish,onMediaChange}:Props)
     setRows(assets);
     setPrivatePreviews({});
     setAltDrafts(Object.fromEntries(assets.map(a=>[a.id,a.alt_text])));
+    setNameDrafts(Object.fromEntries(assets.map(a=>[a.id,a.original_name])));
     setError(error?.message || null);
     setLoading(false);
   };
@@ -78,10 +80,26 @@ export default function CmsMedia({client,userId,canPublish,onMediaChange}:Props)
     if(!permitted)return;
     setBusyId(asset.id);setError(null);
     const value=(altDrafts[asset.id]||'').trim().slice(0,400);
-    const {data,error}=await client.from('nb_media').update({alt_text:value}).eq('id',asset.id).select('id').maybeSingle();
+    const filename=(nameDrafts[asset.id]||'').trim().slice(0,220);
+    if(!filename){setError('Enter a media display name.');setBusyId(null);return;}
+    const {data,error}=await client.from('nb_media')
+      .update({alt_text:value,original_name:filename}).eq('id',asset.id).select('id').maybeSingle();
     if(error||!data)setError(error?.message||'Asset description could not be saved.');
     else {await refresh();onMediaChange();}
     setBusyId(null);
+  };
+  const deleteMedia=async(asset:CmsMediaRow)=>{
+    if(!canPublish||asset.approved)return;
+    if(!window.confirm('Permanently delete this unapproved file? This cannot be undone.'))return;
+    setBusyId(asset.id);setError(null);
+    try{
+      const {data,error}=await client.functions.invoke('nb-media-approval',{
+        body:{id:asset.id,action:'delete'},
+      });
+      if(error||!data?.ok)throw new Error(error?.message||data?.error||'Unable to delete asset.');
+      await refresh();onMediaChange();
+    }catch(cause){setError(cause instanceof Error?cause.message:'File deletion failed.');}
+    finally{setBusyId(null);}
   };
   return <section className="space-y-7">
     <div>
@@ -130,6 +148,13 @@ export default function CmsMedia({client,userId,canPublish,onMediaChange}:Props)
                 {asset.approved?'Approved for publication':'Awaiting approval'}
               </p>
               <label className="block text-xs font-semibold text-stone-700">
+                Media display name
+                <input type="text" className={inputClass+' mt-2'} maxLength={220}
+                  value={nameDrafts[asset.id]??asset.original_name}
+                  disabled={!canPublish && (asset.approved || asset.uploaded_by!==userId)}
+                  onChange={e=>setNameDrafts(current=>({...current,[asset.id]:e.target.value}))}/>
+              </label>
+              <label className="block text-xs font-semibold text-stone-700">
                 {asset.mime_type.startsWith('video/')?'Video description':'Image alternative text'}
                 <input type="text" maxLength={400} className={inputClass+' mt-2'} value={altDrafts[asset.id]??asset.alt_text}
                   disabled={!canPublish && (asset.approved || asset.uploaded_by!==userId)}
@@ -137,10 +162,14 @@ export default function CmsMedia({client,userId,canPublish,onMediaChange}:Props)
               </label>
               <div className="flex flex-wrap gap-2">
                 {(canPublish || (!asset.approved && asset.uploaded_by===userId)) && <button type="button"
-                  disabled={busyId===asset.id || (altDrafts[asset.id]??asset.alt_text)===asset.alt_text}
-                  onClick={()=>void saveDescription(asset)} className={outlineClass}>Save description</button>}
+                  disabled={busyId===asset.id || ((altDrafts[asset.id]??asset.alt_text)===asset.alt_text && (nameDrafts[asset.id]??asset.original_name)===asset.original_name)}
+                  onClick={()=>void saveDescription(asset)} className={outlineClass}>Save edits</button>}
                 {canPublish && <button type="button" disabled={busyId===asset.id} onClick={()=>void approve(asset)} className={outlineClass}>
                   <CheckCircle2 size={15}/>{asset.approved?'Revoke approval':'Approve'}
+                </button>}
+                {canPublish&&!asset.approved&&<button type="button" disabled={busyId===asset.id}
+                  onClick={()=>void deleteMedia(asset)} className={outlineClass+' border-red-300 text-red-800'}>
+                  Delete file
                 </button>}
                 {asset.approved && <button type="button" className={outlineClass} onClick={()=>void navigator.clipboard.writeText(url)}>Copy public URL</button>}
               </div>

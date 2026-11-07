@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { ArrowLeft, ArrowRight, Plus, Save, Send } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Plus, Save, Send, Archive, Trash2 } from 'lucide-react';
 import { type CmsProductRow, type CmsMediaRow, isSafeHttps } from '../../lib/cmsData';
 import { COLLECTION_ROUTES } from '../../storefront/navigation';
 import { AssetPicker, ErrorText, Field, inputClass, outlineClass, primaryClass } from './StudioShared';
@@ -143,6 +143,24 @@ export default function CmsProducts({client,userId,canPublish,media}:Props){
     setMessage('Product version '+data+' published. Customers can now see the approved content.');
     await Promise.all([load(),loadRevisions(id)]);
   };
+  const discardDraft=async()=>{
+    if(!id||!window.confirm('Discard this private product draft? Published content stays visible.'))return;
+    setBusy(true);setError(null);
+    const {error}=await client.from('nb_product_drafts').delete().eq('product_id',id);
+    if(error){setError(error.message);setBusy(false);return;}
+    const original=active;
+    if(original?.live){await open(original);setMessage('Draft discarded; published garment unchanged.');}
+    else{setId(null);setForm({...blank});setMessage('Private draft discarded.');}
+    await load();setBusy(false);
+  };
+  const archiveProduct=async()=>{
+    if(!id||!canPublish||!window.confirm('Archive this garment? Customers will no longer see it. It can be republished later.'))return;
+    setBusy(true);setError(null);setMessage(null);
+    const {error}=await client.rpc('nb_archive_product',{p_product_id:id});
+    if(error)setError(error.message);
+    else{setId(null);setMessage('Product archived and hidden from the live catalogue.');await load();}
+    setBusy(false);
+  };
   return <section className="space-y-7">
     <div className="flex flex-wrap items-end justify-between gap-4">
       <div><h2 className="font-serif text-3xl">Products</h2><p className="mt-2 text-sm text-stone-600">Create and edit private drafts; approved owners publish changes atomically.</p></div>
@@ -169,6 +187,7 @@ export default function CmsProducts({client,userId,canPublish,media}:Props){
             className={'w-full rounded-md px-3 py-3 text-left '+
               (item.id===id?'bg-stone-900 text-white':'hover:bg-stone-100')}>
             <span className="block text-sm font-semibold">{item.label}</span>
+            <span className="mt-1 block text-[10px] font-semibold underline">Edit garment</span>
             <span className={'mt-1 block text-xs '+(item.id===id?'text-stone-300':'text-stone-500')}>
               {item.live?'Published':'Not published'}{item.draft?' · Draft saved':''}
             </span>
@@ -244,6 +263,8 @@ export default function CmsProducts({client,userId,canPublish,media}:Props){
           <div className="flex flex-wrap gap-3 border-t border-stone-200 pt-6">
             <button type="button" className={outlineClass} disabled={busy} onClick={()=>void save()}><Save size={15}/> Save private draft</button>
             {canPublish&&<button type="button" className={primaryClass} disabled={busy} onClick={()=>void publish()}><Send size={15}/> Publish approved version</button>}
+            <button type="button" className={outlineClass} disabled={busy} onClick={()=>void discardDraft()}><Trash2 size={15}/> Discard private draft</button>
+            {canPublish&&active?.live&&<button type="button" className={outlineClass+' border-amber-400 text-amber-900'} disabled={busy} onClick={()=>void archiveProduct()}><Archive size={15}/> Archive garment</button>}
           </div>
           {message&&<p role="status" className="rounded-md bg-emerald-50 p-3 text-sm text-emerald-800">{message}</p>}
           <ErrorText message={error}/>

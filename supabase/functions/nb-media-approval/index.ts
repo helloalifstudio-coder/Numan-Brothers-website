@@ -25,7 +25,7 @@ const handler = withSupabase({ auth: 'user' }, async (req, ctx) => {
   const id = request.id;
   const action = request.action;
   if (typeof id !== 'string' || !/^[0-9a-f-]{36}$/i.test(id) ||
-      (action !== 'approve' && action !== 'revoke')) {
+      (action !== 'approve' && action !== 'revoke' && action !== 'delete')) {
     return json(400, { error: 'Invalid asset or action' })
   }
 
@@ -50,6 +50,22 @@ const handler = withSupabase({ auth: 'user' }, async (req, ctx) => {
   const path = asset.storage_path as string;
   if (!/^[0-9a-f-]{36}\/[0-9a-f-]{36}\.(jpg|png|webp|avif|gif|mp4|webm)$/i.test(path)) {
     return json(409, { error: 'Media path requires manual review' })
+  }
+
+  // Deletion is restricted to unapproved media after checking fresh Auth role
+  // and any attached product-gallery associations. Approved media must first
+  // pass the existing revocation checks, never a direct browser DELETE.
+  if (action === 'delete') {
+    if (asset.approved) return json(409, { error: 'Revoke approval before deletion' })
+    const refs = await ctx.supabaseAdmin.from('nb_product_media')
+      .select('media_id', { count: 'exact', head: true }).eq('media_id', id)
+    if (refs.error) return json(503, { error: 'Could not verify references; removal denied' })
+    if ((refs.count ?? 0) > 0) return json(409, { error: 'Remove product-gallery references first' })
+    const { error: recordError } = await ctx.supabaseAdmin.from('nb_media').delete().eq('id', id)
+    if (recordError) return json(500, { error: 'Could not delete media record' })
+    const { error: fileError } = await ctx.supabaseAdmin.storage.from('nb-media-staging').remove([path])
+    if (fileError) return json(502, { error: 'Metadata removed; staged-file cleanup needs reconciliation' })
+    return json(200, { ok: true, deleted: true })
   }
 
   const publicBucket = ctx.supabaseAdmin.storage.from('nb-media-public');
