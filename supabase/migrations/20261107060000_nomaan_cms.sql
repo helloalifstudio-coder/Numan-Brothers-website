@@ -56,7 +56,7 @@ create table if not exists public.nb_media (
     'video/mp4','video/webm'
   )),
   size_bytes bigint not null check (size_bytes > 0 and size_bytes <= 52428800),
-  alt_text text not null default '',
+  alt_text text not null default '' check (char_length(alt_text) <= 400),
   approved boolean not null default false,
   uploaded_by uuid not null references auth.users(id),
   created_at timestamptz not null default now(),
@@ -130,6 +130,20 @@ as $$
   select (select auth.uid()) is not null
     and coalesce((select auth.jwt()) -> 'app_metadata' ->> 'nb_role', '') = 'owner';
 $$;
+-- Use the verified Supabase Auth JWT issuer to lock published assets
+-- to the intended project, rejecting third-party lookalike URLs.
+create or replace function public.nb_media_public_url(path text)
+returns text language sql stable security invoker set search_path = ''
+as $$
+  select case
+    when ((select auth.jwt()) ->> 'iss')
+      ~ '^https://[a-z0-9-]+[.]supabase[.]co/auth/v1$'
+    then regexp_replace((select auth.jwt()) ->> 'iss','/auth/v1$','')
+      || '/storage/v1/object/public/nb-media/' || path
+    else null
+  end;
+$$;
+
 create or replace function public.nb_touch_updated_at()
 returns trigger language plpgsql security invoker
 set search_path = ''
@@ -296,7 +310,7 @@ begin
       (draft->>'kidsImage'), (draft->>'storyImage')) as urls(photo)
     where coalesce(photo,'') <> '' and not exists (
       select 1 from public.nb_media m
-        where m.approved and photo like '%/storage/v1/object/public/nb-media/' || m.storage_path
+        where m.approved and photo = public.nb_media_public_url(m.storage_path)
     )
   ) then
     raise exception 'Homepage images must come from approved media';
@@ -385,7 +399,7 @@ begin
     select 1 from unnest(photos) as photos_input(photo)
     where not exists (
       select 1 from public.nb_media m
-      where m.approved and photo like '%/storage/v1/object/public/nb-media/' || m.storage_path
+      where m.approved and photo = public.nb_media_public_url(m.storage_path)
     )
   ) then
     raise exception 'Publish images from the approved media library only';
