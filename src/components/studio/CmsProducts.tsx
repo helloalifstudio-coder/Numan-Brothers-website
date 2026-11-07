@@ -3,25 +3,28 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { ArrowLeft, ArrowRight, Plus, Save, Send, Archive, Trash2 } from 'lucide-react';
 import { type CmsProductRow, type CmsMediaRow, isSafeHttps } from '../../lib/cmsData';
 import { COLLECTION_ROUTES } from '../../storefront/navigation';
-import { AssetPicker, ErrorText, Field, inputClass, outlineClass, primaryClass } from './StudioShared';
+import AssetEditor from './AssetEditor';
+import {ErrorText,Field,inputClass,outlineClass,primaryClass} from './StudioShared';
 
 interface Props {client:SupabaseClient;userId:string;canPublish:boolean;media:CmsMediaRow[];}
 interface Draft {
   sku:string;slug:string;title:string;department:'men'|'kids';categoryPaths:string[];
   description:string;fabric:string;sizes:string[];imageUrls:string[];videoUrl:string;
-  price:string;sortRank:number;
+  price:string;offerPrice:string;customizable:boolean;sortRank:number;
 }
 type ProductRevision={id:number;version:number;published_at:string;content:unknown};
 type Entry={id:string;label:string;live:boolean;draft:boolean;form:Draft};
 const blank: Draft = {
   sku:'',slug:'',title:'',department:'men',categoryPaths:[],description:'',
-  fabric:'',sizes:[],imageUrls:[],videoUrl:'',price:'',sortRank:0,
+  fabric:'',sizes:[],imageUrls:[],videoUrl:'',price:'',offerPrice:'',customizable:false,sortRank:0,
 };
 const fromPublished=(p:CmsProductRow):Draft=>({
   sku:p.sku,slug:p.slug,title:p.title,department:p.department,
   categoryPaths:p.category_paths||[],description:p.description||'',fabric:p.fabric||'',
   sizes:p.sizes||[],imageUrls:p.image_urls||[],videoUrl:p.video_url||'',
-  price:p.price===null?'':String(p.price),sortRank:p.sort_rank||0,
+  price:p.price===null?'':String(p.price),
+  offerPrice:p.offer_price===null?'':String(p.offer_price),
+  customizable:Boolean(p.customizable),sortRank:p.sort_rank||0,
 });
 const fromUnknown=(value:unknown):Draft=>{
   const d=(value && typeof value==='object' && !Array.isArray(value)?value:{}) as Partial<Draft>;
@@ -32,17 +35,26 @@ const fromUnknown=(value:unknown):Draft=>{
     imageUrls:Array.isArray(d.imageUrls)?d.imageUrls.filter((x):x is string=>typeof x==='string'):[],
     sizes:Array.isArray(d.sizes)?d.sizes.filter((x):x is string=>typeof x==='string'):[],
     price:typeof d.price==='string'?d.price:'',
+    offerPrice:typeof d.offerPrice==='string'?d.offerPrice:'',
+    customizable:Boolean(d.customizable),
     sortRank:typeof d.sortRank==='number'?d.sortRank:0,
   };
 };
 function validate(form:Draft):string|null {
   if(form.title.trim().length<2)return 'Enter a product name.';
+  if(!form.categoryPaths.length)return 'Select a garment type first.';
+  if(form.sku && !/^NB-[A-Z]{2,3}-[0-9]{5}$/.test(form.sku) &&
+    !/^[A-Z0-9][A-Z0-9-]{1,79}$/.test(form.sku))
+      return 'Use an uppercase SKU such as NB-KP-00001.';
   if(form.sku.trim().length<2)return 'SKU must contain at least two characters.';
   if(!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(form.slug))return 'Slug must use lowercase letters, digits and hyphens.';
   if(!form.categoryPaths.length)return 'Choose at least one collection before publishing.';
   if(!form.imageUrls.length)return 'Choose at least one approved product photograph.';
   if(form.videoUrl && !isSafeHttps(form.videoUrl))return 'The optional video link must use HTTPS.';
-  if(form.price && (!Number.isFinite(Number(form.price))||Number(form.price)<0))return 'Enter a valid price or leave the price empty.';
+  if(form.price && (!Number.isFinite(Number(form.price))||Number(form.price)<0))return 'Enter a valid original price.';
+  if(form.offerPrice && (!form.price||!Number.isFinite(Number(form.offerPrice))||
+    Number(form.offerPrice)<0||Number(form.offerPrice)>=Number(form.price)))
+    return 'Offer price must be lower than the original price.';
   return null;
 }
 export default function CmsProducts({client,userId,canPublish,media}:Props){
@@ -50,7 +62,10 @@ export default function CmsProducts({client,userId,canPublish,media}:Props){
   const [loading,setLoading]=useState(true);
   const [page,setPage]=useState(0);
   const [id,setId]=useState<string|null>(null);
-  const [form,setForm]=useState<Draft>(blank);
+  const [form,setForm]=useState<Draft>({...blank});
+  const [isNew,setIsNew]=useState(false);
+  const [skuLoading,setSkuLoading]=useState(false);
+  const [skuEdited,setSkuEdited]=useState(false);
   const [busy,setBusy]=useState(false);
   const [error,setError]=useState<string|null>(null);
   const [message,setMessage]=useState<string|null>(null);
@@ -98,12 +113,12 @@ export default function CmsProducts({client,userId,canPublish,media}:Props){
     setRevisionsLoading(false);
   };
   const open=async(entry:Entry)=>{
-    setId(entry.id);setError(null);setMessage(null);setBusy(true);
+    setIsNew(false);setSkuEdited(true);setId(entry.id);setError(null);setMessage(null);setBusy(true);
     setRevisions([]);void loadRevisions(entry.id);
     const [draft,published]=await Promise.all([
       client.from('nb_product_drafts').select('content').eq('product_id',entry.id).maybeSingle(),
       client.from('nb_products')
-        .select('id,sku,slug,title,department,category_paths,description,fabric,sizes,image_urls,video_url,price,status,sort_rank,created_at,updated_at')
+        .select('id,sku,slug,title,department,category_paths,description,fabric,sizes,image_urls,video_url,price,offer_price,customizable,status,sort_rank,created_at,updated_at')
         .eq('id',entry.id).maybeSingle(),
     ]);
     if(draft.error||published.error)setError(draft.error?.message||published.error?.message||'Cannot open product');
@@ -112,12 +127,28 @@ export default function CmsProducts({client,userId,canPublish,media}:Props){
     setBusy(false);
   };
   const update=<K extends keyof Draft>(key:K,value:Draft[K])=>setForm((current)=>({...current,[key]:value}));
-  const create=()=>{setId(crypto.randomUUID());setForm({...blank});setRevisions([]);setError(null);setMessage(null)};
+  const create=()=>{setId(crypto.randomUUID());setIsNew(true);setSkuEdited(false);setForm({...blank});setRevisions([]);setError(null);setMessage(null)};
+  const slugify=(value:string)=>value.normalize('NFKD').toLowerCase()
+    .replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,110);
+  const chooseCategory=async(path:string)=>{
+    if(!path)return;
+    setForm(current=>({...current,categoryPaths:[path],slug:current.slug||slugify(current.title)}));
+    if(!isNew||skuEdited)return;
+    setSkuLoading(true);setError(null);
+    const {data,error}=await client.rpc('nb_next_sku',{p_category_path:path});
+    if(error)setError('Could not generate SKU: '+error.message);
+    else if(data){
+      const sku=String(data);
+      setForm(current=>({...current,sku,slug:current.slug||[slugify(current.title),sku.toLowerCase()].filter(Boolean).join('-')}));
+    }
+    setSkuLoading(false);
+  };
   const save=async():Promise<boolean>=>{
     if(!id)return false;
     setBusy(true);setError(null);setMessage(null);
     try{
-      if(form.title.trim().length<2||form.sku.trim().length<2)throw new Error('Product title and SKU are required.');
+      if(form.title.trim().length<2||form.sku.trim().length<2||!form.categoryPaths.length)
+        throw new Error('Choose a garment type, enter a title and generate a unique SKU before saving.');
       if(!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(form.slug))throw new Error('Use a lowercase hyphenated slug.');
       const {error}=await client.from('nb_product_drafts').upsert({
         product_id:id,content:form,updated_by:userId,
@@ -206,46 +237,65 @@ export default function CmsProducts({client,userId,canPublish,media}:Props){
           <button type="button" className="flex items-center gap-2 text-xs text-stone-600" onClick={()=>setId(null)}><ArrowLeft size={14}/> Back to product list</button>
           <h3 className="font-serif text-2xl">{active?.label||'New product draft'}</h3>
           <p className="text-xs text-stone-500">{id}</p>
+          <section className="space-y-4 rounded-lg border border-amber-300 bg-[#fcf6ea] p-5">
+            <p className="text-xs font-bold uppercase tracking-[.16em] text-amber-900">Step 1 · Where will this garment appear?</p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {(['men','kids'] as const).map(dept=><button type="button" key={dept} aria-pressed={form.department===dept}
+                className={(form.department===dept?primaryClass:outlineClass)+' w-full'}
+                onClick={()=>{setForm({...form,department:dept,categoryPaths:[],sku:isNew?'':form.sku,slug:isNew?'':form.slug});setSkuEdited(false)}}>
+                {dept==='men'?"Men’s Wear":"Kids Wear"}</button>)}
+            </div>
+            <label className="block text-sm font-semibold">Garment category (required)
+              <select className={inputClass+' mt-2'} value={form.categoryPaths[0]||''}
+                disabled={skuLoading} onChange={e=>void chooseCategory(e.target.value)}>
+                <option value="">Choose Kurta Pyjama, Sherwani, Pathani, Jodhpuri…</option>
+                {categories.map(c=><option key={c.path} value={c.path}>{c.title}</option>)}
+              </select>
+            </label>
+            <p className="text-xs leading-6 text-stone-600">Choosing a garment type assigns the first collection and automatically reserves a unique SKU such as NB-KP-00001, NB-PA-00001 or NB-JP-00001. You may edit it. The URL slug is the readable product address.</p>
+          </section>
           <div className="grid gap-5 md:grid-cols-2">
-            <Field label="Garment title"><input className={inputClass} value={form.title} onChange={e=>update('title',e.target.value)} maxLength={180}/></Field>
-            <Field label="Unique SKU"><input className={inputClass} value={form.sku} onChange={e=>update('sku',e.target.value)} maxLength={80}/></Field>
-            <Field label="URL slug"><input className={inputClass} value={form.slug} onChange={e=>update('slug',e.target.value)} placeholder="handwork-sherwani-ivory"/></Field>
-            <Field label="Department"><select className={inputClass} value={form.department} onChange={e=>{
-              const department=e.target.value==='kids'?'kids':'men';
-              setForm({...form,department,categoryPaths:[]});
-            }}><option value="men">Men's Wear</option><option value="kids">Kids Wear</option></select></Field>
+            <Field label="Garment title"><input className={inputClass} value={form.title} onChange={e=>{
+              const title=e.target.value;setForm(cur=>({...cur,title,slug:!cur.slug||cur.slug===slugify(cur.title)?slugify(title):cur.slug}));
+            }} maxLength={180}/></Field>
+            <Field label="Unique SKU (auto-generated, editable)"><input className={inputClass} value={form.sku}
+              onChange={e=>{setSkuEdited(true);update('sku',e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g,''))}}
+              maxLength={80} placeholder={skuLoading?'Generating…':'Choose category above'} /></Field>
+            <Field label="Product URL slug (the readable website address)"><input className={inputClass} value={form.slug}
+              onChange={e=>update('slug',slugify(e.target.value))} placeholder="ivory-kurta-pyjama-nb-kp-00001"/></Field>
             <Field label="Fabric"><input className={inputClass} value={form.fabric} onChange={e=>update('fabric',e.target.value)}/></Field>
-            <Field label="Price (optional, not displayed publicly yet)"><input type="number" step=".01" min="0" className={inputClass} value={form.price} onChange={e=>update('price',e.target.value)}/></Field>
+            <Field label="Original price (₹, optional)"><input type="number" step=".01" min="0" className={inputClass} value={form.price} onChange={e=>update('price',e.target.value)}/></Field>
+            <Field label="Offer price (₹, optional; must be lower)"><input type="number" step=".01" min="0" className={inputClass} value={form.offerPrice} onChange={e=>update('offerPrice',e.target.value)}/></Field>
+            <label className="flex min-h-12 items-center gap-3 rounded-md border border-amber-200 bg-amber-50 px-3 text-sm font-semibold">
+              <input type="checkbox" checked={form.customizable} onChange={e=>update('customizable',e.target.checked)}/>
+              Can be customized through tailoring / fabric and measurements
+            </label>
             <Field label="Sizes (comma-separated)"><input className={inputClass} value={form.sizes.join(', ')} onChange={e=>update('sizes',e.target.value.split(',').map(x=>x.trim()).filter(Boolean))}/></Field>
             <Field label="Display order"><input type="number" className={inputClass} value={form.sortRank} onChange={e=>update('sortRank',Number(e.target.value)||0)}/></Field>
             <div className="md:col-span-2"><Field label="Garment description"><textarea rows={4} className={inputClass} value={form.description} onChange={e=>update('description',e.target.value)}/></Field></div>
           </div>
           <fieldset className="rounded-lg border border-stone-200 p-4">
-            <legend className="px-2 text-xs font-semibold">Visible in collections</legend>
+            <legend className="px-2 text-xs font-semibold">Additional collections (optional)</legend>
             <div className="grid gap-2 sm:grid-cols-2">
               {categories.map((c)=><label key={c.path} className="flex min-h-10 cursor-pointer items-center gap-2 text-xs">
                 <input type="checkbox" checked={form.categoryPaths.includes(c.path)}
+                  disabled={form.categoryPaths[0]===c.path}
                   onChange={(e)=>update('categoryPaths',e.target.checked?
                     [...form.categoryPaths,c.path]:form.categoryPaths.filter(x=>x!==c.path))}/>
                 {c.title} <span className="text-stone-400">{c.path}</span>
               </label>)}
             </div>
           </fieldset>
-          <AssetPicker client={client} label="Product photographs" multiple media={media} selected={form.imageUrls} onChange={urls=>update('imageUrls',urls)}/>
-          {form.imageUrls.length>1&&<div className="space-y-2"><p className="text-xs font-semibold">Gallery order (first image is the cover)</p>
-            {form.imageUrls.map((url,index)=><div key={url} className="flex items-center gap-3 text-xs">
-              <span>{index+1}.</span><img alt="" src={url} className="h-12 w-10 object-cover"/>
-              <button type="button" disabled={index===0} className={outlineClass} onClick={()=>{
-                const copy=[...form.imageUrls];[copy[index-1],copy[index]]=[copy[index],copy[index-1]];update('imageUrls',copy);
-              }}>Move up</button>
-              <button type="button" disabled={index===form.imageUrls.length-1} className={outlineClass} onClick={()=>{
-                const copy=[...form.imageUrls];[copy[index+1],copy[index]]=[copy[index],copy[index+1]];update('imageUrls',copy);
-              }}>Move down</button>
-            </div>)}
-          </div>}
-          <AssetPicker client={client} label="Optional uploaded product video" allowVideo media={media}
-            selected={form.videoUrl?[form.videoUrl]:[]}
-            onChange={urls=>update('videoUrl',urls[0]||'')}/>
+          <div className="space-y-3">
+            <h4 className="font-serif text-2xl">Step 2 · Garment photos and video</h4>
+            <p className="text-xs leading-6 text-stone-600">Drag photographs directly from your computer. Owner/admin uploads are securely approved and attached automatically. Or browse the selected Men's/Kids' media category. Use the trash icon to detach one photo without deleting it from the library.</p>
+            <AssetEditor client={client} userId={userId} canPublish={canPublish} label="Product photos · first is the cover" multiple
+              media={media} department={form.department} categoryPath={form.categoryPaths[0]||''}
+              selected={form.imageUrls} onChange={urls=>update('imageUrls',urls)}/>
+            <AssetEditor client={client} userId={userId} canPublish={canPublish} label="Optional garment video"
+              allowVideo media={media} department={form.department} categoryPath={form.categoryPaths[0]||''}
+              selected={form.videoUrl?[form.videoUrl]:[]} onChange={urls=>update('videoUrl',urls[0]||'')}/>
+          </div>
           <Field label="Or external HTTPS video / streaming link"><input type="url" className={inputClass} value={form.videoUrl} onChange={e=>update('videoUrl',e.target.value)} placeholder="https://..."/></Field>
           <section aria-labelledby="product-revisions-title" className="space-y-3 rounded-lg border border-[#ded0bc] bg-[#faf7f0] p-5">
             <h4 id="product-revisions-title" className="font-serif text-xl text-[#31261c]">Published history</h4>
