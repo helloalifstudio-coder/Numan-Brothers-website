@@ -1,10 +1,13 @@
 # Noman Brothers — Copy/paste Supabase SQL Editor installation
 
+> **Current project already installed (7 November 2026):** The live Noman Supabase project `zazdxmukmcayblsteulk` already has CMS tables, an administrator, and the media Edge Function. **DO NOT run this fresh-project installer on the live project.** It is only for a brand-new, empty, separate client-owned project. The original nine migrations were installed via SQL Editor; the tenth (archive/discard) was applied as a tracked Supabase migration. Reconcile this mixed migration history before future CLI pushes. See [Website CMS guide](./WEBSITE_CMS_OPERATIONS_AND_ROADMAP.md).
+
+
 **Target new project:** `zazdxmukmcayblsteulk`  
 **Project API origin (public):** `https://zazdxmukmcayblsteulk.supabase.co`  
 **Supabase Dashboard:** https://supabase.com/dashboard/project/zazdxmukmcayblsteulk
 
-This installation bundle matches the **nine versioned** Noman Brothers CMS migrations in `supabase/migrations/`. It creates the full fresh-project catalogue CMS schema. **Only run the installer on a new, empty, dedicated Noman Brothers project.** Both currently connected Supabase accounts expose only the unrelated project `gym`, so AGM cannot inspect or verify this Noman project's current database state yet. We have not executed this SQL remotely.
+This installation bundle matches the **ten versioned** Noman Brothers CMS migrations in `supabase/migrations/`. It creates the full fresh-project catalogue CMS schema. **Only run the installer on a new, empty, dedicated Noman Brothers project.** The live Noman project has passed its read-only inventory audit and has its admin role and Edge Function set up. Do not reinstall its schema.
 
 ## 1. Confirm project before writing anything
 
@@ -14,9 +17,9 @@ This installation bundle matches the **nine versioned** Noman Brothers CMS migra
 
 ## 2. One copy/paste into Supabase SQL Editor
 
-1. Open `supabase/sql-editor/NOMAN_BROTHERS_INSTALL_FRESH_PROJECT.sql` in the GitHub repository for the `agm/noman-supabase-sql-editor-kit` branch. Use **Raw** and **Copy** to get the entire file (approximately 59 KB and 1,235 lines); do not copy only a GitHub preview fragment.
+1. Open `supabase/sql-editor/NOMAN_BROTHERS_INSTALL_FRESH_PROJECT.sql` in the GitHub repository on the `main` branch. Use **Raw** and **Copy** to get the entire file (the complete latest source file); do not copy only a GitHub preview fragment.
 2. Go to **Supabase → SQL Editor → New query** for project `zazdxmukmcayblsteulk`.
-3. Paste the entire file, including the leading `BEGIN;`, the nine numbered sections, final assertions, and `COMMIT;`.
+3. Paste the entire file, including the leading `BEGIN;`, the ten numbered sections, final assertions, and `COMMIT;`.
 4. Click **Run** once. The file creates all application schema objects in a **single transaction**. If a statement fails, the transaction is not committed; **do not skip that statement**, drop existing tables to force success, or rerun on a populated schema.
 5. Expect a success notification and a PostgreSQL NOTICE roughly describing 13 RLS-enabled tables, 35+ policies, and three buckets. Do not assume success unless the query actually completes.
 
@@ -31,6 +34,7 @@ This installation bundle matches the **nine versioned** Noman Brothers CMS migra
 7. `20261107199000_import_owner_idempotency.sql` — importer fingerprint isolation.
 8. `20261107210000_catalogue_integrity_audit.sql` — immutable event audit, media revocation protections, catalogue health.
 9. `20261107223000_category_media_publish_guard.sql` — reject unapproved collection banner art.
+10. `20261107234500_cms_archive_and_discard.sql` — guard product archive and private draft discard.
 
 The fresh schema creates **13 application tables**, RLS policies, indexes, Storage bucket definitions, SQL functions, SQL triggers and fixed men/kids navigation categories. It **does not** invent garment products, payment records, customers, photos, videos, stock quantities or prices.
 
@@ -73,7 +77,7 @@ The user signs out/in to refresh the access token. `editor` can upload and draft
 
 AGM created a **separate** Vercel project named `numan-brothers-cms-showroom` so the original Firebase production deployment remains untouched.
 
-The public URL `VITE_SUPABASE_URL=https://zazdxmukmcayblsteulk.supabase.co` has already been entered into Vercel project Production/Preview settings. Only the **publishable** API key remains to be set:
+The public URL `VITE_SUPABASE_URL=https://zazdxmukmcayblsteulk.supabase.co` has already been entered into Vercel project Production/Preview settings. The live projects already have this key configured. On a new client project, set that project's **publishable** key:
 
 ```dotenv
 VITE_SUPABASE_URL=https://zazdxmukmcayblsteulk.supabase.co
@@ -102,6 +106,6 @@ The preview is a **review build** and the CMS shows **CMS not connected** until 
 
 ## IMPORTANT: SQL Editor vs migrations history
 
-Supabase officially recommends the CLI-migration workflow for teams because SQL Editor does **not** register these nine files in `supabase_migrations.schema_migrations`. If you use this one-shot SQL Editor installation, **do not later run `supabase db push` on this same project without reconciling migration history**. The safe route is to run the versioned migrations via CLI instead of pasting the bundle. If you have already used SQL Editor, verify all schema changes and follow the documented `supabase migration repair` process with exact migration IDs; never blindly mark missing migrations as applied.
+Supabase officially recommends the CLI-migration workflow for teams because SQL Editor does **not** register these ten files in `supabase_migrations.schema_migrations`. If you use this one-shot SQL Editor installation, **do not later run `supabase db push` on this same project without reconciling migration history**. The safe route is to run the versioned migrations via CLI instead of pasting the bundle. If you have already used SQL Editor, verify all schema changes and follow the documented `supabase migration repair` process with exact migration IDs; never blindly mark missing migrations as applied.
 
 The SQL script's bundled transaction and postflight checks are intended to prevent a half-installed *empty project*; they are **not** a substitute for real hosted Auth, Storage, client session, and video tests.

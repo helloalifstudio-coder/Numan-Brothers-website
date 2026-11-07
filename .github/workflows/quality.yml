@@ -51,7 +51,7 @@ jobs:
           fi
       - name: Client onboarding preflight contract tests
         run: node --test tests/client-preflight.test.mjs
-      - name: Verify complete SQL Editor installer matches all nine source migrations
+      - name: Verify complete SQL Editor installer matches all ten source migrations
         run: node --test tests/sql-editor-bundle.test.mjs
       - name: PostgreSQL CMS role and publishing test
         env:
@@ -63,7 +63,6 @@ jobs:
         run: |
           psql -v ON_ERROR_STOP=1 -f tests/sql/bootstrap.sql
           psql -v ON_ERROR_STOP=1 -f supabase/sql-editor/NOMAN_BROTHERS_INSTALL_FRESH_PROJECT.sql
-          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261107234500_cms_archive_and_discard.sql
           psql -v ON_ERROR_STOP=1 -f tests/sql/assert_management.sql
           psql -v ON_ERROR_STOP=1 -f tests/sql/assert.sql
           psql -v ON_ERROR_STOP=1 -f tests/sql/assert_imports.sql

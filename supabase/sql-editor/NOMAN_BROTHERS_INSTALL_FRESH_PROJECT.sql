@@ -5,14 +5,14 @@
 -- Expected URL:
 --   https://zazdxmukmcayblsteulk.supabase.co
 --
--- This single file faithfully concatenates the NINE reviewed versioned
+-- This single file faithfully concatenates the TEN reviewed versioned
 -- migrations from this repository, in exact order.
 --
 -- READ FIRST:
 -- 1. Use ONLY the brand-new Noman project, never the unrelated "gym" project.
 -- 2. This installer refuses any previously created NB tables/functions/buckets.
 -- 3. Paste the WHOLE file into a new Supabase Dashboard > SQL Editor query.
--- 4. All nine migrations run in ONE PostgreSQL transaction. An SQL error
+-- 4. All ten migrations run in ONE PostgreSQL transaction. An SQL error
 --    prevents COMMIT; do not manually skip failing statements.
 -- 5. No product or client data are seeded. Only route taxonomy is inserted.
 -- 6. This SQL Editor method does NOT record entries in Supabase CLI migration
@@ -1136,7 +1136,7 @@ revoke all on function public.nb_catalogue_health() from public, anon, authentic
 grant execute on function public.nb_catalogue_health() to authenticated;
 
 -- =============================================================================
--- 9 / 9: 20261107223000_category_media_publish_guard.sql
+-- 9 / 10: 20261107223000_category_media_publish_guard.sql
 -- Source: supabase/migrations/20261107223000_category_media_publish_guard.sql
 -- =============================================================================
 -- Prevent bypassing the approved-media library when changing a public
@@ -1169,7 +1169,39 @@ create trigger nb_category_image_approval_guard
   for each row execute function nb_internal.nb_require_approved_category_image();
 
 -- =============================================================================
--- Validate the installation BEFORE committing it. Failure rolls back all 9.
+-- =============================================================================
+-- 10 / 10: 20261107234500_cms_archive_and_discard.sql
+-- Source: supabase/migrations/20261107234500_cms_archive_and_discard.sql
+-- =============================================================================
+-- Forward-only CMS inventory operations: archive products and discard drafts.
+-- Production was provisioned via the SQL Editor installer; see migration ledger.
+
+create or replace function public.nb_archive_product(p_product_id uuid)
+returns boolean language plpgsql security invoker set search_path = ''
+as $$
+declare current_status text;
+begin
+  if not public.nb_can_publish() then raise exception 'Only owners/admins may archive garments' using errcode='42501'; end if;
+  select status into current_status from public.nb_products where id=p_product_id for update;
+  if not found then raise exception 'Product not found' using errcode='P0002'; end if;
+  if current_status='archived' then return true; end if;
+  perform set_config('app.nb_publish_scope','product',true);
+  update public.nb_products set status='archived', published_at=null where id=p_product_id;
+  perform set_config('app.nb_publish_scope','',true);
+  return true;
+end;$$;
+revoke all on function public.nb_archive_product(uuid) from public, anon;
+grant execute on function public.nb_archive_product(uuid) to authenticated;
+grant delete on public.nb_product_drafts to authenticated;
+drop policy if exists nb_product_drafts_editor_delete on public.nb_product_drafts;
+create policy nb_product_drafts_editor_delete on public.nb_product_drafts
+for delete to authenticated using (
+  (select public.nb_can_publish()) or
+  ((select public.nb_can_edit()) and updated_by=(select auth.uid()))
+);
+
+-- =============================================================================
+-- Validate the installation BEFORE committing it. Failure rolls back all 10.
 -- =============================================================================
 DO $nb_install_assert$
 DECLARE

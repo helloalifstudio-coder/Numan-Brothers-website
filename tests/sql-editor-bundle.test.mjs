@@ -12,10 +12,11 @@ const migrationNames = [
   '20261107199000_import_owner_idempotency.sql',
   '20261107210000_catalogue_integrity_audit.sql',
   '20261107223000_category_media_publish_guard.sql',
+  '20261107234500_cms_archive_and_discard.sql',
 ];
 const bundle = readFileSync('supabase/sql-editor/NOMAN_BROTHERS_INSTALL_FRESH_PROJECT.sql','utf8');
 
-test('all nine migrations are included byte-for-byte in source order with only transaction wrappers removed',()=>{
+test('all ten migrations are included byte-for-byte in source order with only transaction wrappers removed',()=>{
   const positions=[];
   for(let index=0;index<migrationNames.length;index++){
     const source=readFileSync('supabase/migrations/'+migrationNames[index],'utf8');
