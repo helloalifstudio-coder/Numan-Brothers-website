@@ -15,6 +15,7 @@ export default function CmsMedia({client,userId,canPublish,onMediaChange}:Props)
   const [selection,setSelection] = useState<FileList|null>(null);
   const [busyId,setBusyId] = useState<string|null>(null);
   const [altDrafts,setAltDrafts] = useState<Record<string,string>>({});
+  const [privatePreviews,setPrivatePreviews] = useState<Record<string,string>>({});
   const refresh = async () => {
     setLoading(true);
     const {data,error} = await client.from('nb_media')
@@ -22,6 +23,7 @@ export default function CmsMedia({client,userId,canPublish,onMediaChange}:Props)
       .order('created_at',{ascending:false}).limit(150);
     const assets=(data||[]) as CmsMediaRow[];
     setRows(assets);
+    setPrivatePreviews({});
     setAltDrafts(Object.fromEntries(assets.map(a=>[a.id,a.alt_text])));
     setError(error?.message || null);
     setLoading(false);
@@ -46,8 +48,19 @@ export default function CmsMedia({client,userId,canPublish,onMediaChange}:Props)
   const approve = async (asset:CmsMediaRow) => {
     if (!canPublish) return;
     setBusyId(asset.id);setError(null);
-    const {data,error} = await client.from('nb_media').update({approved:!asset.approved}).eq('id',asset.id).select('id').maybeSingle();
-    if (error || !data) setError(error?.message||'Unable to change approval status.'); else { await refresh();onMediaChange(); }
+    const {data,error} = await client.functions.invoke('nb-media-approval',{
+      body:{id:asset.id,action:asset.approved?'revoke':'approve'},
+    });
+    if (error || !data?.ok) setError(error?.message||data?.error||'Unable to change approval status.'); 
+    else { await refresh();onMediaChange(); }
+    setBusyId(null);
+  };
+  const previewPrivate = async (asset:CmsMediaRow) => {
+    setBusyId(asset.id);setError(null);
+    const {data,error}=await client.storage.from('nb-media-staging')
+      .createSignedUrl(asset.storage_path,120);
+    if(error || !data?.signedUrl) setError(error?.message||'Private preview unavailable.');
+    else setPrivatePreviews(current=>({...current,[asset.id]:data.signedUrl}));
     setBusyId(null);
   };
   const saveDescription = async (asset:CmsMediaRow) => {
@@ -81,10 +94,14 @@ export default function CmsMedia({client,userId,canPublish,onMediaChange}:Props)
       rows.length===0 ? <p className="rounded-lg bg-stone-100 p-8 text-sm">There are no assets yet. Add the owner's approved product photographs first.</p> :
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {rows.map((asset)=>{
-          const url=mediaPublicUrl(asset.storage_path);
+          const url=asset.approved ? mediaPublicUrl(asset.storage_path) : (privatePreviews[asset.id] || '');
           return <article key={asset.id} className="overflow-hidden rounded-lg border border-stone-200 bg-white shadow-sm">
-            {asset.mime_type.startsWith('image/') ? <img loading="lazy" src={url} alt={asset.alt_text || asset.original_name} className="aspect-[4/3] w-full bg-stone-100 object-cover"/> :
-              <video preload="none" controls src={url} className="aspect-[4/3] w-full bg-stone-950" aria-label={asset.original_name}/>}
+            {url ? (asset.mime_type.startsWith('image/') ? <img loading="lazy" src={url} alt={asset.alt_text || asset.original_name} className="aspect-[4/3] w-full bg-stone-100 object-cover"/> :
+              <video preload="none" controls src={url} className="aspect-[4/3] w-full bg-stone-950" aria-label={asset.original_name}/>) :
+              <div className="flex aspect-[4/3] flex-col items-center justify-center gap-3 bg-stone-100 p-4 text-center">
+                <p className="text-xs text-stone-600">Private pending asset</p>
+                <button type="button" className={outlineClass} disabled={busyId===asset.id} onClick={()=>void previewPrivate(asset)}>Preview privately (2 minutes)</button>
+              </div>}
             <div className="space-y-2 p-4">
               <p className="truncate text-sm font-semibold" title={asset.original_name}>{asset.original_name}</p>
               <p className="text-xs text-stone-500">{(asset.size_bytes/1024/1024).toFixed(2)} MB · {asset.mime_type}</p>
@@ -104,7 +121,7 @@ export default function CmsMedia({client,userId,canPublish,onMediaChange}:Props)
                 {canPublish && <button type="button" disabled={busyId===asset.id} onClick={()=>void approve(asset)} className={outlineClass}>
                   <CheckCircle2 size={15}/>{asset.approved?'Revoke approval':'Approve'}
                 </button>}
-                <button type="button" className={outlineClass} onClick={()=>navigator.clipboard.writeText(url)}>Copy URL</button>
+                {asset.approved && <button type="button" className={outlineClass} onClick={()=>void navigator.clipboard.writeText(url)}>Copy public URL</button>}
               </div>
             </div>
           </article>;
