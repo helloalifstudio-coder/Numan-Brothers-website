@@ -1,0 +1,135 @@
+{
+  "releaseSha": "",
+  "clientProjectRef": "",
+  "stagingProjectRef": "",
+  "canonicalDomain": "",
+  "stagingDeployment": "",
+  "gates": {
+    "protected_branch": {
+      "status": "pending",
+      "releaseSha": "",
+      "evidenceUrl": "",
+      "reviewer": "",
+      "verifiedAt": ""
+    },
+    "exact_commit_ci": {
+      "status": "pending",
+      "releaseSha": "",
+      "evidenceUrl": "",
+      "reviewer": "",
+      "verifiedAt": ""
+    },
+    "no_privileged_secrets": {
+      "status": "pending",
+      "releaseSha": "",
+      "evidenceUrl": "",
+      "reviewer": "",
+      "verifiedAt": ""
+    },
+    "client_database": {
+      "status": "pending",
+      "releaseSha": "",
+      "evidenceUrl": "",
+      "reviewer": "",
+      "verifiedAt": ""
+    },
+    "anonymous_rls": {
+      "status": "pending",
+      "releaseSha": "",
+      "evidenceUrl": "",
+      "reviewer": "",
+      "verifiedAt": ""
+    },
+    "media_lifecycle": {
+      "status": "pending",
+      "releaseSha": "",
+      "evidenceUrl": "",
+      "reviewer": "",
+      "verifiedAt": ""
+    },
+    "cms_happy_path": {
+      "status": "pending",
+      "releaseSha": "",
+      "evidenceUrl": "",
+      "reviewer": "",
+      "verifiedAt": ""
+    },
+    "csv_recovery": {
+      "status": "pending",
+      "releaseSha": "",
+      "evidenceUrl": "",
+      "reviewer": "",
+      "verifiedAt": ""
+    },
+    "photo_recovery": {
+      "status": "pending",
+      "releaseSha": "",
+      "evidenceUrl": "",
+      "reviewer": "",
+      "verifiedAt": ""
+    },
+    "data_scale": {
+      "status": "pending",
+      "releaseSha": "",
+      "evidenceUrl": "",
+      "reviewer": "",
+      "verifiedAt": ""
+    },
+    "seo_staging": {
+      "status": "pending",
+      "releaseSha": "",
+      "evidenceUrl": "",
+      "reviewer": "",
+      "verifiedAt": ""
+    },
+    "mobile_accessibility": {
+      "status": "pending",
+      "releaseSha": "",
+      "evidenceUrl": "",
+      "reviewer": "",
+      "verifiedAt": ""
+    },
+    "storage_restore": {
+      "status": "pending",
+      "releaseSha": "",
+      "evidenceUrl": "",
+      "reviewer": "",
+      "verifiedAt": ""
+    },
+    "legacy_firebase": {
+      "status": "pending",
+      "releaseSha": "",
+      "evidenceUrl": "",
+      "reviewer": "",
+      "verifiedAt": ""
+    },
+    "verified_store_content": {
+      "status": "pending",
+      "releaseSha": "",
+      "evidenceUrl": "",
+      "reviewer": "",
+      "verifiedAt": ""
+    },
+    "owner_release_approval": {
+      "status": "pending",
+      "releaseSha": "",
+      "evidenceUrl": "",
+      "reviewer": "",
+      "verifiedAt": ""
+    },
+    "agency_release_approval": {
+      "status": "pending",
+      "releaseSha": "",
+      "evidenceUrl": "",
+      "reviewer": "",
+      "verifiedAt": ""
+    },
+    "deployment_rollback": {
+      "status": "pending",
+      "releaseSha": "",
+      "evidenceUrl": "",
+      "reviewer": "",
+      "verifiedAt": ""
+    }
+  }
+}
