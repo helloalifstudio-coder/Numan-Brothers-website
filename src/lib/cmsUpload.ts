@@ -32,7 +32,7 @@ async function resumableUpload(
   const authHeaders = { authorization: 'Bearer ' + session.access_token,
     apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY };
   const metadata = [
-    ['bucketName','nb-media'], ['objectName',path], ['contentType',file.type], ['cacheControl','3600'],
+    ['bucketName','nb-media-staging'], ['objectName',path], ['contentType',file.type], ['cacheControl','3600'],
   ].map(([key,value]) => key + ' ' + base64Text(value)).join(',');
   const start = await fetch(endpoint, {
     method: 'POST',
@@ -89,7 +89,7 @@ export async function uploadCmsFile(
   const extension = allowed.get(file.type)!;
   const path = userId + '/' + crypto.randomUUID() + '.' + extension;
   if (file.size <= CHUNK_SIZE) {
-    const { error } = await client.storage.from('nb-media').upload(path, file, {
+    const { error } = await client.storage.from('nb-media-staging').upload(path, file, {
       upsert:false, cacheControl:'3600', contentType:file.type,
     });
     if (error) throw error;
