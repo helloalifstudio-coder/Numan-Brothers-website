@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { ArrowDownRight, ArrowRight, ArrowUpRight, MapPin, MoveDownRight } from 'lucide-react';
+import {ArrowDownRight,ArrowRight,ArrowUpRight,MapPin,MoveDownRight,MessageCircle,Phone,Scissors,Ruler} from 'lucide-react';
 import { motion, useReducedMotion, useScroll, useTransform } from 'motion/react';
 import { Product } from '../types';
 import { type CmsHome, type CmsCategoryRow } from '../lib/cmsData';
@@ -11,8 +11,16 @@ import V2HomeDiscovery from './V2HomeDiscovery';
 
 interface Props {products: Product[]; home: CmsHome; categories?:CmsCategoryRow[]; onNavigate:(path:string)=>void;}
 
+function SectionVideo({url,label}:{url?:string;label:string}){
+  return url?<div className="mx-auto mt-10 max-w-[1050px] overflow-hidden rounded-md border border-[#a7906e]/25 bg-[#1c1714]">
+    <video controls preload="metadata" playsInline src={url} aria-label={label} className="aspect-video w-full object-cover"/>
+  </div>:null;
+}
 export default function V2Home({ products, home, categories=[], onNavigate }: Props) {
   const photo = home.heroImage;
+  const call=home.contactPhone?'tel:+'+home.contactPhone:null;
+  const whatsapp=home.contactWhatsapp?'https://wa.me/'+home.contactWhatsapp+
+    '?text='+encodeURIComponent('Hello Nomaan Brothers, I would like to discuss customized sherwani tailoring, fabric choices and measurements.'):null;
   const photoTwo = home.storyImage || home.menImage;
   const hero = useRef<HTMLElement>(null);
   const reduce = useReducedMotion();
@@ -36,6 +44,8 @@ export default function V2Home({ products, home, categories=[], onNavigate }: Pr
     {/* An immersive cover with a real heading and accessible normal scrolling. */}
     <section ref={hero} style={homeSectionStyle(home,'hero')} className="relative isolate min-h-[620px] overflow-hidden bg-[#211b17] text-[#fff8ed] md:min-h-[730px] lg:min-h-[min(860px,calc(100svh-106px))]" aria-labelledby="v2-home-title">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_28%_35%,#5d4939_0,transparent_56%)]" />
+      {home.sectionVideos.hero&&<video aria-hidden="true" src={home.sectionVideos.hero} autoPlay muted loop playsInline
+        preload="metadata" className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-50"/>}
       <div className="absolute inset-y-0 right-0 w-[100%] md:w-[65%] lg:w-[57%]">
         {photo && <motion.img src={photo} alt="" fetchPriority="high" loading="eager" decoding="async"
           className="h-full w-full scale-[1.10] object-cover object-center opacity-[.60] md:opacity-90"
@@ -63,6 +73,14 @@ export default function V2Home({ products, home, categories=[], onNavigate }: Pr
               <V2Link href="/kids" onNavigate={onNavigate} className="inline-flex min-h-12 items-center gap-4 border border-white/50 px-7 py-3 text-[11px] font-semibold uppercase tracking-[.12em] text-white transition-colors hover:bg-white/10">
                 {siteText(home,'home.heroKids')} <ArrowRight size={17}/>
               </V2Link>
+              <a href="#tailoring" className="inline-flex min-h-12 items-center gap-2 border-b border-[#e9d2ad] px-4 text-[11px] font-semibold uppercase tracking-[.12em] text-[#f9e0b8]">
+                <Scissors size={16}/>{siteText(home,'home.heroTailor')}
+              </a>
+              {whatsapp&&<a href={whatsapp} target="_blank" rel="noopener noreferrer"
+                className="inline-flex min-h-12 items-center gap-2 border border-white/40 px-5 text-[11px] font-semibold uppercase text-white">
+                <MessageCircle size={16}/>{siteText(home,'home.heroWhatsapp')}</a>}
+              {call&&<a href={call} className="inline-flex min-h-12 items-center gap-2 border border-white/40 px-5 text-[11px] font-semibold uppercase text-white">
+                <Phone size={16}/>{siteText(home,'home.heroPhone')}</a>}
             </div>
           </motion.div>
         </motion.div>
@@ -86,6 +104,7 @@ export default function V2Home({ products, home, categories=[], onNavigate }: Pr
         <V2Link href="/kids" onNavigate={onNavigate} className="inline-flex min-h-11 shrink-0 items-center gap-2 text-xs font-semibold text-[#4b3827] hover:text-[#a17848]">{siteText(home,'home.quickKids')} <ArrowUpRight size={15}/></V2Link>
         <a href="#collection-directory" className="inline-flex min-h-11 shrink-0 items-center gap-2 border-b border-[#a17b4b] text-xs font-semibold text-[#70512e] hover:text-[#a17848]">{siteText(home,'home.quickAll')} <ArrowRight size={16}/></a>
       </div>
+      <SectionVideo url={home.sectionVideos.quick} label="Featured quick-links video"/>
     </nav>
 
     <section style={homeSectionStyle(home,'departments')} className="mx-auto max-w-[1440px] px-5 pb-20 pt-24 md:px-12 md:pb-28 md:pt-32 lg:px-20" aria-labelledby="departments-title">
@@ -131,9 +150,13 @@ export default function V2Home({ products, home, categories=[], onNavigate }: Pr
           </div>
         </V2Reveal>
       </div>
+      <SectionVideo url={home.sectionVideos.departments} label="Departments video"/>
     </section>
 
-    <div style={homeSectionStyle(home,'directory')}><V2HomeDiscovery products={products} home={home} categories={categories} onNavigate={onNavigate}/></div>
+    <div style={homeSectionStyle(home,'directory')}>
+      <V2HomeDiscovery products={products} home={home} categories={categories} onNavigate={onNavigate}/>
+      <SectionVideo url={home.sectionVideos.directory} label="Collection directory video"/>
+    </div>
 
     <section style={homeSectionStyle(home,'featured')} className="bg-[#eee7db] px-5 py-24 md:px-12 md:py-28 lg:px-20" aria-labelledby="featured-title">
       <div className="mx-auto max-w-[1330px]">
@@ -160,6 +183,7 @@ export default function V2Home({ products, home, categories=[], onNavigate }: Pr
             </V2Reveal>
           ))}
         </div>
+        <SectionVideo url={home.sectionVideos.featured} label="Featured garment video"/>
       </div>
     </section>
 
@@ -173,9 +197,49 @@ export default function V2Home({ products, home, categories=[], onNavigate }: Pr
         </V2Reveal>
         <V2Reveal className="relative">
           <div className="absolute -right-5 -top-5 h-full w-full border border-[#a88e70]/50" aria-hidden="true"/>
-          {getImage('/men/kurta-pyjama', photoTwo) ? <img src={getImage('/men/kurta-pyjama', photoTwo)} alt="Traditional garment styling" loading="lazy" decoding="async" className="relative z-10 aspect-[4/5] w-full object-cover object-top"/> :
+          {home.sectionVideos.story?<video controls playsInline preload="metadata" src={home.sectionVideos.story}
+              className="relative z-10 aspect-[4/5] w-full object-cover" aria-label="Brand story film"/>:
+           getImage('/men/kurta-pyjama', photoTwo) ? <img src={getImage('/men/kurta-pyjama', photoTwo)} alt="Traditional garment styling" loading="lazy" decoding="async" className="relative z-10 aspect-[4/5] w-full object-cover object-top"/> :
             <div aria-hidden="true" className="relative z-10 aspect-[4/5] w-full bg-[radial-gradient(circle_at_70%_30%,#7f674c,transparent_60%)]"/>}
         </V2Reveal>
+      </div>
+    </section>
+
+    <section id="tailoring" style={homeSectionStyle(home,'customization')}
+      className="scroll-mt-24 overflow-hidden bg-[#e7d7c0] px-5 py-24 text-[#30251b] md:px-12 md:py-32 lg:px-20">
+      <div className="mx-auto grid max-w-[1320px] items-center gap-12 lg:grid-cols-2 lg:gap-20">
+        <div>
+          <p className="mb-6 text-xs font-bold uppercase tracking-[.25em] text-[#916a3a]"><Scissors size={18} className="mr-2 inline"/>
+            {siteText(home,'home.customEyebrow')}</p>
+          <h2 className="font-serif text-[clamp(2.8rem,5vw,5.6rem)] leading-[1.06] tracking-[-.05em]">{siteText(home,'home.customTitle')}</h2>
+          <p className="mt-7 max-w-xl text-sm leading-8 text-[#695645]">{siteText(home,'home.customText')}</p>
+          <ol className="mt-9 space-y-4 border-t border-[#c7ad8d] pt-7">
+            {[siteText(home,'home.customStep1'),siteText(home,'home.customStep2'),siteText(home,'home.customStep3')].map((step,index)=>
+              <li key={index} className="flex items-center gap-4 text-sm font-semibold">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full border border-[#a38762] text-xs">{String(index+1).padStart(2,'0')}</span>
+                {step}</li>)}
+          </ol>
+          <div className="mt-10 flex flex-wrap gap-3">
+            {whatsapp&&<a href={whatsapp} target="_blank" rel="noopener noreferrer"
+              className="inline-flex min-h-12 items-center gap-3 bg-[#2c241c] px-6 text-xs font-bold uppercase text-white">
+              <MessageCircle size={18}/>{siteText(home,'home.customWhatsApp')}</a>}
+            {call&&<a href={call} className="inline-flex min-h-12 items-center gap-3 border border-[#7b6344] px-6 text-xs font-bold uppercase">
+              <Phone size={18}/>{siteText(home,'home.customCall')}</a>}
+            {!whatsapp&&!call&&<V2Link href="/contact" onNavigate={onNavigate}
+              className="inline-flex min-h-12 items-center gap-2 border border-[#7b6344] px-6 text-xs font-bold uppercase">
+              Contact about custom tailoring <ArrowUpRight size={16}/></V2Link>}
+          </div>
+        </div>
+        <div className="relative overflow-hidden bg-[#816c56] shadow-[0_40px_75px_-30px_rgba(24,17,11,.45)]">
+          {home.sectionVideos.customization?
+            <video src={home.sectionVideos.customization} controls playsInline preload="metadata"
+              className="aspect-[4/5] w-full object-cover" aria-label="Custom tailoring showcase"/>:
+           home.customizationImage?
+            <img src={home.customizationImage} loading="lazy" alt="Custom garment fabric and tailoring" className="aspect-[4/5] w-full object-cover"/>:
+            <div className="flex aspect-[4/5] flex-col items-center justify-center gap-6 bg-[radial-gradient(circle_at_55%_25%,#baa084,transparent_55%),linear-gradient(140deg,#6a5038,#211a16)] text-[#eee0cc]">
+              <Ruler size={70} strokeWidth={0.8}/><span className="font-serif text-4xl italic">Made for you.</span>
+            </div>}
+        </div>
       </div>
     </section>
 
@@ -189,6 +253,7 @@ export default function V2Home({ products, home, categories=[], onNavigate }: Pr
           {siteText(home,'home.visitCta')} <ArrowUpRight size={17}/>
         </V2Link>
       </V2Reveal>
+      <SectionVideo url={home.sectionVideos.visit} label="Visit showroom film"/>
     </section>
   </div>;
 }
