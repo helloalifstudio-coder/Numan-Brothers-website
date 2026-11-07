@@ -20,6 +20,14 @@ describe('CMS migration guardrails (static checks; deploy requires live RLS veri
     expect(sql).toContain('returns integer language plpgsql security invoker');
     expect(sql).toContain('public.nb_publish_product');
   });
+  test('requires controlled publishing transactions for revision history', () => {
+    expect(sql).toContain('create trigger nb_product_revision_guard before insert');
+    expect(sql).toContain("public.nb_require_publish_scope('product')");
+    expect(sql).toContain('create trigger nb_home_revision_guard before insert');
+    expect(sql).toContain("public.nb_require_publish_scope('home')");
+    expect(sql).not.toMatch(/grant delete on public\\.nb_products/i);
+    expect(sql).not.toMatch(/grant delete on public\\.nb_media/i);
+  });
   test('scopes storage uploads to authenticated user and dedicated bucket', () => {
     expect(sql).toContain("bucket_id = 'nb-media'");
     expect(sql).toContain("(storage.foldername(name))[1] = (select auth.uid())::text");
