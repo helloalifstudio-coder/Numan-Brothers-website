@@ -13,7 +13,7 @@ The database uses Supabase Auth for staff identity, PostgreSQL + RLS for catalog
 - The eventual client's **production** Supabase project is separately created in the store owner's account. Do not share databases, storage buckets, Auth users or admin keys between the agency test and the client's production installation.
 - Require owner-controlled accounts; the client can use an existing Gmail identity to sign up for GitHub/Supabase/Vercel and **invite AGM as a collaborator**. Do not collect the client's Gmail password, authentication codes or Gmail login link.
 
-## The eight ordered migrations (no destructive reset)
+## The nine ordered migrations (no destructive reset)
 
 Apply the version-controlled files in this order, never by copy-pasting a combined unversioned query into an existing production database:
 
@@ -25,8 +25,9 @@ Apply the version-controlled files in this order, never by copy-pasting a combin
 6. `20261107195000_studio_index_role_gate.sql` — role gating for the staff index.
 7. `20261107199000_import_owner_idempotency.sql` — per-staff import fingerprint isolation.
 8. `20261107210000_catalogue_integrity_audit.sql` — append-only audit records, safe revocation and manager diagnostics.
+9. `20261107223000_category_media_publish_guard.sql` — reject unapproved public collection banner artwork.
 
-The list contains **eight** migration files; filenames are the source of truth. Do not skip a file or reorder them. No merchandise is seeded; only the approved navigation taxonomy is initialized.
+The list contains **nine** migration files; filenames are the source of truth. Do not skip a file or reorder them. No merchandise is seeded; only the approved navigation taxonomy is initialized.
 
 **Migration caveat:** The initial candidate migration briefly creates a legacy public `nb-media` bucket before the next migration makes it private. These migrations are intended only for a fresh, empty dedicated project. Do not upload media or expose the endpoint before the second migration completes. For any previously used database, generate and test a forward-only data-and-assets migration instead of overwriting applied migrations. Migration #2 deliberately aborts if published items or approved media already exist.
 
