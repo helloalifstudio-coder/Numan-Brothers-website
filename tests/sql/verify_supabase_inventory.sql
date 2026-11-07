@@ -1,6 +1,5 @@
 -- Read-only installation inventory check; works in SQL Editor or Postgres CI.
 -- Safe to run on a newly provisioned staging project. This does NOT migrate data.
-\set ON_ERROR_STOP on
 begin read only;
 
 do $inventory$
