@@ -1,6 +1,6 @@
 import type { Product } from '../types';
 import type { CatalogProduct } from '../storefront/catalog';
-import { getCmsClient, cmsProjectUrl } from './supabaseClient';
+import { getCmsClient } from './supabaseClient';
 
 export interface CmsProductRow {
   id: string;
@@ -114,7 +114,7 @@ export async function loadPublishedData(): Promise<PublishedData> {
     const [productsResult, homeResult, categoriesResult] = await Promise.all([
       client.from('nb_products')
         .select('id,sku,slug,title,department,category_paths,description,fabric,sizes,image_urls,video_url,price,status,sort_rank,created_at,updated_at')
-        .eq('status','published').order('sort_rank', { ascending: true }).limit(500),
+        .eq('status','published').order('sort_rank', { ascending: true }).limit(12),
       client.from('nb_home_public').select('content').eq('key','home').maybeSingle(),
       client.from('nb_categories').select('path,department,label,description,image_url,active,sort_order').eq('active',true),
     ]);
