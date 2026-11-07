@@ -68,9 +68,11 @@ jobs:
           psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261107195000_studio_index_role_gate.sql
           psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261107199000_import_owner_idempotency.sql
           psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261107210000_catalogue_integrity_audit.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261107223000_category_media_publish_guard.sql
           psql -v ON_ERROR_STOP=1 -f tests/sql/assert.sql
           psql -v ON_ERROR_STOP=1 -f tests/sql/assert_imports.sql
           psql -v ON_ERROR_STOP=1 -f tests/sql/assert_staging_integrity.sql
+          psql -v ON_ERROR_STOP=1 -f tests/sql/assert_category_media.sql
           psql -v ON_ERROR_STOP=1 -f tests/sql/verify_supabase_inventory.sql
       - name: Reject production deployments without client CMS credentials
         run: |
