@@ -46,7 +46,7 @@ export default function CmsCategories({client,canPublish,media}:Props) {
             <p className="text-xs text-stone-500">{selected.path}</p>
             <Field label="Collection description"><textarea rows={4} className={inputClass} value={selected.description}
               disabled={!canPublish} onChange={(e)=>setSelected({...selected,description:e.target.value})}/></Field>
-            <AssetPicker label="Category banner image" media={media}
+            <AssetPicker client={client} label="Category banner image" media={media}
               selected={selected.image_url?[selected.image_url]:[]}
               onChange={(urls)=>setSelected({...selected,image_url:urls[0]||null})}/>
             {canPublish?<button type="button" className={primaryClass} disabled={saving} onClick={()=>void save()}>
