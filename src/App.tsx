@@ -1,7 +1,7 @@
 import React, { Suspense, useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { ArrowLeft, ArrowRight, ArrowUpRight, MapPin, MessageCircle } from 'lucide-react';
-import { type PublishedData, HOME_TEMPLATE, loadPublishedData } from './lib/cmsData';
+import { type PublishedData, HOME_TEMPLATE, loadPublishedData, isSafeHttps } from './lib/cmsData';
 import { loadCataloguePage, loadProductById, type CataloguePage } from './lib/catalogQueries';
 import type { CatalogProduct } from './storefront/catalog';
 import { productPath, publicProducts } from './storefront/catalog';
@@ -82,7 +82,8 @@ export default function App() {
         The online catalogue is temporarily unavailable. Contact the showroom for current styles.
       </div>}
       {path === '/' ? <V2Home products={published} home={siteData.homepage} onNavigate={navigate}/> :
-       collection ? (activeRoutePage ? <V2Collection route={collection} products={matches} totalCount={activeRoutePage.count}
+       collection ? (activeRoutePage ? <V2Collection route={collection} products={matches}
+         bannerImage={categoryOverride?.image_url && isSafeHttps(categoryOverride.image_url) ? categoryOverride.image_url : undefined} totalCount={activeRoutePage.count}
          page={page} pageSize={activeRoutePage.pageSize} onPageChange={setPage} onNavigate={navigate}/> :
          <p role="status" className="p-12 text-center text-stone-500">Loading collection…</p>) :
        selectedId && !detail ? <p role="status" className="p-12 text-center text-stone-500">Loading product…</p> :
