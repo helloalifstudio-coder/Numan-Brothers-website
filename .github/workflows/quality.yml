@@ -51,6 +51,8 @@ jobs:
           fi
       - name: Client onboarding preflight contract tests
         run: node --test tests/client-preflight.test.mjs
+      - name: Verify complete SQL Editor installer matches all nine source migrations
+        run: node --test tests/sql-editor-bundle.test.mjs
       - name: PostgreSQL CMS role and publishing test
         env:
           PGPASSWORD: cms-ci
@@ -60,15 +62,7 @@ jobs:
           PGDATABASE: nomaan_ci
         run: |
           psql -v ON_ERROR_STOP=1 -f tests/sql/bootstrap.sql
-          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261107060000_nomaan_cms.sql
-          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261107130000_catalogue_private_media.sql
-          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261107150000_studio_product_index.sql
-          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261107170000_bulk_import_jobs.sql
-          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261107172000_match_approved_media.sql
-          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261107195000_studio_index_role_gate.sql
-          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261107199000_import_owner_idempotency.sql
-          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261107210000_catalogue_integrity_audit.sql
-          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261107223000_category_media_publish_guard.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/sql-editor/NOMAN_BROTHERS_INSTALL_FRESH_PROJECT.sql
           psql -v ON_ERROR_STOP=1 -f tests/sql/assert.sql
           psql -v ON_ERROR_STOP=1 -f tests/sql/assert_imports.sql
           psql -v ON_ERROR_STOP=1 -f tests/sql/assert_staging_integrity.sql
