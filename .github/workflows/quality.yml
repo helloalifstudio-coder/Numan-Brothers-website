@@ -65,6 +65,12 @@ jobs:
             echo "::error::Production build accepted an unconfigured CMS backend."
             exit 1
           fi
+      - name: Reject secret-key browser builds
+        run: |
+          if env VERCEL_ENV=production VITE_SUPABASE_URL=https://exampleproject123.supabase.co VITE_SUPABASE_PUBLISHABLE_KEY=sb_secret_not_a_real_key_12345678901234567890 bun run build; then
+            echo "::error::Production bundle accepted a private Supabase API key."
+            exit 1
+          fi
       - name: Production build
         run: bun run build
       - name: Verify crawlable pre-rendered category output
