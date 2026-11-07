@@ -1,0 +1,165 @@
+import React, {useEffect,useRef,useState} from 'react';
+import type {SupabaseClient} from '@supabase/supabase-js';
+import {ArrowDown,ArrowUp,CloudUpload,ImagePlus,Pencil,Trash2,Video,GripVertical} from 'lucide-react';
+import type {CmsMediaRow} from '../../lib/cmsData';
+import {mediaPublicUrl} from '../../lib/cmsData';
+import {uploadCmsFile,checkMediaFile} from '../../lib/cmsUpload';
+import {COLLECTION_ROUTES} from '../../storefront/navigation';
+import {ErrorText,inputClass,labelClass,outlineClass,primaryClass} from './StudioShared';
+
+const MEDIA_COLS='id,storage_path,original_name,mime_type,size_bytes,alt_text,department,category_path,archived_at,approved,uploaded_by,created_at';
+type Dept='men'|'kids'|'';
+interface Props {
+  client:SupabaseClient;label:string;media:CmsMediaRow[];
+  selected:string[];onChange:(urls:string[])=>void;multiple?:boolean;allowVideo?:boolean;
+  userId?:string;canPublish?:boolean;department?:Dept;categoryPath?:string;
+  onUploaded?:()=>void;
+}
+/** Edit or unlink a selected asset without ever deleting shared Storage objects.
+ * New local files are uploaded into private staging and approved server-side
+ * only for current owners/admins; everyone else must use the review queue.
+ */
+export default function AssetEditor({client,label,selected,onChange,multiple=false,allowVideo=false,
+  userId,canPublish=false,department='',categoryPath='',onUploaded}:Props){
+  const [term,setTerm]=useState('');
+  const [dept,setDept]=useState<Dept>(department);
+  const [category,setCategory]=useState(categoryPath);
+  const [page,setPage]=useState(0);
+  const [rows,setRows]=useState<CmsMediaRow[]>([]);
+  const [total,setTotal]=useState(0);
+  const [loading,setLoading]=useState(false);
+  const [uploading,setUploading]=useState(false);
+  const [progress,setProgress]=useState(0);
+  const [error,setError]=useState<string|null>(null);
+  const [notice,setNotice]=useState<string|null>(null);
+  const [dragging,setDragging]=useState(false);
+  const [reload,setReload]=useState(0);
+  const [showLibrary,setShowLibrary]=useState(false);
+  const input=useRef<HTMLInputElement>(null);
+  useEffect(()=>{setDept(department);setCategory(categoryPath);setPage(0)},[department,categoryPath]);
+  useEffect(()=>{
+    let alive=true;setLoading(true);
+    const timer=setTimeout(async()=>{
+      const search=term.replace(/[^a-zA-Z0-9 _.-]/g,' ').trim().slice(0,60);
+      let query=client.from('nb_media').select(MEDIA_COLS,{count:'exact'})
+        .eq('approved',true).is('archived_at',null)
+        .like('mime_type',allowVideo?'video/%':'image/%');
+      if(dept)query=query.eq('department',dept);
+      if(category)query=query.eq('category_path',category);
+      if(search)query=query.ilike('original_name','%'+search+'%');
+      const {data,count,error}=await query.order('created_at',{ascending:false}).range(page*24,page*24+23);
+      if(!alive)return;
+      setRows((data||[]) as CmsMediaRow[]);setTotal(count||0);
+      setLoading(false);setError(error?.message||null);
+    },220);
+    return()=>{alive=false;clearTimeout(timer)};
+  },[client,term,dept,category,page,allowVideo,reload]);
+  const choose=(url:string)=>{
+    if(multiple)onChange(selected.includes(url)?selected.filter(x=>x!==url):[...selected,url]);
+    else onChange(selected.includes(url)?[]:[url]);
+  };
+  const filesFromComputer=async(files:File[])=>{
+    if(!userId||!files.length||uploading)return;
+    setError(null);setNotice(null);setUploading(true);
+    let chosen=[...selected],pending=0;
+    try{
+      for(const file of files){
+        if(allowVideo!==file.type.startsWith('video/'))
+          throw new Error(allowVideo?'Choose MP4 or WebM video files.':'Choose JPG/PNG/WebP/AVIF/GIF photographs.');
+        const validation=checkMediaFile(file);if(validation)throw new Error(validation);
+        const asset=await uploadCmsFile(client,file,userId,p=>setProgress(p),{
+          department:dept||null,categoryPath:category||null,
+        });
+        if(canPublish){
+          const {data,error}=await client.functions.invoke('nb-media-approval',{
+            body:{id:asset.id,action:'approve'},
+          });
+          if(error||!data?.ok){
+            pending++;
+            setNotice('The file was uploaded privately; approval could not finish. Open Media to approve it.');
+            continue;
+          }
+          const url=mediaPublicUrl(asset.storage_path);
+          chosen=multiple?[...new Set([...chosen,url])]:[url];
+        }else pending++;
+      }
+      if(canPublish && chosen.length)onChange(chosen);
+      if(pending && !canPublish)setNotice(pending+' file(s) uploaded to Media → Pending. Ask an admin to approve before selecting.');
+      else if(!pending)setNotice('Uploaded, approved and selected. Save your draft to keep this change.');
+      setPage(0);setReload(n=>n+1);onUploaded?.();
+    }catch(e){setError(e instanceof Error?e.message:'Upload failed.');}
+    finally{setUploading(false);setProgress(0);setDragging(false);}
+  };
+  const move=(index:number,target:number)=>{
+    if(target<0||target>=selected.length)return;
+    const copy=[...selected];const [item]=copy.splice(index,1);copy.splice(target,0,item);onChange(copy);
+  };
+  const categories=COLLECTION_ROUTES.filter(route=>!route.isDepartment&&!route.isGroup&&(!dept||route.department===dept));
+  return <section aria-label={label} className="space-y-3 rounded-lg border border-stone-200 bg-[#fffefb] p-4">
+    <div className="flex flex-wrap items-center justify-between gap-3">
+      <div><p className={labelClass}>{label}</p><p className="text-xs text-stone-500">Remove a selection, drop a new file, or browse approved library assets.</p></div>
+      <button type="button" className={outlineClass} onClick={()=>setShowLibrary(x=>!x)}>
+        <Pencil size={15}/>{showLibrary?'Close library':'Choose / replace'}
+      </button>
+    </div>
+    <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+      {selected.map((url,index)=><div key={url} draggable={multiple}
+        onDragStart={e=>e.dataTransfer.setData('text/x-nb-selected-index',String(index))}
+        onDragOver={e=>e.preventDefault()}
+        onDrop={e=>{e.preventDefault();const from=Number(e.dataTransfer.getData('text/x-nb-selected-index'));if(Number.isInteger(from))move(from,index)}}
+        className="relative overflow-hidden rounded-md border border-amber-300 bg-stone-100">
+        {allowVideo?<div className="flex aspect-[4/3] items-center justify-center bg-stone-900 text-white"><Video size={30}/></div>:
+          <img className="aspect-[4/3] w-full object-cover" alt={'Selected '+label} src={url} loading="lazy"/>}
+        <div className="flex items-center justify-between gap-1 bg-white p-2">
+          <span className="inline-flex min-w-0 items-center text-[11px] text-stone-600">{multiple&&<GripVertical size={13}/>} {index===0?'Cover':'Image '+(index+1)}</span>
+          {multiple&&<button type="button" aria-label="Move selected photo up" disabled={index===0} className="p-1 disabled:opacity-40" onClick={()=>move(index,index-1)}><ArrowUp size={16}/></button>}
+          {multiple&&<button type="button" aria-label="Move selected photo down" disabled={index===selected.length-1} className="p-1 disabled:opacity-40" onClick={()=>move(index,index+1)}><ArrowDown size={16}/></button>}
+          <button type="button" aria-label={'Remove '+label+' '+(index+1)+' from this draft'} title="Remove from this section (does not erase Media library)" className="rounded-md p-1 text-red-700 hover:bg-red-50"
+            onClick={()=>onChange(selected.filter((_,i)=>i!==index))}><Trash2 size={17}/></button>
+        </div>
+      </div>)}
+      {!selected.length&&<div className="flex min-h-28 items-center justify-center rounded-md border border-dashed border-stone-300 text-xs text-stone-500">No {allowVideo?'video':'photograph'} selected</div>}
+    </div>
+    {userId&&<div role="button" tabIndex={0} aria-label={'Drop or choose '+label}
+      onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();input.current?.click()}}}
+      onClick={()=>input.current?.click()}
+      onDragOver={e=>{e.preventDefault();setDragging(true)}}
+      onDragLeave={e=>{if(!e.currentTarget.contains(e.relatedTarget as Node))setDragging(false)}}
+      onDrop={e=>{e.preventDefault();e.stopPropagation();setDragging(false);void filesFromComputer(Array.from(e.dataTransfer.files))}}
+      className={'flex min-h-32 cursor-pointer flex-col items-center justify-center gap-2 rounded-md border-2 border-dashed p-5 text-center '+(dragging?'border-amber-800 bg-amber-50':'border-stone-300 bg-stone-50')}>
+      <CloudUpload size={27}/><p className="text-sm font-semibold">{uploading?'Uploading '+progress+'%':'Drag & drop '+(allowVideo?'a video':'photos')+' here'}</p>
+      <p className="text-xs text-stone-500">Or click to browse your computer · up to 50 MB each · uploads are private until approved</p>
+      <input ref={input} type="file" className="sr-only" multiple={multiple}
+        accept={allowVideo?'video/mp4,video/webm':'image/jpeg,image/png,image/webp,image/avif,image/gif'}
+        onChange={e=>{void filesFromComputer(Array.from(e.currentTarget.files||[]));e.currentTarget.value='';}}/>
+    </div>}
+    {showLibrary&&<div className="space-y-3 border-t border-stone-200 pt-4">
+      <div className="grid gap-2 md:grid-cols-[1fr_1fr_1fr]">
+        <div><label className={labelClass}>Department</label><select className={inputClass} value={dept} onChange={e=>{setDept(e.target.value as Dept);setCategory('');setPage(0)}}>
+          <option value="">All assets</option><option value="men">Men’s Wear</option><option value="kids">Kids Wear</option></select></div>
+        <div><label className={labelClass}>Collection</label><select className={inputClass} value={category} onChange={e=>{setCategory(e.target.value);setPage(0)}}>
+          <option value="">All categories</option>{categories.map(x=><option key={x.path} value={x.path}>{x.title}</option>)}</select></div>
+        <div><label className={labelClass}>Search name</label><input type="search" className={inputClass} value={term}
+          onChange={e=>{setTerm(e.target.value);setPage(0)}} placeholder="Sherwani 1, SKU…"/></div>
+      </div>
+      {loading?<p role="status" className="p-3 text-xs">Searching approved media…</p>:rows.length===0?<p className="p-3 text-xs text-stone-500">No approved items in this category yet. Drop a file above or use Media.</p>:
+        <div className="grid max-h-80 grid-cols-2 gap-2 overflow-auto sm:grid-cols-3 xl:grid-cols-4">{rows.map(asset=>{
+          const url=mediaPublicUrl(asset.storage_path);const isSelected=selected.includes(url);
+          return <button type="button" key={asset.id} title={asset.original_name} onClick={()=>choose(url)}
+            className={'overflow-hidden rounded-md border-2 text-left '+(isSelected?'border-amber-700 bg-amber-50':'border-stone-200 bg-white')}>
+            {allowVideo?<div className="flex aspect-[4/3] items-center justify-center bg-stone-800 text-white"><Video/></div>:
+              <img src={url} alt={asset.alt_text||asset.original_name} loading="lazy" className="aspect-[4/3] w-full object-cover"/>}
+            <div className="flex items-center justify-between gap-1 p-2 text-[11px]">
+              <span className="truncate">{asset.original_name}</span>{isSelected&&<span className="font-semibold text-amber-800">✓</span>}
+            </div>
+          </button>;
+        })}</div>}
+      {total>24&&<div className="flex items-center justify-between gap-2 text-xs">
+        <button type="button" className={outlineClass} disabled={page===0} onClick={()=>setPage(x=>x-1)}>Previous</button>
+        <span>{page+1} / {Math.ceil(total/24)} · {total} assets</span>
+        <button type="button" className={outlineClass} disabled={(page+1)*24>=total} onClick={()=>setPage(x=>x+1)}>Next</button></div>}
+    </div>}
+    <ErrorText message={error}/>
+    {notice&&<p role="status" className="text-xs leading-6 text-amber-800">{notice}</p>}
+  </section>;
+}
