@@ -319,7 +319,9 @@ begin
   end if;
   select content into draft from public.nb_product_drafts
     where product_id = p_product_id for update;
-  if not found then raise exception 'Save a product draft before publishing'; end if;
+  if not found then
+    raise exception 'Save a product draft before publishing';
+  end if;
   product_sku := trim(coalesce(draft->>'sku',''));
   product_slug := trim(coalesce(draft->>'slug',''));
   product_title := trim(coalesce(draft->>'title',''));
@@ -327,57 +329,7 @@ begin
   product_video := nullif(trim(coalesce(draft->>'videoUrl','')), '');
   if length(product_title) < 2 or length(product_title) > 180
     or length(product_sku) < 2 or length(product_sku) > 80
-    or product_slug !~ '^[a-z0-9]+(-[a-z0-9]+)*
-insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-values (
-  'nb-media','nb-media',true,52428800,
-  array['image/jpeg','image/png','image/webp','image/avif','image/gif','video/mp4','video/webm']
-)
-on conflict (id) do nothing;
-
-create policy nb_storage_staff_select on storage.objects for select
-  to authenticated using (bucket_id = 'nb-media' and (select public.nb_can_edit()));
-create policy nb_storage_staff_insert on storage.objects for insert
-  to authenticated with check (
-    bucket_id = 'nb-media'
-    and (select public.nb_can_edit())
-    and (storage.foldername(name))[1] = (select auth.uid())::text
-  );
-create policy nb_storage_publisher_update on storage.objects for update
-  to authenticated using (bucket_id = 'nb-media' and (select public.nb_can_publish()))
-  with check (bucket_id = 'nb-media' and (select public.nb_can_publish()));
-create policy nb_storage_owner_delete on storage.objects for delete
-  to authenticated using (bucket_id = 'nb-media' and (select public.nb_is_owner()));
-
--- Seed navigation taxonomy, never seed inventory or fake commercial claims.
-insert into public.nb_categories (path, department, label, sort_order) values
-  ('/men','men','Men''s Wear',1),
-  ('/men/kurta-pyjama','men','Kurta Pyjama',10),
-  ('/men/pathani','men','Pathani',20),
-  ('/men/sherwani','men','Sherwani',30),
-  ('/men/sherwani/handwork','men','Handwork Sherwani',31),
-  ('/men/sherwani/plain','men','Plain Suits',32),
-  ('/men/suits','men','Suits',40),
-  ('/men/suits/handwork','men','Handwork Suits',41),
-  ('/men/suits/plain','men','Plain Suits',42),
-  ('/men/jodhpuri','men','Jodhpuri',50),
-  ('/men/marriage','men','Marriage Collection',60),
-  ('/men/marriage/jutti','men','Jutti',61),
-  ('/men/marriage/pagdi','men','Pagdi',62),
-  ('/men/marriage/sadi','men','Sadi',63),
-  ('/men/tope','men','Tope',70),
-  ('/kids','kids','Kids Wear',100),
-  ('/kids/kurta-pyjama','kids','Kurta Pyjama',110),
-  ('/kids/sherwani','kids','Sherwani',120),
-  ('/kids/pathani','kids','Pathani',130),
-  ('/kids/sadi','kids','Sadi',140),
-  ('/kids/suits','kids','Suits',150),
-  ('/kids/jodhpuri','kids','Jodhpuri',160),
-  ('/kids/tope','kids','Tope',170)
-on conflict (path) do nothing;
-
-commit;
-
+    or product_slug !~ '^[a-z0-9]+(-[a-z0-9]+)*$'
     or product_dept not in ('men','kids') then
     raise exception 'Invalid SKU, title, slug or department';
   end if;
@@ -386,17 +338,17 @@ commit;
     or jsonb_typeof(coalesce(draft->'sizes','[]'::jsonb)) <> 'array' then
     raise exception 'Invalid product category or image list';
   end if;
-  select coalesce(array_agg(value), '{}') into paths
-    from jsonb_array_elements_text(draft->'categoryPaths') as value;
-  select coalesce(array_agg(value), '{}') into photos
-    from jsonb_array_elements_text(draft->'imageUrls') as value;
-  select coalesce(array_agg(value), '{}') into sizes_value
-    from jsonb_array_elements_text(coalesce(draft->'sizes','[]'::jsonb)) as value;
+  select coalesce(array_agg(val), '{}') into paths
+    from jsonb_array_elements_text(draft->'categoryPaths') as vals(val);
+  select coalesce(array_agg(val), '{}') into photos
+    from jsonb_array_elements_text(draft->'imageUrls') as vals(val);
+  select coalesce(array_agg(val), '{}') into sizes_value
+    from jsonb_array_elements_text(coalesce(draft->'sizes','[]'::jsonb)) as vals(val);
   if cardinality(paths) = 0 or cardinality(photos) = 0 then
     raise exception 'Choose a collection and at least one approved image';
   end if;
   if exists (
-    select 1 from unnest(paths) as route
+    select 1 from unnest(paths) as routes(route)
     where not exists (
       select 1 from public.nb_categories c
       where c.path = route and c.active and c.department = product_dept
@@ -405,7 +357,7 @@ commit;
     raise exception 'A category is inactive, invalid or in the wrong department';
   end if;
   if exists (
-    select 1 from unnest(photos) as photo
+    select 1 from unnest(photos) as photos_input(photo)
     where not exists (
       select 1 from public.nb_media m
       where m.approved and photo like '%/storage/v1/object/public/nb-media/' || m.storage_path
