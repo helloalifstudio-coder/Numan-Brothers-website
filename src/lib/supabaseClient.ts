@@ -5,10 +5,10 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
  * Never place service-role/secret keys or database passwords in VITE_* variables.
  */
 const url = import.meta.env.VITE_SUPABASE_URL?.trim() || '';
-const publishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY?.trim()
-  || import.meta.env.VITE_SUPABASE_ANON_KEY?.trim() || '';
+const publishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY?.trim() || '';
 
-export const isCmsConfigured = /^https:\/\/[a-z0-9.-]+\.supabase\.co$/i.test(url) && publishableKey.length > 25;
+export const isCmsConfigured = /^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(url) &&
+  /^sb_publishable_[A-Za-z0-9_-]{12,}$/.test(publishableKey);
 export const cmsProjectUrl = isCmsConfigured ? url : '';
 
 let singleton: SupabaseClient | null = null;
