@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { ArrowLeft, ArrowRight, Plus, Save, Send } from 'lucide-react';
-import { type CmsProductRow, type CmsMediaRow, isSafeHttps, mediaPublicUrl } from '../../lib/cmsData';
+import { type CmsProductRow, type CmsMediaRow, isSafeHttps } from '../../lib/cmsData';
 import { COLLECTION_ROUTES } from '../../storefront/navigation';
 import { AssetPicker, ErrorText, Field, inputClass, outlineClass, primaryClass } from './StudioShared';
 
@@ -11,7 +11,7 @@ interface Draft {
   description:string;fabric:string;sizes:string[];imageUrls:string[];videoUrl:string;
   price:string;sortRank:number;
 }
-type DraftRow={product_id:string;content:unknown;updated_at:string};
+type ProductRevision={id:number;version:number;published_at:string;content:unknown};
 type Entry={id:string;label:string;live:boolean;draft:boolean;form:Draft};
 const blank: Draft = {
   sku:'',slug:'',title:'',department:'men',categoryPaths:[],description:'',
@@ -58,10 +58,12 @@ export default function CmsProducts({client,userId,canPublish,media}:Props){
   const [search,setSearch]=useState('');
   const [statusFilter,setStatusFilter]=useState('all');
   const [departmentFilter,setDepartmentFilter]=useState('all');
+  const [revisions,setRevisions]=useState<ProductRevision[]>([]);
+  const [revisionsLoading,setRevisionsLoading]=useState(false);
   const active=rows.find((r)=>r.id===id);
   const categories=COLLECTION_ROUTES.filter((c)=>!c.isDepartment && !c.isGroup && c.department===form.department);
-  const approvedImages=media.filter((m)=>m.approved && m.mime_type.startsWith('image/'));
-  const approvedVideos=media.filter((m)=>m.approved && m.mime_type.startsWith('video/'));
+  // The media prop is just a recent preview cache. The asset picker queries
+  // approved images by page; the publishing RPC verifies every URL in SQL.
   const load=async()=>{
     setLoading(true);setError(null);
     let query=client.from('nb_studio_product_index')
@@ -84,8 +86,20 @@ export default function CmsProducts({client,userId,canPublish,media}:Props){
     const timer=setTimeout(()=>{void load()},250);
     return()=>clearTimeout(timer);
   },[page,client,search,statusFilter,departmentFilter]);
+  const loadRevisions=async(productId:string)=>{
+    setRevisionsLoading(true);
+    const {data,error}=await client.from('nb_product_revisions')
+      .select('id,version,published_at,content')
+      .eq('product_id',productId)
+      .order('version',{ascending:false})
+      .limit(15);
+    if(error)setError(error.message);
+    else setRevisions((data||[]) as ProductRevision[]);
+    setRevisionsLoading(false);
+  };
   const open=async(entry:Entry)=>{
     setId(entry.id);setError(null);setMessage(null);setBusy(true);
+    setRevisions([]);void loadRevisions(entry.id);
     const [draft,published]=await Promise.all([
       client.from('nb_product_drafts').select('content').eq('product_id',entry.id).maybeSingle(),
       client.from('nb_products')
@@ -98,7 +112,7 @@ export default function CmsProducts({client,userId,canPublish,media}:Props){
     setBusy(false);
   };
   const update=<K extends keyof Draft>(key:K,value:Draft[K])=>setForm((current)=>({...current,[key]:value}));
-  const create=()=>{setId(crypto.randomUUID());setForm({...blank});setError(null);setMessage(null)};
+  const create=()=>{setId(crypto.randomUUID());setForm({...blank});setRevisions([]);setError(null);setMessage(null)};
   const save=async():Promise<boolean>=>{
     if(!id)return false;
     setBusy(true);setError(null);setMessage(null);
@@ -118,17 +132,16 @@ export default function CmsProducts({client,userId,canPublish,media}:Props){
     if(!id||!canPublish)return;
     const err=validate(form);
     if(err){setError(err);return;}
-    if(form.imageUrls.some((url)=>!approvedImages.some((m)=>{
-      const stored=mediaPublicUrl(m.storage_path);
-      return url===stored;
-    }))){setError('Choose images from the approved media library.');return;}
+    // Do not validate against the 300 most recent assets: this rejects
+    // valid approved garments in a large library. The security-invoker SQL
+    // publish RPC verifies *every* asset is actually approved for this project.
     if(!await save())return;
     setBusy(true);setError(null);
     const {data,error}=await client.rpc('nb_publish_product',{p_product_id:id});
     setBusy(false);
     if(error){setError(error.message);return;}
     setMessage('Product version '+data+' published. Customers can now see the approved content.');
-    await load();
+    await Promise.all([load(),loadRevisions(id)]);
   };
   return <section className="space-y-7">
     <div className="flex flex-wrap items-end justify-between gap-4">
@@ -212,9 +225,22 @@ export default function CmsProducts({client,userId,canPublish,media}:Props){
             </div>)}
           </div>}
           <AssetPicker client={client} label="Optional uploaded product video" allowVideo media={media}
-            selected={approvedVideos.some(m=>mediaPublicUrl(m.storage_path)===form.videoUrl)?[form.videoUrl]:[]}
+            selected={form.videoUrl?[form.videoUrl]:[]}
             onChange={urls=>update('videoUrl',urls[0]||'')}/>
           <Field label="Or external HTTPS video / streaming link"><input type="url" className={inputClass} value={form.videoUrl} onChange={e=>update('videoUrl',e.target.value)} placeholder="https://..."/></Field>
+          <section aria-labelledby="product-revisions-title" className="space-y-3 rounded-lg border border-[#ded0bc] bg-[#faf7f0] p-5">
+            <h4 id="product-revisions-title" className="font-serif text-xl text-[#31261c]">Published history</h4>
+            <p className="text-xs leading-6 text-[#76685b]">Each publish creates a numbered, read-only snapshot. Editing a private draft does not change an earlier published version. Reverting requires an authorized reviewed new publication.</p>
+            {revisionsLoading ? <p role="status" className="text-xs text-[#76685b]">Loading versions…</p> :
+              revisions.length===0 ? <p className="text-xs text-[#76685b]">No published versions yet.</p> :
+              <ol className="space-y-2">{revisions.map(revision=><li key={revision.id}
+                className="flex flex-wrap items-center justify-between gap-2 border-b border-[#e8dccb] py-2 text-xs">
+                <span className="font-semibold text-[#5a4533]">Version {revision.version}</span>
+                <time dateTime={revision.published_at} className="text-[#756958]">
+                  {new Date(revision.published_at).toLocaleString('en-IN',{dateStyle:'medium',timeStyle:'short'})}
+                </time>
+              </li>)}</ol>}
+          </section>
           <div className="flex flex-wrap gap-3 border-t border-stone-200 pt-6">
             <button type="button" className={outlineClass} disabled={busy} onClick={()=>void save()}><Save size={15}/> Save private draft</button>
             {canPublish&&<button type="button" className={primaryClass} disabled={busy} onClick={()=>void publish()}><Send size={15}/> Publish approved version</button>}
