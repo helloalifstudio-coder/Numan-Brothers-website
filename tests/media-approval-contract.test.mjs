@@ -17,6 +17,8 @@ describe('Server-only media approval contract',()=>{
   it('denies revocation of assets referenced by published pages',()=>{
     assert.match(code,/from\('nb_product_media'\)/);
     assert.match(code,/from\('nb_home_public'\)/);
+    assert.match(code,/from\('nb_home_drafts'\)/);
+    assert.match(code,/from\('nb_product_drafts'\)/);
     assert.match(code,/from\('nb_categories'\)/);
     assert.match(code,/contains\('image_urls'/);
     assert.match(code,/eq\('video_url'/);
@@ -33,5 +35,8 @@ describe('Server-only media approval contract',()=>{
     assert.match(code,/from\('nb_media'\)\.delete\(\)/);
     assert.match(code,/from\('nb-media-staging'\)\.remove/);
     assert.match(code,/publicBucket\.remove/);
+    assert.match(code,/referencedByHomeDraft/);
+    assert.match(code,/productDraftImages\.count/);
+    assert.match(code,/productDraftVideo\.count/);
   });
 });

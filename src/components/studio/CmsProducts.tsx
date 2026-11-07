@@ -132,14 +132,20 @@ export default function CmsProducts({client,userId,canPublish,media}:Props){
     .replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,110);
   const chooseCategory=async(path:string)=>{
     if(!path)return;
-    setForm(current=>({...current,categoryPaths:[path],slug:current.slug||slugify(current.title)}));
+    setForm(current=>({...current,categoryPaths:[path]}));
     if(!isNew||skuEdited)return;
     setSkuLoading(true);setError(null);
     const {data,error}=await client.rpc('nb_next_sku',{p_category_path:path});
     if(error)setError('Could not generate SKU: '+error.message);
     else if(data){
       const sku=String(data);
-      setForm(current=>({...current,sku,slug:current.slug||[slugify(current.title),sku.toLowerCase()].filter(Boolean).join('-')}));
+      setForm(current=>{
+        const oldAuto=[slugify(current.title),current.sku.toLowerCase()].filter(Boolean).join('-');
+        const previousAuto=current.slug===''||current.slug===oldAuto||current.slug===current.sku.toLowerCase();
+        return {...current,sku,slug:previousAuto
+          ?[slugify(current.title),sku.toLowerCase()].filter(Boolean).join('-')
+          :current.slug};
+      });
     }
     setSkuLoading(false);
   };
@@ -256,7 +262,12 @@ export default function CmsProducts({client,userId,canPublish,media}:Props){
           </section>
           <div className="grid gap-5 md:grid-cols-2">
             <Field label="Garment title"><input className={inputClass} value={form.title} onChange={e=>{
-              const title=e.target.value;setForm(cur=>({...cur,title,slug:!cur.slug||cur.slug===slugify(cur.title)?slugify(title):cur.slug}));
+              const title=e.target.value;setForm(cur=>{
+                const oldAuto=[slugify(cur.title),cur.sku.toLowerCase()].filter(Boolean).join('-');
+                const shouldUpdate=!cur.slug||cur.slug===oldAuto||cur.slug===slugify(cur.title);
+                return {...cur,title,slug:shouldUpdate
+                  ?[slugify(title),cur.sku.toLowerCase()].filter(Boolean).join('-'):cur.slug};
+              });
             }} maxLength={180}/></Field>
             <Field label="Unique SKU (auto-generated, editable)"><input className={inputClass} value={form.sku}
               onChange={e=>{setSkuEdited(true);update('sku',e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g,''))}}

@@ -34,6 +34,7 @@ export default function AssetEditor({client,label,selected,onChange,multiple=fal
   const [notice,setNotice]=useState<string|null>(null);
   const [dragging,setDragging]=useState(false);
   const [reload,setReload]=useState(0);
+  const [deletingUrl,setDeletingUrl]=useState<string|null>(null);
   const [showLibrary,setShowLibrary]=useState(false);
   const input=useRef<HTMLInputElement>(null);
   useEffect(()=>{setDept(department);setCategory(categoryPath);setPage(0)},[department,categoryPath]);
@@ -90,6 +91,30 @@ export default function AssetEditor({client,label,selected,onChange,multiple=fal
     }catch(e){setError(e instanceof Error?e.message:'Upload failed.');}
     finally{setUploading(false);setProgress(0);setDragging(false);}
   };
+  const deleteFromDatabase=async(url:string)=>{
+    if(!canPublish)return;
+    if(!window.confirm('Permanently DELETE this file from both Supabase Storage and the database?\n\nIf it is used by a published page or saved draft, deletion will be refused. This cannot be undone.'))return;
+    setDeletingUrl(url);setError(null);setNotice(null);
+    try{
+      const prefix=mediaPublicUrl('');
+      if(!prefix || !url.startsWith(prefix))throw new Error('Only files from this store\'s Media library can be permanently deleted.');
+      const storagePath=decodeURIComponent(url.slice(prefix.length));
+      if(!/^[0-9a-f-]{36}\/[0-9a-f-]{36}\.(jpg|png|webp|avif|gif|mp4|webm)$/i.test(storagePath))
+        throw new Error('This media file needs manual review before deletion.');
+      const {data:asset,error:findError}=await client.from('nb_media')
+        .select('id').eq('storage_path',storagePath).maybeSingle();
+      if(findError)throw findError;
+      if(!asset)throw new Error('Media record not found. Refresh the library.');
+      const {data,error}=await client.functions.invoke('nb-media-approval',{body:{id:asset.id,action:'delete'}});
+      if(error || !data?.ok)throw new Error(data?.error||error?.message||'Deletion blocked by Supabase.');
+      onChange(selected.filter(x=>x!==url));
+      setNotice('File permanently removed from Supabase Storage and its media database record.');
+      setReload(n=>n+1);onUploaded?.();
+    }catch(cause){
+      setError((cause instanceof Error?cause.message:'Deletion failed.')+
+        ' If this image is live, first remove it from the page, Save draft and Publish website changes. Then delete it here or in Media.');
+    }finally{setDeletingUrl(null);}
+  };
   const move=(index:number,target:number)=>{
     if(target<0||target>=selected.length)return;
     const copy=[...selected];const [item]=copy.splice(index,1);copy.splice(target,0,item);onChange(copy);
@@ -97,7 +122,7 @@ export default function AssetEditor({client,label,selected,onChange,multiple=fal
   const categories=COLLECTION_ROUTES.filter(route=>!route.isDepartment&&!route.isGroup&&(!dept||route.department===dept));
   return <section aria-label={label} className="space-y-3 rounded-lg border border-stone-200 bg-[#fffefb] p-4">
     <div className="flex flex-wrap items-center justify-between gap-3">
-      <div><p className={labelClass}>{label}</p><p className="text-xs text-stone-500">Remove a selection, drop a new file, or browse approved library assets.</p></div>
+      <div><p className={labelClass}>{label}</p><p className="text-xs text-stone-500">Trash removes the image from this page; Delete from Supabase permanently erases the file only after all published and saved-draft references are cleared.</p></div>
       <button type="button" className={outlineClass} onClick={()=>setShowLibrary(x=>!x)}>
         <Pencil size={15}/>{showLibrary?'Close library':'Choose / replace'}
       </button>
@@ -106,7 +131,8 @@ export default function AssetEditor({client,label,selected,onChange,multiple=fal
       {selected.map((url,index)=><div key={url} draggable={multiple}
         onDragStart={e=>e.dataTransfer.setData('text/x-nb-selected-index',String(index))}
         onDragOver={e=>e.preventDefault()}
-        onDrop={e=>{e.preventDefault();const from=Number(e.dataTransfer.getData('text/x-nb-selected-index'));if(Number.isInteger(from))move(from,index)}}
+        onDrop={e=>{e.preventDefault();const raw=e.dataTransfer.getData('text/x-nb-selected-index');
+          if(raw!=='' && /^\d+$/.test(raw))move(Number(raw),index)}}
         className="relative overflow-hidden rounded-md border border-amber-300 bg-stone-100">
         {allowVideo?<div className="flex aspect-[4/3] items-center justify-center bg-stone-900 text-white"><Video size={30}/></div>:
           <img className="aspect-[4/3] w-full object-cover" alt={'Selected '+label} src={url} loading="lazy"/>}
@@ -114,8 +140,14 @@ export default function AssetEditor({client,label,selected,onChange,multiple=fal
           <span className="inline-flex min-w-0 items-center text-[11px] text-stone-600">{multiple&&<GripVertical size={13}/>} {index===0?'Cover':'Image '+(index+1)}</span>
           {multiple&&<button type="button" aria-label="Move selected photo up" disabled={index===0} className="p-1 disabled:opacity-40" onClick={()=>move(index,index-1)}><ArrowUp size={16}/></button>}
           {multiple&&<button type="button" aria-label="Move selected photo down" disabled={index===selected.length-1} className="p-1 disabled:opacity-40" onClick={()=>move(index,index+1)}><ArrowDown size={16}/></button>}
-          <button type="button" aria-label={'Remove '+label+' '+(index+1)+' from this draft'} title="Remove from this section (does not erase Media library)" className="rounded-md p-1 text-red-700 hover:bg-red-50"
+          <button type="button" aria-label={'Remove '+label+' '+(index+1)+' from this draft'} title="Remove from this section only (keep the original in Media)" className="rounded-md p-1 text-red-700 hover:bg-red-50"
             onClick={()=>onChange(selected.filter((_,i)=>i!==index))}><Trash2 size={17}/></button>
+          {canPublish&&<button type="button" disabled={deletingUrl!==null}
+            title="Erase the file from Storage AND its database record once unused"
+            onClick={()=>void deleteFromDatabase(url)}
+            className="min-h-9 rounded-md border border-red-200 px-2 text-[10px] font-semibold text-red-800 disabled:opacity-50">
+            {deletingUrl===url?'Deleting…':'Delete from Supabase'}
+          </button>}
         </div>
       </div>)}
       {!selected.length&&<div className="flex min-h-28 items-center justify-center rounded-md border border-dashed border-stone-300 text-xs text-stone-500">No {allowVideo?'video':'photograph'} selected</div>}

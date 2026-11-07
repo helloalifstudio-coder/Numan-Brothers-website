@@ -78,7 +78,8 @@ const handler = withSupabase({ auth: 'user' }, async (req, ctx) => {
   // A published product or homepage must never be left with a broken gallery.
   // Associations are rebuilt transactionally when a product is published.
   const publicUrl = publicBucket.getPublicUrl(path).data.publicUrl
-  const [products, homes, collections, legacyImages, legacyVideo] = await Promise.all([
+  const [products, homes, collections, legacyImages, legacyVideo,
+    productDraftImages, productDraftVideo, homeDraft] = await Promise.all([
     ctx.supabaseAdmin.from('nb_product_media')
       .select('product_id', { count: 'exact', head: true }).eq('media_id', id),
     ctx.supabaseAdmin.from('nb_home_public').select('content').eq('key', 'home').maybeSingle(),
@@ -90,9 +91,20 @@ const handler = withSupabase({ auth: 'user' }, async (req, ctx) => {
     ctx.supabaseAdmin.from('nb_products')
       .select('id', { count: 'exact', head: true })
       .eq('status', 'published').eq('video_url', publicUrl),
+    // Draft references must also be released *and saved* before file deletion.
+    // Otherwise previously saved work would silently point to missing Storage.
+    ctx.supabaseAdmin.from('nb_product_drafts')
+      .select('product_id', { count: 'exact', head: true })
+      .contains('content', {imageUrls:[publicUrl]}),
+    ctx.supabaseAdmin.from('nb_product_drafts')
+      .select('product_id', { count: 'exact', head: true })
+      .eq('content->>videoUrl', publicUrl),
+    ctx.supabaseAdmin.from('nb_home_drafts')
+      .select('content').eq('key','home').maybeSingle(),
   ])
   if (products.error || homes.error || collections.error ||
-      legacyImages.error || legacyVideo.error) {
+      legacyImages.error || legacyVideo.error ||
+      productDraftImages.error || productDraftVideo.error || homeDraft.error) {
     return json(503, { error: 'Cannot verify media references; revocation denied' })
   }
   const homeContent = homes.data?.content as Record<string, unknown> | undefined
@@ -102,10 +114,19 @@ const handler = withSupabase({ auth: 'user' }, async (req, ctx) => {
   const referencedByHome = homeContent &&
     (['heroImage', 'menImage', 'kidsImage', 'storyImage','customizationImage']
       .some(key => homeContent[key] === publicUrl) || referenceVideos.some(url=>url===publicUrl))
+  const draftContent=homeDraft.data?.content as Record<string, unknown> | undefined
+  const draftSectionVideos=draftContent?.sectionVideos &&
+    typeof draftContent.sectionVideos==='object' && !Array.isArray(draftContent.sectionVideos)
+    ? Object.values(draftContent.sectionVideos):[];
+  const referencedByHomeDraft=Boolean(draftContent &&
+    (['heroImage','menImage','kidsImage','storyImage','customizationImage']
+      .some(key=>draftContent[key]===publicUrl) ||
+      draftSectionVideos.some(url=>url===publicUrl)));
   if ((products.count ?? 0) > 0 || (collections.count ?? 0) > 0 ||
       (legacyImages.count ?? 0) > 0 || (legacyVideo.count ?? 0) > 0 ||
-      referencedByHome) {
-    return json(409, { error: 'Remove this asset from published products, homepage and collections before revoking or deleting' })
+      (productDraftImages.count ?? 0) > 0 || (productDraftVideo.count ?? 0) > 0 ||
+      referencedByHome || (action==='delete' && referencedByHomeDraft)) {
+    return json(409, { error: 'This file is still used by a published page or saved draft. Remove it, save and publish the replacement, then retry deletion.' })
   }
 
   if(action==='delete') {
