@@ -40,7 +40,7 @@ insert into public.nb_home_drafts(key,content,updated_by) values ('home',
  '11111111-1111-4111-8111-111111111111');
 insert into public.nb_product_drafts(product_id,content,updated_by) values
   ('22222222-2222-4222-8222-222222222222',
-  '{"sku":"NB-CI-1","slug":"ci-kids-sherwani","title":"Kids Sherwani","department":"kids","categoryPaths":["/kids/sherwani"],"imageUrls":["https://test.supabase.co/storage/v1/object/public/nb-media/11111111-1111-4111-8111-111111111111/a.webp"],"sizes":["M"],"price":"999.00"}',
+  '{"sku":"NB-CI-1","slug":"ci-kids-sherwani","title":"Kids Sherwani","department":"kids","categoryPaths":["/kids/sherwani"],"imageUrls":["https://test.supabase.co/storage/v1/object/public/nb-media-public/11111111-1111-4111-8111-111111111111/a.webp"],"sizes":["M"],"price":"999.00"}',
   '11111111-1111-4111-8111-111111111111');
 do $$
 declare rejected boolean := false;
@@ -74,9 +74,10 @@ end;
 $$;
 reset role;
 \echo 'Checking publisher transaction and media approval'
+-- Simulate the audited server-side asset promotion (service role), not a browser update.
+update public.nb_media set approved=true;
 select set_config('request.jwt.claims','{"iss":"https://test.supabase.co/auth/v1","app_metadata":{"nb_role":"owner"}}',false);
 set role authenticated;
-update public.nb_media set approved=true;
 do $$
 begin
   if not public.nb_can_publish() then raise exception 'Owner role missing'; end if;
@@ -93,7 +94,7 @@ declare blocked boolean := false;
 begin
   update public.nb_product_drafts
     set content = jsonb_set(content, '{imageUrls}',
-      '["https://attacker.example/storage/v1/object/public/nb-media/11111111-1111-4111-8111-111111111111/a.webp"]'::jsonb)
+      '["https://attacker.example/storage/v1/object/public/nb-media-public/11111111-1111-4111-8111-111111111111/a.webp"]'::jsonb)
     where product_id='22222222-2222-4222-8222-222222222222';
   begin
     perform public.nb_publish_product('22222222-2222-4222-8222-222222222222');
@@ -102,7 +103,7 @@ begin
   if not blocked then raise exception 'Unapproved external media URL was accepted'; end if;
   update public.nb_product_drafts
     set content = jsonb_set(content, '{imageUrls}',
-      '["https://test.supabase.co/storage/v1/object/public/nb-media/11111111-1111-4111-8111-111111111111/a.webp"]'::jsonb)
+      '["https://test.supabase.co/storage/v1/object/public/nb-media-public/11111111-1111-4111-8111-111111111111/a.webp"]'::jsonb)
     where product_id='22222222-2222-4222-8222-222222222222';
 end;
 $$;
@@ -143,6 +144,17 @@ begin
   if not forbidden then raise exception 'Published revisions are mutable'; end if;
 end;
 $$;
+-- Direct approval is not permitted through an owner browser session.
+do $media_gate$
+declare denied boolean := false;
+begin
+  begin
+    update public.nb_media set approved = false where original_name = 'a.webp';
+  exception when insufficient_privilege then denied := true;
+  end;
+  if not denied then raise exception 'Client can mutate approval status directly'; end if;
+end $media_gate$;
+
 -- Publishers must use the RPC even for writing revision history. An owner
 -- cannot forge a published version or permanently remove a live catalogue row.
 do $phase1$
