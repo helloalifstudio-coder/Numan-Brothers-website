@@ -145,7 +145,7 @@ $$;
 -- The scope GUC is transaction-local and set only inside role-checked RPCs.
 create or replace function public.nb_require_publish_scope()
 returns trigger language plpgsql security invoker set search_path = ''
-as $
+as $$
 begin
   if not public.nb_can_publish() or
     current_setting('app.nb_publish_scope', true) is distinct from TG_ARGV[0] then
@@ -153,7 +153,7 @@ begin
   end if;
   return new;
 end;
-$;
+$$;
 drop trigger if exists nb_materialized_product_guard on public.nb_products;
 create trigger nb_materialized_product_guard before insert or update on public.nb_products
   for each row execute function public.nb_require_publish_scope('product');

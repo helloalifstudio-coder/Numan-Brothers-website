@@ -82,7 +82,7 @@ begin
 end;
 $$;
 -- The owner may publish via RPC, but must not directly mutate a live row.
-do $
+do $$
 declare denied boolean := false;
 begin
   begin
@@ -106,9 +106,9 @@ begin
     raise exception 'Homepage revision was not recorded';
   end if;
 end;
-$;
+$$;
 -- Confirm revision history cannot be overwritten through the Data API.
-do $
+do $$
 declare forbidden boolean := false;
 begin
   begin
@@ -117,7 +117,7 @@ begin
   end;
   if not forbidden then raise exception 'Published revisions are mutable'; end if;
 end;
-$;
+$$;
 -- Confirm unpublished/draft HTML cannot be publicly selected.
 reset role;
 select set_config('request.jwt.claims','{}',false);
