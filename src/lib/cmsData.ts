@@ -84,7 +84,7 @@ export const isSafeHttps = (url: string): boolean => {
 };
 export const mediaPublicUrl = (path: string): string => {
   const client = getCmsClient();
-  return client?.storage.from('nb-media').getPublicUrl(path).data.publicUrl || '';
+  return client?.storage.from('nb-media-public').getPublicUrl(path).data.publicUrl || '';
 };
 
 export function rowToProduct(row: CmsProductRow): CatalogProduct {
