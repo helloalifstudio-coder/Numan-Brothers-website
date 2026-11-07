@@ -2,6 +2,8 @@ import React, { Suspense, useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { ArrowLeft, ArrowRight, ArrowUpRight, MapPin, MessageCircle } from 'lucide-react';
 import { type PublishedData, HOME_TEMPLATE, loadPublishedData } from './lib/cmsData';
+import { loadCataloguePage, loadProductById, type CataloguePage } from './lib/catalogQueries';
+import type { CatalogProduct } from './storefront/catalog';
 import { productPath, publicProducts } from './storefront/catalog';
 import { getCollection } from './storefront/navigation';
 import { useStoreHistory } from './storefront/history';
@@ -40,14 +42,25 @@ export default function App() {
         description: categoryOverride.description || collectionDefault.description }
     : collectionDefault;
   const selectedId = path.startsWith('/products/') ? path.slice('/products/'.length) : null;
-  const product = selectedId ? published.find((item) => productPath(item) === path) : undefined;
   const searchQuery = path === '/search' ? new URLSearchParams(url.split('?')[1] || '').get('q')?.trim() || '' : '';
-  const matches = useMemo(() => {
-    const query = searchQuery.toLocaleLowerCase('en-IN');
-    return query ? published.filter((p) =>
-      [p.title, p.fabric, p.category, ...(p.badges || [])].join(' ').toLowerCase().includes(query)
-    ) : [];
-  }, [published, searchQuery]);
+  const [page,setPage] = useState(0);
+  const [routeResult,setRouteResult] = useState<{key:string;data:CataloguePage}|null>(null);
+  const [detail,setDetail] = useState<{id:string;product:CatalogProduct|null}|null>(null);
+  const routeKey = path + '|' + searchQuery + '|' + page;
+  useEffect(()=>setPage(0),[path,searchQuery]);
+  useEffect(()=>{
+    let active=true;
+    if(collectionDefault || path==='/search'){
+      void loadCataloguePage({route:collectionDefault?.path,query:searchQuery,page})
+        .then(data=>{if(active)setRouteResult({key:routeKey,data})});
+    } else setRouteResult(null);
+    if(selectedId)void loadProductById(selectedId).then(product=>{if(active)setDetail({id:selectedId,product})});
+    else setDetail(null);
+    return ()=>{active=false};
+  },[path,searchQuery,page]);
+  const activeRoutePage = routeResult?.key===routeKey ? routeResult.data : null;
+  const matches = activeRoutePage?.products || [];
+  const product = selectedId && detail?.id===selectedId ? detail.product : undefined;
   const title = path === '/' ? 'Traditional Menswear & Kidswear in Warangal' :
     collection ? collection.title : product ? product.title :
     path === '/search' ? 'Search Collections' : path === '/contact' ? 'Visit Our Showroom' : 'Page Not Found';
@@ -69,20 +82,31 @@ export default function App() {
         The online catalogue is temporarily unavailable. Contact the showroom for current styles.
       </div>}
       {path === '/' ? <V2Home products={published} home={siteData.homepage} onNavigate={navigate}/> :
-       collection ? <V2Collection route={collection} products={published} onNavigate={navigate}/> :
+       collection ? (activeRoutePage ? <V2Collection route={collection} products={matches} totalCount={activeRoutePage.count}
+         page={page} pageSize={activeRoutePage.pageSize} onPageChange={setPage} onNavigate={navigate}/> :
+         <p role="status" className="p-12 text-center text-stone-500">Loading collection…</p>) :
+       selectedId && !detail ? <p role="status" className="p-12 text-center text-stone-500">Loading product…</p> :
        product ? <V2Product key={product.id} product={product} whatsappNumber={siteData.homepage.contactWhatsapp} onNavigate={navigate}/> :
        path === '/search' ? <section className="mx-auto min-h-[70vh] max-w-[1360px] px-5 py-16 md:px-12">
          <V2Reveal>
            <p className="mb-5 text-[10px] font-bold uppercase tracking-[.24em] text-[#a37f50]">Discover the catalogue</p>
            <h1 className="font-serif text-[clamp(3rem,6vw,5.5rem)] tracking-[-.05em] text-[#29221c]">Search <em>collections</em></h1>
-           <p className="mt-5 mb-12 text-sm text-[#817164]">{searchQuery ? 'Results for "' + searchQuery + '"' : 'Enter a product name or browse a collection.'} · {matches.length} styles</p>
+           <p className="mt-5 mb-12 text-sm text-[#817164]">{searchQuery ? 'Results for "' + searchQuery + '"' : 'Enter a product name or browse a collection.'} · {activeRoutePage?.count ?? '—'} styles</p>
          </V2Reveal>
-         {matches.length ? <V2ProductGrid products={matches} onNavigate={navigate}/> :
+         {!activeRoutePage ? <p role="status">Searching catalogue…</p> : matches.length ? <V2ProductGrid products={matches} onNavigate={navigate}/> :
           <div className="border border-[#e4d5c2] bg-[#f5ece0] px-7 py-14 text-center">
             <h2 className="font-serif text-3xl">No matching styles yet.</h2>
             <p className="mt-4 text-sm leading-7 text-[#766b5e]">Try searching for Sherwani, Kurta or Jodhpuri, or explore the departments.</p>
             <V2Link href="/men" onNavigate={navigate} className="mt-7 inline-flex items-center gap-2 text-sm font-semibold text-[#805e38]">Browse Men's Wear <ArrowRight size={16}/></V2Link>
           </div>}
+         {activeRoutePage && activeRoutePage.count>activeRoutePage.pageSize && <nav aria-label="Search results pages" className="mt-10 flex justify-center gap-3">
+           <button type="button" className="min-h-11 border border-stone-300 px-5 disabled:opacity-40"
+             disabled={page===0} onClick={()=>setPage(current=>Math.max(0,current-1))}>Previous</button>
+           <span className="self-center text-sm">Page {page+1} of {Math.ceil(activeRoutePage.count/activeRoutePage.pageSize)}</span>
+           <button type="button" className="min-h-11 border border-stone-300 px-5 disabled:opacity-40"
+             disabled={(page+1)*activeRoutePage.pageSize>=activeRoutePage.count}
+             onClick={()=>setPage(current=>current+1)}>Next</button>
+         </nav>}
        </section> :
        path === '/contact' ? <section className="relative min-h-[70vh] overflow-hidden bg-[#2b241e] px-6 py-20 text-[#f8eddd] md:px-12 md:py-32">
          <div className="pointer-events-none absolute -right-24 top-0 h-[600px] w-[600px] rounded-full bg-[radial-gradient(circle,#644f38,transparent_70%)]"/>
