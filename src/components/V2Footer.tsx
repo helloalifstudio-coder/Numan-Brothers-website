@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowUpRight, MapPin } from 'lucide-react';
+import {ArrowUpRight,MapPin,Instagram,Facebook,Youtube} from 'lucide-react';
 import V2Link from './V2Link';
 import type {CmsHome,CmsCategoryRow} from '../lib/cmsData';
 import {siteText} from '../lib/siteContent';
@@ -41,11 +41,27 @@ export default function V2Footer({ onNavigate,home,categories=[] }: {onNavigate:
           <h2 className="mb-6 text-[10px] font-bold uppercase tracking-[.22em] text-[#cfae81]">{siteText(home,'footer.find')}</h2>
           <p className="flex items-start gap-3 text-sm leading-7 text-[#cfc3b5]"><MapPin size={18} className="mt-1 shrink-0"/> {siteText(home,'footer.address')}</p>
           <V2Link href="/contact" onNavigate={onNavigate} className="mt-6 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[.12em] text-[#e6c69d]">{siteText(home,'footer.cta')} <ArrowUpRight size={16}/></V2Link>
+          <nav className="mt-6 flex items-center gap-3" aria-label="Social media profiles">
+            {([
+              ['instagram',Instagram,'Instagram'],['facebook',Facebook,'Facebook'],['youtube',Youtube,'YouTube'],
+            ] as const).map(([key,Icon,label])=>
+              home?.socialLinks[key]&&<a key={key} href={home.socialLinks[key]} target="_blank" rel="noopener noreferrer"
+                aria-label={'Open our '+label} className="flex h-11 w-11 items-center justify-center rounded-full border border-[#887258] hover:bg-white/15">
+                <Icon size={18}/></a>)}
+          </nav>
         </div>
       </div>
       <div className="flex flex-wrap items-center justify-between gap-4 py-7 text-[10px] font-semibold uppercase tracking-[.15em] text-[#998b7c]">
         <span>© {new Date().getFullYear()} {siteText(home,'footer.brand')}. {siteText(home,'footer.copyright')}</span>
         <span>{siteText(home,'footer.slogan')}</span>
+      </div>
+      <div className="flex flex-wrap items-center justify-center gap-2 border-t border-[#3c332a] py-5 text-xs text-[#b9ad9c]">
+        <span>Website by</span>
+        <a href="https://alif-growth-media.vercel.app/" target="_blank" rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 font-semibold text-[#f2d4a1] underline-offset-4 hover:underline">
+          <img src="https://alif-growth-media.vercel.app/favicon.png" alt="" loading="lazy"
+            className="h-7 w-7 rounded-md object-contain"/>Alif Growth Media <ArrowUpRight size={14}/>
+        </a>
       </div>
     </div>
   </footer>;
