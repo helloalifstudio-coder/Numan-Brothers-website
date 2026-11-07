@@ -1,6 +1,7 @@
 import type { Product } from '../types';
 import type { CatalogProduct } from '../storefront/catalog';
 import { getCmsClient } from './supabaseClient';
+import {cleanSiteText,normalizeOrder,HOME_SECTIONS,FEATURED_CARDS} from './siteContent';
 
 export interface CmsProductRow {
   id: string;
@@ -53,6 +54,10 @@ export interface CmsHome {
   storyDescription: string;
   storyImage: string;
   contactWhatsapp: string;
+  siteText: Record<string,string>;
+  sectionOrder: string[];
+  hiddenSections: string[];
+  featuredOrder: string[];
 }
 export const HOME_TEMPLATE: CmsHome = {
   heroTitle: 'For the moments you remember.',
@@ -65,11 +70,16 @@ export const HOME_TEMPLATE: CmsHome = {
   storyDescription: 'From wedding ensembles to traditional everyday styles, discover the silhouettes that feel right for your celebration.',
   storyImage: '',
   contactWhatsapp: '',
+  siteText: {},
+  sectionOrder:HOME_SECTIONS.map(s=>s.id),
+  hiddenSections:[],
+  featuredOrder:FEATURED_CARDS.map(s=>s.id),
 };
-export const homeKeys = Object.keys(HOME_TEMPLATE) as (keyof CmsHome)[];
+export const homeKeys = ['heroTitle','heroEyebrow','heroSubtitle','heroImage','menImage',
+  'kidsImage','storyTitle','storyDescription','storyImage','contactWhatsapp'] as const;
 export const cleanHome = (value: unknown): CmsHome => {
   const record = value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {};
-  return homeKeys.reduce((next, key) => {
+  const base=homeKeys.reduce((next, key) => {
     const raw = record[key];
     const value = typeof raw === 'string' ? raw.slice(0, key.includes('Description') || key.includes('Subtitle') ? 900 : 300) : HOME_TEMPLATE[key];
     next[key] = key === 'contactWhatsapp'
@@ -77,6 +87,14 @@ export const cleanHome = (value: unknown): CmsHome => {
       : key.toLowerCase().includes('image') ? (value && isSafeHttps(value) ? value : '') : value;
     return next;
   }, { ...HOME_TEMPLATE });
+  return {...base,
+    siteText:cleanSiteText(record.siteText),
+    sectionOrder:normalizeOrder(record.sectionOrder,HOME_SECTIONS.map(s=>s.id)),
+    featuredOrder:normalizeOrder(record.featuredOrder,FEATURED_CARDS.map(s=>s.id)),
+    hiddenSections:Array.isArray(record.hiddenSections)
+      ? record.hiddenSections.filter((id):id is string=>typeof id==='string'&&id!=='hero'&&HOME_SECTIONS.some(s=>s.id===id))
+      : [],
+  };
 };
 export const isSafeHttps = (url: string): boolean => {
   try { const parsed = new URL(url); return parsed.protocol === 'https:' && !parsed.username && !parsed.password; }
