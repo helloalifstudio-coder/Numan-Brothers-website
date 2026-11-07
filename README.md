@@ -46,6 +46,9 @@ Never use a secret key or database password as a VITE_ variable. Do not use anot
 - Categories: nb_categories (seeded with user-requested category names, not inventory).
 
 Full setup and go/no-go instructions:
+- docs/ARCHITECTURE_FRONTEND_CMS_PAYMENTS.md (live vs candidate systems, frontend/backend map, payments, CMS vs code versions)
+- docs/SUPABASE_STAGING_INSTALL.md (all nine SQL migrations, Auth, Storage and deployment setup)
+- docs/SUPABASE_STAGING_TEST_MATRIX.md (actual image/video/role/load acceptance evidence)
 - docs/CLIENT_ONBOARDING.md (client-owned fork, new Supabase, Vercel and read-only commissioning)
 - docs/PHASE1_SECURITY_REVIEW.md (Phase 1 audit, controls, unresolved security blockers)
 - docs/CMS_DEPLOYMENT.md
@@ -57,7 +60,7 @@ Full setup and go/no-go instructions:
 ## Boundaries and known pending work
 **Production gate:** Phase 2 source introduces private staging and approved-public media promotion, but this has NOT been deployed or validated on a client Supabase project. Treat the old public bucket as insecure until the reviewed migration and real Storage tests prove otherwise. Never use the unrelated gym project.
 
-The website is *browse and enquire*, not an online payment system. Future ERP/POS is the authoritative stock, prices and tax source. Production SEO requires real indexing tests and an SSR/prerender decision for dynamically generated product routes. Real photography, contact numbers and the meanings of "Sadi" and Sherwani "Plain Suits" need owner confirmation.
+The website is *browse and enquire*, not an online payment system. Future ERP/POS is the authoritative stock, prices and tax source. SEO SSR/prerender code exists but requires real Vercel routing, HTTP-status, crawler and indexing acceptance tests. Real photography, contact numbers and the meanings of "Sadi" and Sherwani "Plain Suits" need owner confirmation.
 
 The legacy Firebase rules in the repository are deny-all, **but that file is not deployed to Firebase**. Back up and secure the old live Firebase project in a controlled migration.
 
