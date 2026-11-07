@@ -96,9 +96,12 @@ const handler = withSupabase({ auth: 'user' }, async (req, ctx) => {
     return json(503, { error: 'Cannot verify media references; revocation denied' })
   }
   const homeContent = homes.data?.content as Record<string, unknown> | undefined
+  const referenceVideos=homeContent?.sectionVideos && typeof homeContent.sectionVideos==='object'
+    && !Array.isArray(homeContent.sectionVideos)
+    ? Object.values(homeContent.sectionVideos):[];
   const referencedByHome = homeContent &&
-    ['heroImage', 'menImage', 'kidsImage', 'storyImage']
-      .some(key => homeContent[key] === publicUrl)
+    (['heroImage', 'menImage', 'kidsImage', 'storyImage','customizationImage']
+      .some(key => homeContent[key] === publicUrl) || referenceVideos.some(url=>url===publicUrl))
   if ((products.count ?? 0) > 0 || (collections.count ?? 0) > 0 ||
       (legacyImages.count ?? 0) > 0 || (legacyVideo.count ?? 0) > 0 ||
       referencedByHome) {
