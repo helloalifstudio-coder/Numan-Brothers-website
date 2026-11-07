@@ -5,9 +5,9 @@ import { canonicalOrigin, renderNotFoundHtml, renderProductHtml } from './_seo.m
 let cachedTemplate:string|null=null;
 function template():string {
   if(cachedTemplate)return cachedTemplate;
-  // Bundled by Vercel functions.includeFiles; never use source index.html,
+  // Bundled by Vercel functions.includeFiles; preserve original empty-root build shell,
   // which points to unhashed development JavaScript assets.
-  cachedTemplate=readFileSync(resolve(process.cwd(),'dist/index.html'),'utf8');
+  cachedTemplate=readFileSync(resolve(process.cwd(),'dist/_shell.html'),'utf8');
   return cachedTemplate;
 }
 export default {
