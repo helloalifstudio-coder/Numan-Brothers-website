@@ -29,7 +29,7 @@ describe('Server-only media approval contract',()=>{
     assert.match(code,/return json\(409,.*This file is still used/);
   });
   it('supports deliberate archiving and fully deleting unused assets, never direct anonymous mutation',()=>{
-    assert.match(code,/action === 'archive'/);
+    assert.match(code,/action\s*===\s*'archive'/);
     assert.match(code,/action === 'restore'/);
     assert.match(code,/action==='delete'/);
     assert.match(code,/from\('nb_media'\)\.delete\(\)/);
