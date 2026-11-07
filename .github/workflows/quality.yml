@@ -49,5 +49,11 @@ jobs:
           psql -v ON_ERROR_STOP=1 -f tests/sql/bootstrap.sql
           psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261107060000_nomaan_cms.sql
           psql -v ON_ERROR_STOP=1 -f tests/sql/assert.sql
+      - name: Reject production deployments without client CMS credentials
+        run: |
+          if env VERCEL_ENV=production VITE_SUPABASE_URL= VITE_SUPABASE_PUBLISHABLE_KEY= VITE_SUPABASE_ANON_KEY= bun run build; then
+            echo "::error::Production build accepted an unconfigured CMS backend."
+            exit 1
+          fi
       - name: Production build
         run: bun run build
