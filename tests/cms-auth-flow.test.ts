@@ -46,6 +46,6 @@ describe('Noman CMS authentication and role recovery',()=>{
     const sql=readFileSync(new URL('../docs/OWNER_ROLE_SQL_TEMPLATE.sql',import.meta.url),'utf8');
     expect(sql).toContain('email_confirmed_at is not null');
     expect(sql).toContain('found_count <> 1');
-    expect(sql).toContain("'{nb_role}'").not.toBeNull();
+    expect(sql).toContain("'{nb_role}'");
   });
 });
