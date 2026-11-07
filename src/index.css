@@ -105,6 +105,5 @@ a { text-decoration: none; }
   from { opacity: .12; transform: scale(1.04); }
   to { opacity: .55; transform: scale(1); }
 }
-@media (prefers-reduced-motion: reduce) {
-  .motion-safe\\:animate-\\[nb-ambient-arrival_850ms_ease-out_both\\] { animation: none !important; }
-}
+/* Tailwind's motion-safe: utility already suppresses this animation for
+   visitors with prefers-reduced-motion: reduce. */
