@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { ArrowUpRight, Database, FolderOpen, Image, LayoutDashboard, LockKeyhole, LogOut, Package } from 'lucide-react';
+import { ArrowUpRight, Database, FolderOpen, Image, LayoutDashboard, LockKeyhole, LogOut, Package, FileUp } from 'lucide-react';
 import type { SupabaseClient, User } from '@supabase/supabase-js';
 import { getCmsClient } from '../lib/supabaseClient';
 import { allowedCmsRole, canPublishRole, type CmsMediaRow } from '../lib/cmsData';
@@ -9,12 +9,14 @@ import CmsMedia from './studio/CmsMedia';
 import CmsProducts from './studio/CmsProducts';
 import CmsHomepage from './studio/CmsHomepage';
 import CmsCategories from './studio/CmsCategories';
+import CmsImports from './studio/CmsImports';
 
-type Section = 'dashboard' | 'products' | 'media' | 'homepage' | 'collections';
+type Section = 'dashboard' | 'products' | 'media' | 'homepage' | 'collections' | 'imports';
 type CmsUser = { id:string;email:string;role:'owner'|'admin'|'editor' };
 const sections: { id:Section;label:string;icon:React.ComponentType<{size?:number}> }[] = [
   {id:'dashboard',label:'Dashboard',icon:LayoutDashboard},
   {id:'products',label:'Products',icon:Package},
+  {id:'imports',label:'Bulk imports',icon:FileUp},
   {id:'media',label:'Media',icon:Image},
   {id:'homepage',label:'Homepage',icon:LayoutDashboard},
   {id:'collections',label:'Collections',icon:FolderOpen},
@@ -158,6 +160,7 @@ export default function CmsStudio(){
               </div>
             </section>}
             {section==='media'&&<CmsMedia client={client} userId={staff.id} canPublish={canPublish} onMediaChange={()=>void loadMedia()}/>}
+            {section==='imports'&&<CmsImports client={client} userId={staff.id} onMediaChange={()=>void loadMedia()}/>}
             {section==='products'&&<CmsProducts client={client} userId={staff.id} canPublish={canPublish} media={media}/>}
             {section==='homepage'&&<CmsHomepage client={client} userId={staff.id} canPublish={canPublish} media={media}/>}
             {section==='collections'&&<CmsCategories client={client} canPublish={canPublish} media={media}/>}
