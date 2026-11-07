@@ -70,8 +70,11 @@ export default function CmsHomepage({client,userId,canPublish,media}:Props) {
     try {
       if(form.heroTitle.trim().length<4)throw new Error('Hero headline must have at least four characters.');
       if(form.contactWhatsapp && !/^[1-9][0-9]{9,14}$/.test(form.contactWhatsapp))throw new Error('WhatsApp must be a verified international number (10–15 digits, including country code).');
+      const content=cleanHome(form);
+      const byteCount=new TextEncoder().encode(JSON.stringify(content)).length;
+      if(byteCount>28000)throw new Error('Website content is too long ('+byteCount+' bytes). Shorten long paragraphs before saving.');
       const {error}=await client.from('nb_home_drafts').upsert({
-        key:'home', content:form,updated_by:userId,
+        key:'home', content,updated_by:userId,
       },{onConflict:'key'});
       if(error)throw error;
       setMessage('Draft saved. Visitors are still seeing the last published version.');
