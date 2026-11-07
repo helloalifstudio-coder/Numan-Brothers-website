@@ -81,6 +81,43 @@ begin
   end if;
 end;
 $$;
+-- The owner may publish via RPC, but must not directly mutate a live row.
+do $
+declare denied boolean := false;
+begin
+  begin
+    update public.nb_products set title='Bypassed publishing' where sku='NB-CI-1';
+  exception when insufficient_privilege then denied:=true;
+  end;
+  if not denied then raise exception 'Owner could bypass product publishing'; end if;
+
+  denied:=false;
+  begin
+    update public.nb_home_public set content='{"heroTitle":"Bypassed"}'::jsonb where key='home';
+  exception when insufficient_privilege then denied:=true;
+  end;
+  if not denied then raise exception 'Owner could bypass homepage publishing'; end if;
+
+  if (select count(*) from public.nb_product_revisions where product_id =
+    '22222222-2222-4222-8222-222222222222') <> 1 then
+    raise exception 'Product revision was not recorded';
+  end if;
+  if (select count(*) from public.nb_home_revisions where key='home') <> 1 then
+    raise exception 'Homepage revision was not recorded';
+  end if;
+end;
+$;
+-- Confirm revision history cannot be overwritten through the Data API.
+do $
+declare forbidden boolean := false;
+begin
+  begin
+    update public.nb_home_revisions set version=9 where key='home';
+  exception when insufficient_privilege then forbidden:=true;
+  end;
+  if not forbidden then raise exception 'Published revisions are mutable'; end if;
+end;
+$;
 -- Confirm unpublished/draft HTML cannot be publicly selected.
 reset role;
 select set_config('request.jwt.claims','{}',false);
