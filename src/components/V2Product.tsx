@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowLeft, ArrowRight, ArrowUpRight, MapPin } from 'lucide-react';
 import { Product } from '../types';
-import { productImage } from '../storefront/catalog';
+import { productImage, type CatalogProduct } from '../storefront/catalog';
 import V2Link from './V2Link';
 import V2Reveal from './V2Reveal';
 
@@ -9,6 +9,9 @@ interface Props { product: Product; onNavigate: (path: string) => void; }
 export default function V2Product({ product, onNavigate }: Props) {
   const images = (product.images || []).filter((image) => /^https:\/\//.test(image));
   const [selectedImage, setSelectedImage] = useState(0);
+  const videoUrl = (product as CatalogProduct).videoUrl;
+  const playableVideo = typeof videoUrl === 'string' && /^https:\/\//.test(videoUrl) &&
+    (/\.(mp4|webm)(\?|$)/i.test(videoUrl) || videoUrl.includes('/storage/v1/object/public/nb-media/'));
   const contact = 'https://wa.me/919908597337?text=' +
     encodeURIComponent('Hello Nomaan Brothers, I would like to enquire about ' + product.title + ' (' + product.id + ').');
   return <div className="min-h-[65vh] bg-[#fbf8f2] px-5 pb-28 pt-9 md:px-12 lg:px-20">
@@ -21,6 +24,10 @@ export default function V2Product({ product, onNavigate }: Props) {
               alt={product.title} loading="eager" fetchPriority="high" decoding="async" className="h-full w-full object-cover object-top"/> :
               <div className="flex h-full items-center justify-center font-serif text-6xl italic text-[#9a8266]">Nomaan</div>}
           </div>
+          {videoUrl && <div className="mt-6 overflow-hidden rounded-sm bg-[#25201b]">
+            {playableVideo ? <video src={videoUrl} controls preload="metadata" playsInline poster={images[0]} className="aspect-video w-full" aria-label={'Video of '+product.title}/> :
+              <a href={videoUrl} target="_blank" rel="noopener noreferrer" className="flex min-h-20 items-center justify-center gap-3 text-sm font-medium text-white">View the product video <ArrowRight size={16}/></a>}
+          </div>}
           {images.length > 1 && <div className="mt-4 flex gap-3 overflow-auto pb-2" aria-label="Product images">
             {images.map((image, index) => <button key={image + index} type="button"
               aria-label={'View image ' + (index + 1)} aria-pressed={selectedImage === index}

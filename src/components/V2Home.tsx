@@ -2,15 +2,16 @@ import React, { useRef } from 'react';
 import { ArrowDownRight, ArrowRight, ArrowUpRight, MapPin, MoveDownRight } from 'lucide-react';
 import { motion, useReducedMotion, useScroll, useTransform } from 'motion/react';
 import { Product } from '../types';
+import { type CmsHome } from '../lib/cmsData';
 import { productsForCollection, productImage } from '../storefront/catalog';
 import V2Link from './V2Link';
 import V2Reveal from './V2Reveal';
 
-interface Props { products: Product[]; onNavigate: (path: string) => void; }
-const photo = 'https://images.unsplash.com/photo-1597983073493-88cd35cf93b0?auto=format&fit=crop&w=1800&q=85';
-const photoTwo = 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=1000&q=80';
+interface Props { products: Product[]; home: CmsHome; onNavigate: (path: string) => void; }
 
-export default function V2Home({ products, onNavigate }: Props) {
+export default function V2Home({ products, home, onNavigate }: Props) {
+  const photo = home.heroImage;
+  const photoTwo = home.storyImage || home.menImage;
   const hero = useRef<HTMLElement>(null);
   const reduce = useReducedMotion();
   const { scrollYProgress } = useScroll({ target: hero, offset: ['start start', 'end start'] });
@@ -34,9 +35,9 @@ export default function V2Home({ products, onNavigate }: Props) {
     <section ref={hero} className="relative isolate min-h-[620px] overflow-hidden bg-[#211b17] text-[#fff8ed] md:min-h-[730px] lg:min-h-[min(860px,calc(100svh-106px))]" aria-labelledby="v2-home-title">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_28%_35%,#5d4939_0,transparent_56%)]" />
       <div className="absolute inset-y-0 right-0 w-[100%] md:w-[65%] lg:w-[57%]">
-        <motion.img src={photo} alt="" fetchPriority="high" loading="eager" decoding="async"
+        {photo && <motion.img src={photo} alt="" fetchPriority="high" loading="eager" decoding="async"
           className="h-full w-full scale-[1.10] object-cover object-center opacity-[.60] md:opacity-90"
-          style={reduce ? undefined : { y: imageY }} />
+          style={reduce ? undefined : { y: imageY }} />}
       </div>
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#211b17] via-[#211b17]/90 to-[#211b17]/30 md:via-[#211b17]/75 md:to-transparent" />
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#211b17]/70 via-transparent to-[#211b17]/10" />
@@ -45,13 +46,13 @@ export default function V2Home({ products, onNavigate }: Props) {
           <motion.div initial={reduce ? false : { opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: .7, ease: [0.22,1,0.36,1] }}>
             <div className="mb-8 flex items-center gap-4 text-[10px] font-semibold uppercase tracking-[.26em] text-[#e9c797]">
-              <span className="h-px w-10 bg-[#cba777]"/> The Designer Sherwani House
+              <span className="h-px w-10 bg-[#cba777]"/> {home.heroEyebrow}
             </div>
             <h1 id="v2-home-title" className="max-w-[12ch] font-serif text-[clamp(3.8rem,7.7vw,8.1rem)] font-normal leading-[.93] tracking-[-.065em]">
-              For the <em className="font-normal text-[#dec59d]">moments</em> you remember.
+              {home.heroTitle}
             </h1>
             <p className="mt-8 max-w-[465px] text-sm leading-8 text-[#e0d6c7] md:text-base">
-              Modern heritage menswear and kidswear, discovered in the heart of Mandi Bazar, Warangal.
+              {home.heroSubtitle}
             </p>
             <div className="mt-10 flex flex-wrap gap-3">
               <V2Link href="/men" onNavigate={onNavigate} className="inline-flex min-h-12 items-center gap-4 border border-[#f1dfbd] bg-[#e9d2ad] px-7 py-3 text-[11px] font-bold uppercase tracking-[.12em] text-[#281f16] transition-colors hover:bg-[#fff1d8]">
@@ -92,8 +93,8 @@ export default function V2Home({ products, onNavigate }: Props) {
       </V2Reveal>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
         <V2Reveal className="group relative min-h-[490px] overflow-hidden bg-[#332b24] text-white md:min-h-[620px]">
-          <img src={getImage('/men', photo)} loading="lazy" decoding="async" alt="Traditional menswear collection preview"
-            className="absolute inset-0 h-full w-full object-cover object-top opacity-75 transition-transform duration-700 group-hover:scale-[1.045]"/>
+          {getImage('/men', home.menImage) && <img src={getImage('/men', home.menImage)} loading="lazy" decoding="async" alt="Traditional menswear collection preview"
+            className="absolute inset-0 h-full w-full object-cover object-top opacity-75 transition-transform duration-700 group-hover:scale-[1.045]"/>}
           <div className="absolute inset-0 bg-gradient-to-t from-[#1b1815]/95 via-[#1b1815]/5 to-black/5"/>
           <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-5 px-7 pb-9 md:px-11 md:pb-12">
             <div><span className="text-[10px] uppercase tracking-[.27em] text-[#ebd6b2]">Collection 01</span>
@@ -106,9 +107,11 @@ export default function V2Home({ products, onNavigate }: Props) {
         </V2Reveal>
         <V2Reveal delay={0.1} className="group relative min-h-[490px] overflow-hidden bg-[#c7bba4] md:min-h-[620px]">
           {/* An illustrated placeholder avoids presenting adult product photographs as kidswear. */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_70%_20%,#eee3cb_0,transparent_50%),linear-gradient(130deg,#c2ad8a,#f4e5cc_70%,#a58e6b)]"/>
-          <div className="absolute left-[45%] top-[12%] h-[370px] w-[240px] rotate-[-16deg] rounded-[48%_48%_12%_12%] border-[22px] border-[#8e7250]/25 bg-[#d6c19b]/30 shadow-[30px_40px_90px_rgba(50,34,18,.2)] md:h-[460px] md:w-[290px]"/>
-          <div className="absolute left-[30%] top-[17%] h-[330px] w-[170px] rotate-[15deg] rounded-[46%_46%_18%_18%] border-[12px] border-[#f8ead1]/45 bg-[#d9bf93]/15 md:h-[430px] md:w-[210px]"/>
+          {home.kidsImage ? <img src={home.kidsImage} alt="Kidswear collection preview" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover object-top"/> : <>
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_70%_20%,#eee3cb_0,transparent_50%),linear-gradient(130deg,#c2ad8a,#f4e5cc_70%,#a58e6b)]"/>
+            <div className="absolute left-[45%] top-[12%] h-[370px] w-[240px] rotate-[-16deg] rounded-[48%_48%_12%_12%] border-[22px] border-[#8e7250]/25 bg-[#d6c19b]/30 shadow-[30px_40px_90px_rgba(50,34,18,.2)] md:h-[460px] md:w-[290px]"/>
+            <div className="absolute left-[30%] top-[17%] h-[330px] w-[170px] rotate-[15deg] rounded-[46%_46%_18%_18%] border-[12px] border-[#f8ead1]/45 bg-[#d9bf93]/15 md:h-[430px] md:w-[210px]"/>
+          </>}
           <div className="absolute left-10 top-10 flex h-24 w-24 items-center justify-center rounded-full border border-[#9b7f58]/55 text-[9px] uppercase tracking-[.18em] text-[#816744] md:h-28 md:w-28">Little<br/>Traditions</div>
           <div className="absolute inset-0 bg-gradient-to-t from-[#6d5135]/70 via-transparent to-transparent"/>
           <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-5 px-7 pb-9 text-white md:px-11 md:pb-12">
@@ -155,13 +158,14 @@ export default function V2Home({ products, onNavigate }: Props) {
       <div className="mx-auto grid max-w-[1330px] items-center gap-14 md:grid-cols-[.93fr_1.07fr] md:gap-20">
         <V2Reveal>
           <p className="mb-6 text-[10px] font-semibold uppercase tracking-[.29em] text-[#d8b581]">An invitation to discover</p>
-          <h2 className="max-w-[10ch] font-serif text-[clamp(3.1rem,5.3vw,6rem)] leading-[1.03] tracking-[-.045em]">A sense of <em className="text-[#e0bd89]">occasion.</em></h2>
-          <p className="mt-7 max-w-md text-sm leading-8 text-[#d7cabc]">From wedding ensembles to traditional everyday styles, discover the details and silhouettes that feel right for your celebration.</p>
+          <h2 className="max-w-[14ch] font-serif text-[clamp(3.1rem,5.3vw,6rem)] leading-[1.03] tracking-[-.045em]">{home.storyTitle}</h2>
+          <p className="mt-7 max-w-md text-sm leading-8 text-[#d7cabc]">{home.storyDescription}</p>
           <V2Link href="/men/marriage" onNavigate={onNavigate} className="mt-9 inline-flex items-center gap-4 border-b border-[#d8bd93] pb-3 text-xs font-semibold uppercase tracking-[.12em] text-[#ead7b8]">Marriage collection <ArrowDownRight size={17}/></V2Link>
         </V2Reveal>
         <V2Reveal className="relative">
           <div className="absolute -right-5 -top-5 h-full w-full border border-[#a88e70]/50" aria-hidden="true"/>
-          <img src={getImage('/men/kurta-pyjama', photoTwo)} alt="Traditional garment styling" loading="lazy" decoding="async" className="relative z-10 aspect-[4/5] w-full object-cover object-top"/>
+          {getImage('/men/kurta-pyjama', photoTwo) ? <img src={getImage('/men/kurta-pyjama', photoTwo)} alt="Traditional garment styling" loading="lazy" decoding="async" className="relative z-10 aspect-[4/5] w-full object-cover object-top"/> :
+            <div aria-hidden="true" className="relative z-10 aspect-[4/5] w-full bg-[radial-gradient(circle_at_70%_30%,#7f674c,transparent_60%)]"/>}
         </V2Reveal>
       </div>
     </section>

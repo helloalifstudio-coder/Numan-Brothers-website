@@ -1,10 +1,8 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { Suspense, useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { ArrowLeft, ArrowRight, ArrowUpRight, MapPin, MessageCircle } from 'lucide-react';
-import { PRODUCTS } from './data';
-import { Product } from './types';
-import { subscribeProducts } from './lib/firestoreService';
-import { CatalogProduct, productPath, publicProducts } from './storefront/catalog';
+import { type PublishedData, HOME_TEMPLATE, loadPublishedData } from './lib/cmsData';
+import { productPath, publicProducts } from './storefront/catalog';
 import { getCollection } from './storefront/navigation';
 import { useStoreHistory } from './storefront/history';
 import V2Header from './components/V2Header';
@@ -14,26 +12,33 @@ import V2Product from './components/V2Product';
 import V2Footer from './components/V2Footer';
 import V2Link from './components/V2Link';
 import V2Reveal from './components/V2Reveal';
+const CmsStudio = React.lazy(() => import('./components/CmsStudio'));
 
-/**
- * Public V2 is intentionally browse-and-enquire only.
- * The retired PIN-admin, checkout, rewards, and return flows are NOT mounted.
- * Product subscription is read-only; seedProducts is never called.
- * A server-authorized admin/CMS and ERP-backed catalogue are release blockers.
- */
+/** Public catalogue is read-only. All editorial mutations happen in the authenticated studio. */
 export default function App() {
   const { path, url, navigate } = useStoreHistory();
-  const [products, setProducts] = useState<CatalogProduct[]>(PRODUCTS);
+  const [siteData, setSiteData] = useState<PublishedData>({
+    products: [], homepage: HOME_TEMPLATE, categories: [], error: null,
+  });
+  const [catalogLoading, setCatalogLoading] = useState(true);
   useEffect(() => {
     let active = true;
-    const unsubscribe = subscribeProducts((items: CatalogProduct[]) => {
-      if (active && Array.isArray(items) && items.length > 0) setProducts(items);
-    });
-    return () => { active = false; unsubscribe?.(); };
+    const reload = async () => {
+      const next = await loadPublishedData();
+      if (active) { setSiteData(next); setCatalogLoading(false); }
+    };
+    void reload();
+    window.addEventListener('focus', reload);
+    return () => { active = false; window.removeEventListener('focus', reload); };
   }, []);
 
-  const published = useMemo(() => publicProducts(products), [products]);
-  const collection = getCollection(path);
+  const published = useMemo(() => publicProducts(siteData.products), [siteData.products]);
+  const collectionDefault = getCollection(path);
+  const categoryOverride = siteData.categories.find((c) => c.path === collectionDefault?.path);
+  const collection = collectionDefault && categoryOverride
+    ? { ...collectionDefault, title: categoryOverride.label,
+        description: categoryOverride.description || collectionDefault.description }
+    : collectionDefault;
   const selectedId = path.startsWith('/products/') ? path.slice('/products/'.length) : null;
   const product = selectedId ? published.find((item) => productPath(item) === path) : undefined;
   const searchQuery = path === '/search' ? new URLSearchParams(url.split('?')[1] || '').get('q')?.trim() || '' : '';
@@ -47,6 +52,10 @@ export default function App() {
     collection ? collection.title : product ? product.title :
     path === '/search' ? 'Search Collections' : path === '/contact' ? 'Visit Our Showroom' : 'Page Not Found';
 
+  if (path === '/studio' || path.startsWith('/studio/')) {
+    return <Suspense fallback={<p role="status" className="p-12">Loading private studio…</p>}><CmsStudio/></Suspense>;
+  }
+
   return <div className="min-h-screen bg-[#fbf8f2]">
     <Helmet>
       <title>{title} | Nomaan Brothers</title>
@@ -56,7 +65,10 @@ export default function App() {
     </Helmet>
     <V2Header path={path} onNavigate={navigate}/>
     <main id="main-content" className="min-h-[40vh]">
-      {path === '/' ? <V2Home products={published} onNavigate={navigate}/> :
+      {!catalogLoading && siteData.error && <div role="status" className="border-b border-amber-200 bg-amber-50 px-6 py-3 text-center text-xs text-amber-900">
+        The online catalogue is temporarily unavailable. Contact the showroom for current styles.
+      </div>}
+      {path === '/' ? <V2Home products={published} home={siteData.homepage} onNavigate={navigate}/> :
        collection ? <V2Collection route={collection} products={published} onNavigate={navigate}/> :
        product ? <V2Product key={product.id} product={product} onNavigate={navigate}/> :
        path === '/search' ? <section className="mx-auto min-h-[70vh] max-w-[1360px] px-5 py-16 md:px-12">

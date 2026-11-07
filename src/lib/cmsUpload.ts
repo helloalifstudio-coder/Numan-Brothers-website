@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { CmsMediaRow } from './cmsData';
-import { cmsProjectUrl, mediaPublicUrl } from './cmsData';
+import { cmsProjectUrl } from './supabaseClient';
 
 const allowed = new Map<string, string>([
   ['image/jpeg','jpg'], ['image/png','png'], ['image/webp','webp'],
