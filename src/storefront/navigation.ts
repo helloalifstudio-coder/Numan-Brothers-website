@@ -1,7 +1,7 @@
 /**
  * Nomaan Brothers V2 taxonomy.
- * Labels are intentionally faithful to the owner's draft until they approve
- * the meaning of "Sadi" and "Plain Suits" inside Sherwani.
+ * Customer-approved garment labels use Tobh, Jooti and Sadiri.
+ * Existing internal URL paths are retained to avoid breaking old links.
  */
 export type DepartmentId = 'men' | 'kids';
 
@@ -36,7 +36,7 @@ export const DEPARTMENTS: Department[] = [
         { label: 'Kurta Pyjama', path: '/men/kurta-pyjama' },
         { label: 'Pathani', path: '/men/pathani' },
         { label: 'Jodhpuri', path: '/men/jodhpuri' },
-        { label: 'Tope', path: '/men/tope' },
+        { label: 'Tobh', path: '/men/tope' },
       ] },
       { title: 'Sherwani', landingPath: '/men/sherwani', items: [
         { label: 'All Sherwanis', path: '/men/sherwani' },
@@ -49,9 +49,9 @@ export const DEPARTMENTS: Department[] = [
         { label: 'Plain Suits', path: '/men/suits/plain' },
       ] },
       { title: 'Marriage Collection', landingPath: '/men/marriage', items: [
-        { label: 'Jutti', path: '/men/marriage/jutti' },
+        { label: 'Jooti', path: '/men/marriage/jutti' },
         { label: 'Pagdi', path: '/men/marriage/pagdi' },
-        { label: 'Sadi', path: '/men/marriage/sadi' },
+        { label: 'Sadiri', path: '/men/marriage/sadi' },
       ] },
     ],
   },
@@ -65,10 +65,10 @@ export const DEPARTMENTS: Department[] = [
         { label: 'Kurta Pyjama', path: '/kids/kurta-pyjama' },
         { label: 'Sherwani', path: '/kids/sherwani' },
         { label: 'Pathani', path: '/kids/pathani' },
-        { label: 'Sadi', path: '/kids/sadi' },
+        { label: 'Sadiri', path: '/kids/sadi' },
         { label: 'Suits', path: '/kids/suits' },
         { label: 'Jodhpuri', path: '/kids/jodhpuri' },
-        { label: 'Tope', path: '/kids/tope' },
+        { label: 'Tobh', path: '/kids/tope' },
       ] },
     ],
   },

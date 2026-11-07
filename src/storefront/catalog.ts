@@ -13,6 +13,9 @@ export type CatalogProduct = Product & {
   published?: boolean;
   isPublished?: boolean;
   videoUrl?: string;
+  originalPrice?:number;
+  offerPrice?:number;
+  customizable?:boolean;
 };
 
 const words = (p: Product): string =>
@@ -45,9 +48,9 @@ export const productPaths = (p: CatalogProduct): string[] => {
     paths.push(prefix + '/pathani');
   } else if (/\bkurta\b|\bkurtas\b|\bpyjama\b|\bpajama\b/.test(name)) {
     paths.push(prefix + '/kurta-pyjama');
-  } else if (/\btope\b|\btopi\b|\bcap\b/.test(name)) {
+  } else if (/\btobh\b|\btob\b|\btope\b|\btopi\b|\bcap\b/.test(name)) {
     paths.push(prefix + '/tope');
-  } else if (/\bsadi\b/.test(name)) {
+  } else if (/\bsadri\b|\bsadiri\b|\bsadi\b/.test(name)) {
     paths.push(kids ? '/kids/sadi' : '/men/marriage/sadi');
   } else if (/\bsuit\b|\bsuits\b/.test(name)) {
     paths.push(prefix + '/suits');
@@ -55,7 +58,7 @@ export const productPaths = (p: CatalogProduct): string[] => {
       if (/\bhandwork\b|\bembroider\b|\bzardozi\b/.test(name)) paths.push('/men/suits/handwork');
       if (/\bplain\b/.test(name)) paths.push('/men/suits/plain');
     }
-  } else if (!kids && /\bjutti\b|\bmojaris?\b/.test(name)) {
+  } else if (!kids && /\bjooti\b|\bjhooti\b|\bjutti\b|\bmojaris?\b/.test(name)) {
     paths.push('/men/marriage/jutti');
   } else if (!kids && /\bpagdi\b|\bsafa\b|\bturban\b/.test(name)) {
     paths.push('/men/marriage/pagdi');
