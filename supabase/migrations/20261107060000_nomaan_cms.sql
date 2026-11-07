@@ -177,6 +177,7 @@ grant select on public.nb_categories, public.nb_products, public.nb_product_draf
   to authenticated;
 grant insert, update on public.nb_products, public.nb_product_drafts, public.nb_media,
   public.nb_home_drafts, public.nb_home_public to authenticated;
+grant insert on public.nb_product_revisions to authenticated;
 grant insert, update on public.nb_home_revisions to authenticated;
 grant update on public.nb_categories to authenticated;
 grant delete on public.nb_products, public.nb_media to authenticated;
