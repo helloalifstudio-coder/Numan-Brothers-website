@@ -3,6 +3,7 @@ import { ArrowDownRight, ArrowRight, ArrowUpRight, MapPin, MoveDownRight } from 
 import { motion, useReducedMotion, useScroll, useTransform } from 'motion/react';
 import { Product } from '../types';
 import { type CmsHome } from '../lib/cmsData';
+import {siteText,homeSectionStyle,featuredCardStyle} from '../lib/siteContent';
 import { productsForCollection, productImage } from '../storefront/catalog';
 import V2Link from './V2Link';
 import V2Reveal from './V2Reveal';
@@ -23,17 +24,17 @@ export default function V2Home({ products, home, onNavigate }: Props) {
     productImage(productsForCollection(products, route)[0] || {} as Product) || fallback;
 
   const edits = [
-    { eyebrow: '01 / Groom collection', title: 'The Sherwani Edit', description: 'Wedding silhouettes for the moment that matters.', route: '/men/sherwani',
+    { id:'one', eyebrow: siteText(home,'home.card1Eyebrow'), title:siteText(home,'home.card1Title'), description:siteText(home,'home.card1Text'), route: '/men/sherwani',
       image: getImage('/men/sherwani', photo), tone: 'bg-[#2b2926]' },
-    { eyebrow: '02 / The classics', title: 'Kurta & Pyjama', description: 'Timeless occasion-ready dressing.', route: '/men/kurta-pyjama',
+    { id:'two', eyebrow:siteText(home,'home.card2Eyebrow'), title:siteText(home,'home.card2Title'), description:siteText(home,'home.card2Text'), route: '/men/kurta-pyjama',
       image: getImage('/men/kurta-pyjama', photoTwo), tone: 'bg-[#44392d]' },
-    { eyebrow: '03 / Heritage fits', title: 'Jodhpuri', description: 'Structured elegance for celebration.', route: '/men/jodhpuri',
+    { id:'three', eyebrow:siteText(home,'home.card3Eyebrow'), title:siteText(home,'home.card3Title'), description:siteText(home,'home.card3Text'), route: '/men/jodhpuri',
       image: getImage('/men/jodhpuri', ''), tone: 'bg-[#545045]' },
   ];
 
-  return <div className="overflow-hidden bg-[#fbf8f2]">
+  return <div className="flex flex-col overflow-hidden bg-[#fbf8f2]">
     {/* An immersive cover with a real heading and accessible normal scrolling. */}
-    <section ref={hero} className="relative isolate min-h-[620px] overflow-hidden bg-[#211b17] text-[#fff8ed] md:min-h-[730px] lg:min-h-[min(860px,calc(100svh-106px))]" aria-labelledby="v2-home-title">
+    <section ref={hero} style={homeSectionStyle(home,'hero')} className="relative isolate min-h-[620px] overflow-hidden bg-[#211b17] text-[#fff8ed] md:min-h-[730px] lg:min-h-[min(860px,calc(100svh-106px))]" aria-labelledby="v2-home-title">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_28%_35%,#5d4939_0,transparent_56%)]" />
       <div className="absolute inset-y-0 right-0 w-[100%] md:w-[65%] lg:w-[57%]">
         {photo && <motion.img src={photo} alt="" fetchPriority="high" loading="eager" decoding="async"
@@ -57,17 +58,17 @@ export default function V2Home({ products, home, onNavigate }: Props) {
             </p>
             <div className="mt-10 flex flex-wrap gap-3">
               <V2Link href="/men" onNavigate={onNavigate} className="inline-flex min-h-12 items-center gap-4 border border-[#f1dfbd] bg-[#e9d2ad] px-7 py-3 text-[11px] font-bold uppercase tracking-[.12em] text-[#281f16] transition-colors hover:bg-[#fff1d8]">
-                Explore men's wear <ArrowUpRight size={17}/>
+                {siteText(home,'home.heroMen')} <ArrowUpRight size={17}/>
               </V2Link>
               <V2Link href="/kids" onNavigate={onNavigate} className="inline-flex min-h-12 items-center gap-4 border border-white/50 px-7 py-3 text-[11px] font-semibold uppercase tracking-[.12em] text-white transition-colors hover:bg-white/10">
-                Kids collection <ArrowRight size={17}/>
+                {siteText(home,'home.heroKids')} <ArrowRight size={17}/>
               </V2Link>
             </div>
           </motion.div>
         </motion.div>
         <motion.div className="absolute bottom-8 left-6 flex items-center gap-3 text-[10px] font-medium uppercase tracking-[.22em] text-white/75 md:left-12 lg:left-20"
           style={reduce ? undefined : { opacity: scrollLine }}>
-          <span className="flex h-8 w-8 items-center justify-center rounded-full border border-white/40"><MoveDownRight size={14}/></span> Scroll to discover
+          <span className="flex h-8 w-8 items-center justify-center rounded-full border border-white/40"><MoveDownRight size={14}/></span> {siteText(home,'home.scroll')}
         </motion.div>
         <div className="absolute bottom-9 right-7 hidden border-l border-white/40 pl-5 text-[10px] uppercase tracking-[.24em] text-[#e3d6c4] lg:block">
           Nomaan Brothers · Warangal
@@ -75,27 +76,27 @@ export default function V2Home({ products, home, onNavigate }: Props) {
       </div>
     </section>
 
-    <nav aria-label="Explore popular collections" className="border-b border-[#e0d4c2] bg-[#f2eadd] px-5 md:px-12 lg:px-20">
+    <nav aria-label="Explore popular collections" style={homeSectionStyle(home,'quick')} className="border-b border-[#e0d4c2] bg-[#f2eadd] px-5 md:px-12 lg:px-20">
       <div className="mx-auto flex max-w-[1330px] items-center gap-5 overflow-x-auto py-4 md:gap-8">
-        <span className="shrink-0 text-[10px] font-bold uppercase tracking-[.18em] text-[#8d704d]">Explore quickly</span>
+        <span className="shrink-0 text-[10px] font-bold uppercase tracking-[.18em] text-[#8d704d]">{siteText(home,'home.quickLabel')}</span>
         <div className="h-6 w-px shrink-0 bg-[#d2c2ac]" aria-hidden="true"/>
-        <V2Link href="/men/sherwani" onNavigate={onNavigate} className="inline-flex min-h-11 shrink-0 items-center gap-2 text-xs font-semibold text-[#4b3827] hover:text-[#a17848]">Sherwani <ArrowUpRight size={15}/></V2Link>
-        <V2Link href="/men/kurta-pyjama" onNavigate={onNavigate} className="inline-flex min-h-11 shrink-0 items-center gap-2 text-xs font-semibold text-[#4b3827] hover:text-[#a17848]">Kurta Pyjama <ArrowUpRight size={15}/></V2Link>
-        <V2Link href="/men/marriage" onNavigate={onNavigate} className="inline-flex min-h-11 shrink-0 items-center gap-2 text-xs font-semibold text-[#4b3827] hover:text-[#a17848]">Wedding Edit <ArrowUpRight size={15}/></V2Link>
-        <V2Link href="/kids" onNavigate={onNavigate} className="inline-flex min-h-11 shrink-0 items-center gap-2 text-xs font-semibold text-[#4b3827] hover:text-[#a17848]">Kids Wear <ArrowUpRight size={15}/></V2Link>
-        <a href="#collection-directory" className="inline-flex min-h-11 shrink-0 items-center gap-2 border-b border-[#a17b4b] text-xs font-semibold text-[#70512e] hover:text-[#a17848]">All categories <ArrowRight size={16}/></a>
+        <V2Link href="/men/sherwani" onNavigate={onNavigate} className="inline-flex min-h-11 shrink-0 items-center gap-2 text-xs font-semibold text-[#4b3827] hover:text-[#a17848]">{siteText(home,'home.quickSherwani')} <ArrowUpRight size={15}/></V2Link>
+        <V2Link href="/men/kurta-pyjama" onNavigate={onNavigate} className="inline-flex min-h-11 shrink-0 items-center gap-2 text-xs font-semibold text-[#4b3827] hover:text-[#a17848]">{siteText(home,'home.quickKurta')} <ArrowUpRight size={15}/></V2Link>
+        <V2Link href="/men/marriage" onNavigate={onNavigate} className="inline-flex min-h-11 shrink-0 items-center gap-2 text-xs font-semibold text-[#4b3827] hover:text-[#a17848]">{siteText(home,'home.quickWedding')} <ArrowUpRight size={15}/></V2Link>
+        <V2Link href="/kids" onNavigate={onNavigate} className="inline-flex min-h-11 shrink-0 items-center gap-2 text-xs font-semibold text-[#4b3827] hover:text-[#a17848]">{siteText(home,'home.quickKids')} <ArrowUpRight size={15}/></V2Link>
+        <a href="#collection-directory" className="inline-flex min-h-11 shrink-0 items-center gap-2 border-b border-[#a17b4b] text-xs font-semibold text-[#70512e] hover:text-[#a17848]">{siteText(home,'home.quickAll')} <ArrowRight size={16}/></a>
       </div>
     </nav>
 
-    <section className="mx-auto max-w-[1440px] px-5 pb-20 pt-24 md:px-12 md:pb-28 md:pt-32 lg:px-20" aria-labelledby="departments-title">
+    <section style={homeSectionStyle(home,'departments')} className="mx-auto max-w-[1440px] px-5 pb-20 pt-24 md:px-12 md:pb-28 md:pt-32 lg:px-20" aria-labelledby="departments-title">
       <V2Reveal className="mb-10 flex flex-wrap items-end justify-between gap-4 md:mb-16">
         <div>
-          <p className="mb-4 text-[10px] font-bold uppercase tracking-[.28em] text-[#a37d50]">Find your occasion</p>
+          <p className="mb-4 text-[10px] font-bold uppercase tracking-[.28em] text-[#a37d50]">{siteText(home,'home.departmentEyebrow')}</p>
           <h2 id="departments-title" className="max-w-[730px] font-serif text-[clamp(2.8rem,5.5vw,5.5rem)] leading-[1.04] tracking-[-.05em] text-[#29221b]">
-            Two worlds. <em className="text-[#97774f]">One tradition.</em>
+            {siteText(home,'home.departmentTitle')}
           </h2>
         </div>
-        <p className="max-w-xs text-sm leading-7 text-[#73685e]">Explore our clothing departments, organized for effortless discovery.</p>
+        <p className="max-w-xs text-sm leading-7 text-[#73685e]">{siteText(home,'home.departmentDescription')}</p>
       </V2Reveal>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
         <V2Reveal className="group relative min-h-[490px] overflow-hidden bg-[#332b24] text-white md:min-h-[620px]">
@@ -103,9 +104,9 @@ export default function V2Home({ products, home, onNavigate }: Props) {
             className="absolute inset-0 h-full w-full object-cover object-top opacity-75 transition-transform duration-700 group-hover:scale-[1.045]"/>}
           <div className="absolute inset-0 bg-gradient-to-t from-[#1b1815]/95 via-[#1b1815]/5 to-black/5"/>
           <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-5 px-7 pb-9 md:px-11 md:pb-12">
-            <div><span className="text-[10px] uppercase tracking-[.27em] text-[#ebd6b2]">Collection 01</span>
-              <h3 className="mt-3 font-serif text-5xl tracking-[-.04em] md:text-6xl">Men's Wear</h3>
-              <p className="mt-3 text-sm text-[#eee2d2]">Sherwani · Kurta Pyjama · Suits · More</p>
+            <div><span className="text-[10px] uppercase tracking-[.27em] text-[#ebd6b2]">{siteText(home,'home.menCardEyebrow')}</span>
+              <h3 className="mt-3 font-serif text-5xl tracking-[-.04em] md:text-6xl">{siteText(home,'home.menCardTitle')}</h3>
+              <p className="mt-3 text-sm text-[#eee2d2]">{siteText(home,'home.menCardDescription')}</p>
             </div>
             <V2Link href="/men" onNavigate={onNavigate} aria-label="Explore men's wear"
               className="flex h-13 w-13 shrink-0 items-center justify-center rounded-full border border-white/70 transition-colors hover:bg-white hover:text-[#241d17]"><ArrowUpRight/></V2Link>
@@ -121,9 +122,9 @@ export default function V2Home({ products, home, onNavigate }: Props) {
           <div className="absolute left-10 top-10 flex h-24 w-24 items-center justify-center rounded-full border border-[#9b7f58]/55 text-[9px] uppercase tracking-[.18em] text-[#816744] md:h-28 md:w-28">Little<br/>Traditions</div>
           <div className="absolute inset-0 bg-gradient-to-t from-[#6d5135]/70 via-transparent to-transparent"/>
           <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-5 px-7 pb-9 text-white md:px-11 md:pb-12">
-            <div><span className="text-[10px] uppercase tracking-[.27em] text-[#fff1d9]">Collection 02</span>
-              <h3 className="mt-3 font-serif text-5xl tracking-[-.04em] md:text-6xl">Kids Wear</h3>
-              <p className="mt-3 text-sm text-[#fff2df]">A special edit for every celebration</p>
+            <div><span className="text-[10px] uppercase tracking-[.27em] text-[#fff1d9]">{siteText(home,'home.kidsCardEyebrow')}</span>
+              <h3 className="mt-3 font-serif text-5xl tracking-[-.04em] md:text-6xl">{siteText(home,'home.kidsCardTitle')}</h3>
+              <p className="mt-3 text-sm text-[#fff2df]">{siteText(home,'home.kidsCardDescription')}</p>
             </div>
             <V2Link href="/kids" onNavigate={onNavigate} aria-label="Explore kids wear"
               className="flex h-13 w-13 shrink-0 items-center justify-center rounded-full border border-white/70 text-white transition-colors hover:bg-white hover:text-[#241d17]"><ArrowUpRight/></V2Link>
@@ -132,18 +133,18 @@ export default function V2Home({ products, home, onNavigate }: Props) {
       </div>
     </section>
 
-    <V2HomeDiscovery products={products} home={home} onNavigate={onNavigate}/>
+    <div style={homeSectionStyle(home,'directory')}><V2HomeDiscovery products={products} home={home} onNavigate={onNavigate}/></div>
 
-    <section className="bg-[#eee7db] px-5 py-24 md:px-12 md:py-28 lg:px-20" aria-labelledby="featured-title">
+    <section style={homeSectionStyle(home,'featured')} className="bg-[#eee7db] px-5 py-24 md:px-12 md:py-28 lg:px-20" aria-labelledby="featured-title">
       <div className="mx-auto max-w-[1330px]">
         <V2Reveal className="mb-12 flex flex-wrap items-end justify-between gap-6">
-          <div><p className="mb-4 text-[10px] font-bold uppercase tracking-[.28em] text-[#a37d50]">The curated edit</p>
-            <h2 id="featured-title" className="font-serif text-[clamp(2.8rem,5vw,5.1rem)] leading-[1.02] tracking-[-.045em] text-[#29221b]">Explore by <em>style.</em></h2></div>
-          <V2Link href="/men" onNavigate={onNavigate} className="inline-flex items-center gap-3 border-b border-[#a98d6a] pb-2 text-[11px] font-bold uppercase tracking-[.14em] text-[#6b502d]">All men's collections <ArrowRight size={16}/></V2Link>
+          <div><p className="mb-4 text-[10px] font-bold uppercase tracking-[.28em] text-[#a37d50]">{siteText(home,'home.featureEyebrow')}</p>
+            <h2 id="featured-title" className="font-serif text-[clamp(2.8rem,5vw,5.1rem)] leading-[1.02] tracking-[-.045em] text-[#29221b]">{siteText(home,'home.featureTitle')}</h2></div>
+          <V2Link href="/men" onNavigate={onNavigate} className="inline-flex items-center gap-3 border-b border-[#a98d6a] pb-2 text-[11px] font-bold uppercase tracking-[.14em] text-[#6b502d]">{siteText(home,'home.featureCta')} <ArrowRight size={16}/></V2Link>
         </V2Reveal>
         <div className="grid gap-5 md:grid-cols-3">
           {edits.map((edit, i) => (
-            <V2Reveal key={edit.route} delay={i * 0.075} className={'group overflow-hidden ' + edit.tone}>
+            <V2Reveal key={edit.route} delay={i * 0.075} style={featuredCardStyle(home,edit.id)} className={'group overflow-hidden ' + edit.tone}>
               <V2Link href={edit.route} onNavigate={onNavigate} className="block">
                 <div className="relative aspect-[3/4] overflow-hidden">
                   {edit.image ? <img src={edit.image} alt="" loading="lazy" decoding="async"
@@ -162,13 +163,13 @@ export default function V2Home({ products, home, onNavigate }: Props) {
       </div>
     </section>
 
-    <section className="relative overflow-hidden bg-[#211b17] px-5 py-24 text-[#f9efe0] md:px-12 md:py-32 lg:px-20">
+    <section style={homeSectionStyle(home,'story')} className="relative overflow-hidden bg-[#211b17] px-5 py-24 text-[#f9efe0] md:px-12 md:py-32 lg:px-20">
       <div className="mx-auto grid max-w-[1330px] items-center gap-14 md:grid-cols-[.93fr_1.07fr] md:gap-20">
         <V2Reveal>
-          <p className="mb-6 text-[10px] font-semibold uppercase tracking-[.29em] text-[#d8b581]">An invitation to discover</p>
+          <p className="mb-6 text-[10px] font-semibold uppercase tracking-[.29em] text-[#d8b581]">{siteText(home,'home.storyEyebrow')}</p>
           <h2 className="max-w-[14ch] font-serif text-[clamp(3.1rem,5.3vw,6rem)] leading-[1.03] tracking-[-.045em]">{home.storyTitle}</h2>
           <p className="mt-7 max-w-md text-sm leading-8 text-[#d7cabc]">{home.storyDescription}</p>
-          <V2Link href="/men/marriage" onNavigate={onNavigate} className="mt-9 inline-flex items-center gap-4 border-b border-[#d8bd93] pb-3 text-xs font-semibold uppercase tracking-[.12em] text-[#ead7b8]">Marriage collection <ArrowDownRight size={17}/></V2Link>
+          <V2Link href="/men/marriage" onNavigate={onNavigate} className="mt-9 inline-flex items-center gap-4 border-b border-[#d8bd93] pb-3 text-xs font-semibold uppercase tracking-[.12em] text-[#ead7b8]">{siteText(home,'home.storyCta')} <ArrowDownRight size={17}/></V2Link>
         </V2Reveal>
         <V2Reveal className="relative">
           <div className="absolute -right-5 -top-5 h-full w-full border border-[#a88e70]/50" aria-hidden="true"/>
@@ -178,14 +179,14 @@ export default function V2Home({ products, home, onNavigate }: Props) {
       </div>
     </section>
 
-    <section className="px-6 py-24 text-center md:py-28" aria-labelledby="visit-title">
+    <section style={homeSectionStyle(home,'visit')} className="px-6 py-24 text-center md:py-28" aria-labelledby="visit-title">
       <V2Reveal className="mx-auto max-w-[790px]">
         <MapPin className="mx-auto mb-7 h-7 w-7 text-[#a47d4e]" strokeWidth={1.2}/>
-        <p className="mb-5 text-[10px] font-bold uppercase tracking-[.27em] text-[#9b7649]">Experience the collection in person</p>
-        <h2 id="visit-title" className="font-serif text-[clamp(2.8rem,5vw,5.7rem)] leading-[1.05] tracking-[-.045em] text-[#282019]">Come discover <em>Nomaan Brothers.</em></h2>
-        <p className="mx-auto mt-6 max-w-xl text-sm leading-8 text-[#71685e]">Find our showroom in Mandi Bazar, Warangal. Explore styles, ask questions, and plan your visit.</p>
+        <p className="mb-5 text-[10px] font-bold uppercase tracking-[.27em] text-[#9b7649]">{siteText(home,'home.visitEyebrow')}</p>
+        <h2 id="visit-title" className="font-serif text-[clamp(2.8rem,5vw,5.7rem)] leading-[1.05] tracking-[-.045em] text-[#282019]">{siteText(home,'home.visitTitle')}</h2>
+        <p className="mx-auto mt-6 max-w-xl text-sm leading-8 text-[#71685e]">{siteText(home,'home.visitText')}</p>
         <V2Link href="/contact" onNavigate={onNavigate} className="mt-9 inline-flex min-h-12 items-center gap-4 bg-[#2b231b] px-8 py-3 text-[11px] font-semibold uppercase tracking-[.15em] text-white hover:bg-[#644a30]">
-          Plan your visit <ArrowUpRight size={17}/>
+          {siteText(home,'home.visitCta')} <ArrowUpRight size={17}/>
         </V2Link>
       </V2Reveal>
     </section>

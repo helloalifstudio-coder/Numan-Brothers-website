@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ArrowRight, ArrowUpRight, Compass, Sparkles } from 'lucide-react';
 import type { Product } from '../types';
 import type { CmsHome } from '../lib/cmsData';
+import {siteText} from '../lib/siteContent';
 import { productImage, productsForCollection } from '../storefront/catalog';
 import { getDepartment, type DepartmentId } from '../storefront/navigation';
 import V2Link from './V2Link';
@@ -24,23 +25,23 @@ export default function V2HomeDiscovery({ products, home, onNavigate }: Props) {
     ? home.kidsImage || productImage(productsForCollection(products, '/kids')[0] || {} as Product)
     : home.menImage || productImage(productsForCollection(products, '/men')[0] || {} as Product);
   const featured = active === 'men'
-    ? 'Sherwani · Kurta Pyjama · Suits · Marriage Collection'
-    : 'Sherwani · Kurta Pyjama · Pathani · Little celebrations';
+    ? siteText(home,'home.directoryMen')
+    : siteText(home,'home.directoryKids');
   const cards = department.groups;
   return <section id="collection-directory" className="scroll-mt-28 border-y border-[#dacebd] bg-[#eae2d6] px-5 py-20 md:px-12 md:py-28 lg:px-20"
     aria-labelledby="directory-title">
     <div className="mx-auto max-w-[1330px]">
       <V2Reveal className="flex flex-wrap items-end justify-between gap-7">
         <div className="max-w-[760px]">
-          <p className="mb-4 inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[.26em] text-[#876641]"><Compass size={15}/> The collection directory</p>
+          <p className="mb-4 inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[.26em] text-[#876641]"><Compass size={15}/> {siteText(home,'home.directoryEyebrow')}</p>
           <h2 id="directory-title" className="font-serif text-[clamp(2.8rem,5.8vw,5.8rem)] leading-[1.04] tracking-[-.055em] text-[#28221c]">
-            Find your look, <em className="text-[#98754e]">beautifully.</em>
+            {siteText(home,'home.directoryTitle')}
           </h2>
-          <p className="mt-6 max-w-xl text-sm leading-7 text-[#665a4c]">Every collection in one place. Choose a department, then go straight to the styles that interest you.</p>
+          <p className="mt-6 max-w-xl text-sm leading-7 text-[#665a4c]">{siteText(home,'home.directoryDescription')}</p>
         </div>
         <V2Link href="/search" onNavigate={onNavigate}
           className="inline-flex min-h-12 items-center gap-3 border-b border-[#9d7b51] text-[11px] font-bold uppercase tracking-[.14em] text-[#62472b]">
-          Search the catalogue <ArrowUpRight size={17}/>
+          {siteText(home,'home.directorySearch')} <ArrowUpRight size={17}/>
         </V2Link>
       </V2Reveal>
       <div className="mt-11 flex w-full max-w-[520px] gap-2 rounded-full border border-[#c9b69b] bg-[#f6f0e6]/65 p-1.5 sm:mt-14" role="group" aria-label="Choose a collection department">
@@ -99,9 +100,9 @@ export default function V2HomeDiscovery({ products, home, onNavigate }: Props) {
         </div>
       </div>
       <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-[#cfc0a9] pt-6 text-xs text-[#786754]">
-        <p>Explore by style · Browse by department · Enquire at the showroom</p>
+        <p>{siteText(home,'home.directoryBottom')}</p>
         <V2Link href="/contact" onNavigate={onNavigate} className="inline-flex min-h-11 items-center gap-2 font-semibold text-[#765536] hover:underline">
-          Need guidance? Visit us <ArrowUpRight size={16}/>
+          {siteText(home,'home.directoryContact')} <ArrowUpRight size={16}/>
         </V2Link>
       </div>
     </div>
