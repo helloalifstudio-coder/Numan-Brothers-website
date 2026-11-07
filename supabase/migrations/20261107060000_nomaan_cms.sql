@@ -175,6 +175,15 @@ drop trigger if exists nb_materialized_home_guard on public.nb_home_public;
 create trigger nb_materialized_home_guard before insert or update on public.nb_home_public
   for each row execute function public.nb_require_publish_scope('home');
 
+-- Published revision history must be created only by an authorized publishing
+-- transaction. RLS by itself does not prevent a publisher from forging history.
+drop trigger if exists nb_product_revision_guard on public.nb_product_revisions;
+create trigger nb_product_revision_guard before insert on public.nb_product_revisions
+  for each row execute function public.nb_require_publish_scope('product');
+drop trigger if exists nb_home_revision_guard on public.nb_home_revisions;
+create trigger nb_home_revision_guard before insert on public.nb_home_revisions
+  for each row execute function public.nb_require_publish_scope('home');
+
 drop trigger if exists nb_touch_product on public.nb_products;
 create trigger nb_touch_product before update on public.nb_products
   for each row execute function public.nb_touch_updated_at();
@@ -215,7 +224,8 @@ grant insert, update on public.nb_products, public.nb_product_drafts, public.nb_
 grant insert on public.nb_product_revisions to authenticated;
 grant insert on public.nb_home_revisions to authenticated;
 grant update on public.nb_categories to authenticated;
-grant delete on public.nb_products, public.nb_media to authenticated;
+-- Phase 1 least privilege: no routine hard deletes through the browser API.
+-- Soft archive and audited cleanup operations are introduced in later phases.
 grant usage, select on sequence public.nb_home_revisions_id_seq,
   public.nb_product_revisions_id_seq to authenticated;
 
@@ -246,8 +256,7 @@ create policy nb_product_revisions_staff_select on public.nb_product_revisions f
   to authenticated using ((select public.nb_can_edit()));
 create policy nb_product_revisions_publisher_insert on public.nb_product_revisions for insert
   to authenticated with check ((select public.nb_can_publish()) and published_by = (select auth.uid()));
-create policy nb_products_owner_delete on public.nb_products for delete
-  to authenticated using ((select public.nb_is_owner()));
+-- No public API delete policy for products; archives replace destructive deletes.
 
 create policy nb_media_staff_select on public.nb_media for select
   to authenticated using ((select public.nb_can_edit()));
@@ -261,8 +270,7 @@ create policy nb_media_editor_insert on public.nb_media for insert
 create policy nb_media_publisher_update on public.nb_media for update
   to authenticated using ((select public.nb_can_publish()))
   with check ((select public.nb_can_publish()));
-create policy nb_media_owner_delete on public.nb_media for delete
-  to authenticated using ((select public.nb_is_owner()));
+-- No direct public API media delete: reconciled cleanup requires a dedicated procedure.
 
 create policy nb_home_drafts_staff_select on public.nb_home_drafts for select
   to authenticated using ((select public.nb_can_edit()));
