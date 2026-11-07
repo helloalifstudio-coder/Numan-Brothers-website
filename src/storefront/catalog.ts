@@ -12,6 +12,7 @@ export type CatalogProduct = Product & {
   department?: 'men' | 'kids';
   published?: boolean;
   isPublished?: boolean;
+  videoUrl?: string;
 };
 
 const words = (p: Product): string =>

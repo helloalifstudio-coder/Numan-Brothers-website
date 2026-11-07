@@ -24,6 +24,6 @@ jobs:
       - name: TypeScript checks
         run: bun run lint
       - name: Navigation and catalogue tests
-        run: bun test tests/navigation.test.ts
+        run: bun test tests/navigation.test.ts tests/cms-security.test.ts tests/cms-data.test.ts
       - name: Production build
         run: bun run build
