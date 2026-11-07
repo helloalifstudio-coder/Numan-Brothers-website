@@ -8,7 +8,7 @@ declare
     'nb_categories','nb_products','nb_media','nb_product_drafts',
     'nb_product_revisions','nb_home_drafts','nb_home_public',
     'nb_home_revisions','nb_product_categories','nb_product_media',
-    'nb_import_jobs','nb_import_rows','nb_audit_events'
+    'nb_import_jobs','nb_import_rows','nb_audit_events','nb_sku_counters'
   ];
   name text;
   rls_enabled boolean;

@@ -33,7 +33,7 @@ This document distinguishes delivered functionality from advanced editing still 
 - All website text slots are **plain text**, never arbitrary HTML or scripts. Destinations for navigation buttons remain controlled routes.
 - The Homepage tab retains existing hero/story text/image fields and WhatsApp contact field plus 7 named layout sections and 3 featured product cards.
 - Drag a section/card or use the up/down buttons to change the live rendering order. Hide optional homepage sections without destroying their settings.
-- Page tabs organize 99 text fields for the navbar, footer, homepage, shared collection/product templates, search, contact and browser metadata.
+- Page tabs organize over 100 text fields for the navbar, footer, homepage, shared collection/product templates, search, contact and browser metadata.
 - **Save draft** only changes the authenticated `nb_home_drafts` row. **Publish website changes** uses `nb_publish_home` and creates an immutable numbered `nb_home_revisions` snapshot. The published JSON is visible to public readers.
 - Use **Collections** for individual category-specific labels/descriptions and banner art. Use **Products** for garment title, description, photography and gallery.
 
