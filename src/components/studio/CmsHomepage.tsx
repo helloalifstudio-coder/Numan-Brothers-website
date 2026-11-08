@@ -195,7 +195,7 @@ export default function CmsHomepage({client,userId,canPublish}:Props) {
         <div className="md:col-span-2 border-t border-stone-200 pt-6"><h3 className="font-serif text-2xl">Customization section artwork</h3></div>
         <div className="md:col-span-2">{assets('customizationImage','Tailoring and customization photograph')}</div>
         <div className="md:col-span-2 border-t border-stone-200 pt-6"><h3 className="font-serif text-2xl">Contact information</h3>
-          <p className="mt-2 text-xs leading-6 text-stone-600">Add the verified business WhatsApp number only after the shop owner approves it. Leave blank to hide all WhatsApp buttons.</p></div>
+          <p className="mt-2 text-xs leading-6 text-stone-600">Publish the verified business numbers to enable direct WhatsApp and Call floating buttons after the hero. Until then, visitors see a Contact showroom button, never a broken or unverified phone link.</p></div>
         <div className="md:col-span-2"><Field label="Verified WhatsApp number including country code (digits only, e.g. 91XXXXXXXXXX)">
           <input type="tel" className={inputClass} maxLength={15} value={form.contactWhatsapp}
             onChange={e=>update('contactWhatsapp',e.target.value.replace(/[^0-9]/g,''))} placeholder="Not published"/>

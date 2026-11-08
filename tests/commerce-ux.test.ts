@@ -2,6 +2,7 @@ import {describe,expect,test} from 'bun:test';
 import React from 'react';
 import {renderToStaticMarkup} from 'react-dom/server';
 import {validContactNumber,whatsappContact,callingContact} from '../src/lib/contactLinks';
+import {readFileSync} from 'node:fs';
 import {rowToProduct,HOME_TEMPLATE} from '../src/lib/cmsData';
 import {productPath} from '../src/storefront/catalog';
 import V2Product from '../src/components/V2Product';
@@ -42,4 +43,13 @@ describe('Floating contact and independent product pages',()=>{
     expect(html).toContain('wa.me/919876543210');
     expect(html).not.toContain('Add to cart');
   });
+});
+
+// Regression: newly installed shops must not have an invisible floating dock.
+test('no verified number still yields a usable contact action',()=>{
+  const dock=readFileSync(new URL('../src/components/FloatingContactDock.tsx',import.meta.url),'utf8');
+  expect(dock).toContain('const fallback=!whatsapp&&!calling');
+  expect(dock).toContain("'/contact'");
+  expect(dock).toContain('Contact showroom');
+  expect(dock).not.toContain('if(!visible||(!whatsapp&&!calling))');
 });

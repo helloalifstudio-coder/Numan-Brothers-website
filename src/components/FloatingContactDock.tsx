@@ -1,5 +1,5 @@
 import {useEffect,useState} from 'react';
-import {MessageCircle,Phone,ArrowUpRight} from 'lucide-react';
+import {MessageCircle,Phone,ArrowUpRight,MapPin} from 'lucide-react';
 import type {CatalogProduct} from '../storefront/catalog';
 import type {CmsHome} from '../lib/cmsData';
 import {callingContact,whatsappContact} from '../lib/contactLinks';
@@ -7,9 +7,9 @@ import {callingContact,whatsappContact} from '../lib/contactLinks';
 interface Props {home:CmsHome;path:string;product?:CatalogProduct|null;}
 
 /**
- * Appears only once the current hero is behind the reader. Query a measured
- * hero edge instead of using a fixed mobile scroll count; hide over the footer.
- * Passive listeners + requestAnimationFrame avoid unnecessary React updates.
+ * Appears only once the current hero is behind the reader. A useful showroom
+ * contact link is always available even before the owner publishes approved
+ * phone numbers. Passive scroll listeners avoid unnecessary React updates.
  */
 export default function FloatingContactDock({home,path,product}:Props){
   const [visible,setVisible]=useState(false);
@@ -45,11 +45,27 @@ export default function FloatingContactDock({home,path,product}:Props){
     : 'Hello Nomaan Brothers, I would like to enquire about your menswear and kidswear collections.';
   const whatsapp=whatsappContact(home.contactWhatsapp,context);
   const calling=callingContact(home.contactPhone);
-  if(!visible||(!whatsapp&&!calling))return null;
+  // Never show a broken WhatsApp or tel: link. If neither phone number has
+  // been approved in Studio, keep the dock visible with a working showroom
+  // destination instead of silently rendering nothing.
+  const fallback=!whatsapp&&!calling;
+  const fallbackHref=path==='/contact'
+    ? 'https://www.google.com/maps/search/?api=1&query=Nomaan+Brothers+Dresses+Mandi+Bazar+Warangal'
+    : '/contact';
+  if(!visible)return null;
 
   return <aside data-testid="floating-contact-dock" aria-label="Contact Nomaan Brothers"
     className="fixed bottom-[calc(.9rem+env(safe-area-inset-bottom))] left-3 z-40 flex max-w-[calc(100vw-1.5rem)] items-center gap-2 sm:bottom-6 sm:left-6"
     role="complementary">
+    {fallback&&<a href={fallbackHref}
+      aria-label={path==='/contact'?'Find Nomaan Brothers showroom directions':'Contact Nomaan Brothers showroom'}
+      title={path==='/contact'?'Get directions':'Contact the showroom'}
+      {...(path==='/contact'?{target:'_blank',rel:'noopener noreferrer'}:{})}
+      className="group inline-flex min-h-13 min-w-13 items-center justify-center gap-2.5 rounded-full border border-[#e8d4b7] bg-[#2c231c] px-3.5 text-[#f6e8d5] shadow-[0_12px_30px_rgba(0,0,0,.23)] ring-1 ring-black/20 transition-[transform,background-color,box-shadow] duration-200 hover:-translate-y-1 hover:bg-[#493626] focus-visible:outline-offset-4 motion-reduce:transform-none sm:px-4">
+      <MapPin size={21} strokeWidth={1.8} aria-hidden="true"/>
+      <span className="text-xs font-semibold tracking-wide">{path==='/contact'?'Directions':'Contact showroom'}</span>
+      <ArrowUpRight size={13} className="opacity-70" aria-hidden="true"/>
+    </a>}
     {whatsapp&&<a href={whatsapp} target="_blank" rel="noopener noreferrer"
       aria-label={product?'WhatsApp about '+product.title:'Chat with Nomaan Brothers on WhatsApp'}
       title="WhatsApp us"

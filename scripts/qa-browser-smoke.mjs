@@ -23,14 +23,14 @@ const mockProduct={
   price:12000,offer_price:9900,customizable:true,status:'published',sort_rank:1,
   created_at:'2026-10-01T00:00:00Z',updated_at:'2026-10-01T00:00:00Z'
 };
-async function mockCmsRoutes(page){
+async function mockCmsRoutes(page,{emptyContacts=false}={}){
   if(process.env.NB_MOCK_CMS!=='1')return;
   await page.route('https://fixture.supabase.co/**',async route=>{
     const url=new URL(route.request().url());
     const path=url.pathname;
     const json=(body,extra={})=>route.fulfill({status:200,contentType:'application/json',
       headers:{'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'apikey,authorization,content-type,x-client-info,prefer,accept,accept-profile,content-profile','Access-Control-Allow-Methods':'GET,POST,OPTIONS,HEAD','content-range':'0-0/1',...extra},body:JSON.stringify(body)});
-    if(path.endsWith('/nb_home_public'))return json({content:{
+    if(path.endsWith('/nb_home_public'))return json({content:emptyContacts?{}:{
       contactWhatsapp:'919876543210',contactPhone:'919876543211'
     }});
     if(path.endsWith('/nb_categories'))return json([]);
@@ -116,6 +116,36 @@ async function inspect(route,width=390,height=844,opts={}){
 }
 
 
+async function inspectUnconfiguredContactFallback(){
+  if(process.env.NB_MOCK_CMS!=='1')return;
+  for(const width of [320,375,390,768,1440]){
+    const context=await browser.newContext({viewport:{width,height:844}});
+    const page=await context.newPage();
+    await mockCmsRoutes(page,{emptyContacts:true});
+    try{
+      await page.goto(base+'/',{waitUntil:'domcontentloaded'});
+      await page.locator('#v2-home-title').waitFor({state:'visible',timeout:7000});
+      const dock=page.getByTestId('floating-contact-dock');
+      assert.equal(await dock.count(),0,'dock is hidden before hero is passed');
+      await page.locator('[data-nb-contact-hero]')
+        .evaluate(el=>window.scrollTo(0,el.getBoundingClientRect().bottom+window.scrollY+160));
+      await dock.waitFor({state:'visible',timeout:7000});
+      const fallback=dock.getByRole('link',{name:'Contact Nomaan Brothers showroom'});
+      assert.equal(await fallback.getAttribute('href'),'/contact');
+      assert.equal(await dock.locator('a[href^="https://wa.me/"]').count(),0,'no invented WhatsApp number');
+      assert.equal(await dock.locator('a[href^="tel:"]').count(),0,'no invented phone number');
+      const rect=await fallback.boundingBox();
+      assert.ok(rect&&rect.width>=44&&rect.height>=44,'fallback is easy to tap');
+      const extent=await page.evaluate(()=>document.documentElement.scrollWidth);
+      assert.ok(extent<=width+2,'no horizontal overflow at '+width+'px');
+      console.log('PASS_EMPTY_CONTACT_FALLBACK',JSON.stringify({width,href:'/contact',tapHeight:rect.height}));
+    }catch(error){
+      failures.push({route:'empty-contact',width,error:String(error?.stack||error)});
+      console.error('FAIL_EMPTY_CONTACT_FALLBACK',width,String(error?.message||error));
+    }finally{await context.close();}
+  }
+}
+
 async function inspectFloatingContactsAndProduct(){
   if(process.env.NB_MOCK_CMS!=='1')return;
   const context=await browser.newContext({viewport:{width:375,height:812}});
@@ -163,6 +193,7 @@ try{
   }
   if(!skipped)await inspect('/',390,844,{reduce:true});
   if(!skipped)await inspectFloatingContactsAndProduct();
+  if(!skipped)await inspectUnconfiguredContactFallback();
 }finally{await browser.close();}
 if(skipped)console.log('LIVE_CHECK_INCOMPLETE: external deployment is not publicly accessible from this runner.');
 console.log('BROWSER_SMOKE_SUMMARY',JSON.stringify({base,live,checks:results.length,failures:failures.length,skipped}));
