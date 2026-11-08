@@ -76,7 +76,7 @@ async function inspect(route,width=390,height=844,opts={}){
       const heading=document.querySelector('h1');
       const rect=heading?.getBoundingClientRect();
       const nav=Array.from(document.querySelectorAll('header button[aria-label="Open navigation"],header button[aria-label="Search collections"]'))
-        .filter(el=>getComputedStyle(el).display!=='none')
+        .filter(el=>el.getClientRects().length>0)
         .map(el=>{const r=el.getBoundingClientRect();return {left:r.left,right:r.right,width:r.width,height:r.height}});
       return {
         screen:innerWidth,
