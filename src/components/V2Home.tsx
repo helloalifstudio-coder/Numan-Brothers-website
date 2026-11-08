@@ -60,7 +60,7 @@ export default function V2Home({ products, home, categories=[], onNavigate }: Pr
             <div className="mb-8 flex items-center gap-4 text-[10px] font-semibold uppercase tracking-[.26em] text-[#e9c797]">
               <span className="h-px w-10 bg-[#cba777]"/> {home.heroEyebrow}
             </div>
-            <h1 id="v2-home-title" className="max-w-[12ch] font-serif text-[clamp(3.8rem,7.7vw,8.1rem)] font-normal leading-[.93] tracking-[-.065em]">
+            <h1 id="v2-home-title" className="max-w-[12ch] font-serif break-words text-[clamp(2.8rem,10vw,8.1rem)] font-normal leading-[.93] tracking-[-.065em]">
               {home.heroTitle}
             </h1>
             <p className="mt-8 max-w-[465px] text-sm leading-8 text-[#e0d6c7] md:text-base">
@@ -119,12 +119,12 @@ export default function V2Home({ products, home, categories=[], onNavigate }: Pr
       </V2Reveal>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
         <V2Reveal className="group relative min-h-[490px] overflow-hidden bg-[#332b24] text-white md:min-h-[620px]">
-          {home.menImage || getImage('/men') && <img src={home.menImage || getImage('/men')} loading="lazy" decoding="async" alt="Traditional menswear collection preview"
+          {(home.menImage || getImage('/men')) && <img src={home.menImage || getImage('/men')} loading="lazy" decoding="async" alt="Traditional menswear collection preview"
             className="absolute inset-0 h-full w-full object-cover object-top opacity-75 transition-transform duration-700 group-hover:scale-[1.045]"/>}
           <div className="absolute inset-0 bg-gradient-to-t from-[#1b1815]/95 via-[#1b1815]/5 to-black/5"/>
           <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-5 px-7 pb-9 md:px-11 md:pb-12">
             <div><span className="text-[10px] uppercase tracking-[.27em] text-[#ebd6b2]">{siteText(home,'home.menCardEyebrow')}</span>
-              <h3 className="mt-3 font-serif text-5xl tracking-[-.04em] md:text-6xl">{siteText(home,'home.menCardTitle')}</h3>
+              <h3 className="mt-3 font-serif text-[clamp(2.35rem,10vw,3rem)] tracking-[-.04em] md:text-6xl">{siteText(home,'home.menCardTitle')}</h3>
               <p className="mt-3 text-sm text-[#eee2d2]">{siteText(home,'home.menCardDescription')}</p>
             </div>
             <V2Link href="/men" onNavigate={onNavigate} aria-label="Explore men's wear"
@@ -142,7 +142,7 @@ export default function V2Home({ products, home, categories=[], onNavigate }: Pr
           <div className="absolute inset-0 bg-gradient-to-t from-[#6d5135]/70 via-transparent to-transparent"/>
           <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-5 px-7 pb-9 text-white md:px-11 md:pb-12">
             <div><span className="text-[10px] uppercase tracking-[.27em] text-[#fff1d9]">{siteText(home,'home.kidsCardEyebrow')}</span>
-              <h3 className="mt-3 font-serif text-5xl tracking-[-.04em] md:text-6xl">{siteText(home,'home.kidsCardTitle')}</h3>
+              <h3 className="mt-3 font-serif text-[clamp(2.35rem,10vw,3rem)] tracking-[-.04em] md:text-6xl">{siteText(home,'home.kidsCardTitle')}</h3>
               <p className="mt-3 text-sm text-[#fff2df]">{siteText(home,'home.kidsCardDescription')}</p>
             </div>
             <V2Link href="/kids" onNavigate={onNavigate} aria-label="Explore kids wear"

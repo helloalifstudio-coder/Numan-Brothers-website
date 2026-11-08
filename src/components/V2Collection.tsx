@@ -11,7 +11,7 @@ interface Props { route: CollectionRoute; products: CatalogProduct[]; bannerImag
   page?:number;pageSize?:number;onPageChange?:(page:number)=>void;
   onNavigate: (path: string) => void;home?:CmsHome;categories?:CmsCategoryRow[]; }
 export function V2ProductGrid({ products, onNavigate,home }: { products: CatalogProduct[]; onNavigate: (path: string) => void;home?:CmsHome }) {
-  return <div className="grid grid-cols-2 gap-x-4 gap-y-9 md:grid-cols-3 md:gap-x-6 md:gap-y-12 lg:grid-cols-4">
+  return <div className="grid grid-cols-1 gap-x-4 gap-y-9 min-[360px]:grid-cols-2 md:grid-cols-3 md:gap-x-6 md:gap-y-12 lg:grid-cols-4">
     {products.map((product, index) => (
       <V2Reveal key={product.id} delay={Math.min(index % 4, 3) * 0.04}>
         <V2Link href={productPath(product)} onNavigate={onNavigate} className="group block">
@@ -57,7 +57,7 @@ export default function V2Collection({ route, products, bannerImage, totalCount,
           </>}
         </nav>
         <p className="mb-6 text-[10px] font-semibold uppercase tracking-[.28em] text-[#ddb98b]">{siteText(home,'collection.eyebrow')} / {department.title}</p>
-        <h1 className="max-w-[850px] font-serif text-[clamp(3.4rem,7.5vw,7.4rem)] leading-[1] tracking-[-.06em]">{route.title}</h1>
+        <h1 className="max-w-[850px] font-serif break-words text-[clamp(2.65rem,8vw,7.4rem)] leading-[1] tracking-[-.06em]">{route.title}</h1>
         <p className="mt-7 max-w-xl text-sm leading-8 text-[#e0d2c1]">{route.description}</p>
       </div>
     </section>
@@ -92,7 +92,7 @@ export default function V2Collection({ route, products, bannerImage, totalCount,
           </V2Link>
         </V2Reveal>
       }
-      {onPageChange && (totalCount||0)>pageSize && <nav aria-label="Collection pages" className="mt-12 flex justify-center gap-3">
+      {onPageChange && (totalCount||0)>pageSize && <nav aria-label="Collection pages" className="mt-12 flex flex-wrap items-center justify-center gap-3">
         <button type="button" className="min-h-11 border border-[#b9a991] px-5 disabled:opacity-40"
           disabled={page===0} onClick={()=>onPageChange(Math.max(0,page-1))}>Previous</button>
         <span className="self-center text-sm">Page {page+1} of {Math.ceil((totalCount||0)/pageSize)}</span>

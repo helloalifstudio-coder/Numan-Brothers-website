@@ -39,7 +39,7 @@ export default function V2Product({ product, whatsappNumber, contactPhone, home,
       encodeURIComponent('Hello Nomaan Brothers, I would like to enquire about ' + product.title + ' (' + product.id + ').')
     : null;
 
-  return <div className="min-h-[72vh] bg-[#fbf8f2]">
+  return <div className="min-h-[72vh] bg-[#fbf8f2] pb-24 lg:pb-0">
     <section className="relative isolate overflow-hidden pb-20 pt-7 md:pb-28 md:pt-11" style={{ backgroundColor: theme.backdrop }}>
       <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
         {visual && <img key={visual} src={visual} alt="" loading="eager" decoding="async"
@@ -180,7 +180,7 @@ export default function V2Product({ product, whatsappNumber, contactPhone, home,
         </V2Link>)}
       </div>
     </section>
-    {contact && <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[#d8c6ab] bg-[#fcf7ee]/95 px-4 py-3 shadow-[0_-10px_35px_rgba(0,0,0,.08)] backdrop-blur-md lg:hidden">
+    {contact && <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[#d8c6ab] bg-[#fcf7ee]/95 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 shadow-[0_-10px_35px_rgba(0,0,0,.08)] backdrop-blur-md lg:hidden">
       <a href={contact} target="_blank" rel="noopener noreferrer"
         className="flex min-h-12 items-center justify-center gap-3 bg-[#30251b] px-5 text-xs font-bold uppercase tracking-[.11em] text-white">
         <MessageCircle size={17}/> Enquire about this design <ArrowUpRight size={17}/>

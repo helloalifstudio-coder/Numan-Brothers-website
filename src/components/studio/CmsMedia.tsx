@@ -246,7 +246,7 @@ export default function CmsMedia({client,userId,canPublish,onMediaChange}:Props)
           </article>;
         })}
       </div>}
-    {total>30&&<nav aria-label="Media pages" className="flex items-center justify-center gap-3">
+    {total>30&&<nav aria-label="Media pages" className="flex flex-wrap items-center justify-center gap-3">
       <button type="button" className={outlineClass} disabled={page===0}
         onClick={()=>setPage(current=>Math.max(0,current-1))}>Previous</button>
       <span className="text-sm">Page {page+1} / {Math.ceil(total/30)}</span>

@@ -217,8 +217,8 @@ export default function CmsProducts({client,userId,canPublish,media}:Props){
       </select>
       <p className="text-xs text-stone-500 sm:col-span-3">{totalCount.toLocaleString('en-IN')} records · 50 per page</p>
     </div>
-    <div className="grid gap-5 lg:grid-cols-[300px_1fr]">
-      <div className="max-h-[800px] space-y-2 overflow-y-auto rounded-lg border border-stone-200 bg-white p-3">
+    <div className="grid gap-5 xl:grid-cols-[300px_minmax(0,1fr)]">
+      <div className="max-h-60 space-y-2 overflow-y-auto xl:max-h-[800px] rounded-lg border border-stone-200 bg-white p-3">
         {loading?<p className="p-3 text-sm">Loading catalogue…</p>:rows.length===0?<p className="p-3 text-sm text-stone-600">No products yet. Add the first genuine garment.</p>:
           rows.map((item)=><button type="button" key={item.id} onClick={()=>open(item)}
             className={'w-full rounded-md px-3 py-3 text-left '+

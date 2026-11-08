@@ -136,16 +136,16 @@ export default function AssetEditor({client,label,selected,onChange,multiple=fal
         className="relative overflow-hidden rounded-md border border-amber-300 bg-stone-100">
         {allowVideo?<div className="flex aspect-[4/3] items-center justify-center bg-stone-900 text-white"><Video size={30}/></div>:
           <img className="aspect-[4/3] w-full object-cover" alt={'Selected '+label} src={url} loading="lazy"/>}
-        <div className="flex items-center justify-between gap-1 bg-white p-2">
+        <div className="flex flex-wrap items-center justify-between gap-1 bg-white p-2">
           <span className="inline-flex min-w-0 items-center text-[11px] text-stone-600">{multiple&&<GripVertical size={13}/>} {index===0?'Cover':'Image '+(index+1)}</span>
-          {multiple&&<button type="button" aria-label="Move selected photo up" disabled={index===0} className="p-1 disabled:opacity-40" onClick={()=>move(index,index-1)}><ArrowUp size={16}/></button>}
-          {multiple&&<button type="button" aria-label="Move selected photo down" disabled={index===selected.length-1} className="p-1 disabled:opacity-40" onClick={()=>move(index,index+1)}><ArrowDown size={16}/></button>}
-          <button type="button" aria-label={'Remove '+label+' '+(index+1)+' from this draft'} title="Remove from this section only (keep the original in Media)" className="rounded-md p-1 text-red-700 hover:bg-red-50"
+          {multiple&&<button type="button" aria-label="Move selected photo up" disabled={index===0} className="inline-flex min-h-10 min-w-10 items-center justify-center rounded-md disabled:opacity-40" onClick={()=>move(index,index-1)}><ArrowUp size={16}/></button>}
+          {multiple&&<button type="button" aria-label="Move selected photo down" disabled={index===selected.length-1} className="inline-flex min-h-10 min-w-10 items-center justify-center rounded-md disabled:opacity-40" onClick={()=>move(index,index+1)}><ArrowDown size={16}/></button>}
+          <button type="button" aria-label={'Remove '+label+' '+(index+1)+' from this draft'} title="Remove from this section only (keep the original in Media)" className="inline-flex min-h-10 min-w-10 items-center justify-center rounded-md text-red-700 hover:bg-red-50"
             onClick={()=>onChange(selected.filter((_,i)=>i!==index))}><Trash2 size={17}/></button>
           {canPublish&&<button type="button" disabled={deletingUrl!==null}
             title="Erase the file from Storage AND its database record once unused"
             onClick={()=>void deleteFromDatabase(url)}
-            className="min-h-9 rounded-md border border-red-200 px-2 text-[10px] font-semibold text-red-800 disabled:opacity-50">
+            className="min-h-10 rounded-md border border-red-200 px-2 text-[10px] font-semibold text-red-800 disabled:opacity-50">
             {deletingUrl===url?'Deleting…':'Delete from Supabase'}
           </button>}
         </div>
@@ -186,7 +186,7 @@ export default function AssetEditor({client,label,selected,onChange,multiple=fal
             </div>
           </button>;
         })}</div>}
-      {total>24&&<div className="flex items-center justify-between gap-2 text-xs">
+      {total>24&&<div className="flex flex-wrap items-center justify-between gap-2 text-xs">
         <button type="button" className={outlineClass} disabled={page===0} onClick={()=>setPage(x=>x-1)}>Previous</button>
         <span>{page+1} / {Math.ceil(total/24)} · {total} assets</span>
         <button type="button" className={outlineClass} disabled={(page+1)*24>=total} onClick={()=>setPage(x=>x+1)}>Next</button></div>}

@@ -3,7 +3,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { CmsMediaRow } from '../../lib/cmsData';
 import { mediaPublicUrl } from '../../lib/cmsData';
 
-export const inputClass = 'w-full min-h-11 rounded-md border border-stone-300 bg-white px-3 py-2.5 text-sm text-stone-900 outline-offset-2 focus-visible:outline-2 focus-visible:outline-amber-700';
+export const inputClass = 'w-full min-h-11 rounded-md border border-stone-300 bg-white px-3 py-2.5 text-base text-stone-900 sm:text-sm outline-offset-2 focus-visible:outline-2 focus-visible:outline-amber-700';
 export const labelClass = 'mb-1.5 block text-xs font-semibold text-stone-700';
 export const primaryClass = 'inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-stone-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-50';
 export const outlineClass = 'inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-stone-300 px-4 py-2.5 text-sm font-semibold text-stone-800 hover:bg-stone-100 disabled:opacity-50';
