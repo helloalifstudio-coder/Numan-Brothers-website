@@ -107,3 +107,8 @@ a { text-decoration: none; }
 }
 /* Tailwind's motion-safe: utility already suppresses this animation for
    visitors with prefers-reduced-motion: reduce. */
+
+/* Long CMS-authored headings must not push narrow viewports sideways. */
+@media (max-width: 640px) {
+  h1, h2, h3 { overflow-wrap: anywhere; }
+}

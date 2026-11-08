@@ -61,16 +61,16 @@ export default function V2Header({ path, home, categories=[] , onNavigate }: Pro
         {siteText(home,'nav.announcement')}
       </div>
       <div className="relative mx-auto flex h-[76px] max-w-[1440px] items-center justify-between gap-3 px-5 md:h-[90px] md:px-10 xl:px-14">
-        <div className="flex items-center md:hidden">
+        <div className="flex items-center lg:hidden">
           <button type="button" aria-label="Open navigation" onClick={() => { setMobile(true); setOpen(null); }}
             className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[#ded6c8]">
             <Menu className="h-5 w-5" />
           </button>
         </div>
-        <V2Link href="/" onNavigate={go} className="group flex shrink-0 flex-col items-center justify-center text-center md:items-start md:text-left"
+        <V2Link href="/" onNavigate={go} className="group flex min-w-0 shrink flex-col items-center justify-center text-center lg:items-start lg:text-left"
           aria-label="Nomaan Brothers, return to homepage">
-          <span className="font-serif text-[23px] font-medium leading-[.95] tracking-[-0.03em] text-[#201b17] md:text-[30px]">{siteText(home,'nav.brand')}</span>
-          <span className="mt-1.5 text-[8px] font-semibold uppercase tracking-[.22em] text-[#997b56] md:text-[9px]">{siteText(home,'nav.tagline')}</span>
+          <span className="font-serif text-[clamp(1.1rem,5.5vw,1.45rem)] font-medium leading-[.95] tracking-[-0.03em] text-[#201b17] sm:text-[26px] lg:text-[30px]">{siteText(home,'nav.brand')}</span>
+          <span className="mt-1.5 text-[8px] font-semibold uppercase tracking-[.12em] text-[#997b56] sm:tracking-[.22em] lg:text-[9px]">{siteText(home,'nav.tagline')}</span>
         </V2Link>
         <nav className="hidden items-center gap-2 lg:flex" aria-label="Shop departments">
           {DEPARTMENTS.map((department) => (
@@ -151,7 +151,7 @@ export default function V2Header({ path, home, categories=[] , onNavigate }: Pro
       {mobile && (
         <motion.div className="fixed inset-0 z-[70] lg:hidden" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
           <button aria-label="Close navigation" onClick={closeAll} className="absolute inset-0 h-full w-full bg-black/50" />
-          <motion.div role="dialog" aria-modal="true" aria-label="Browse collections" className="absolute inset-y-0 left-0 flex w-[min(91vw,420px)] flex-col overflow-y-auto bg-[#fbf8f2] p-5 shadow-2xl"
+          <motion.div role="dialog" aria-modal="true" aria-label="Browse collections" className="absolute inset-y-0 left-0 flex w-[min(92vw,420px)] flex-col overflow-y-auto overscroll-contain bg-[#fbf8f2] px-4 pb-[calc(1.25rem+env(safe-area-inset-bottom))] pt-[calc(1.25rem+env(safe-area-inset-top))] shadow-2xl sm:px-5"
             initial={reducedMotion ? false : { x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }}
             transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}>
             <div className="mb-5 flex items-center justify-between border-b border-[#e7ddd0] pb-5">
@@ -195,7 +195,7 @@ export default function V2Header({ path, home, categories=[] , onNavigate }: Pro
     <AnimatePresence>
       {searchOpen && (
         <motion.div role="dialog" aria-modal="true" aria-label="Search clothing collections"
-          className="fixed inset-0 z-[80] flex items-start justify-center bg-[#16110d]/70 px-4 pt-[12vh] backdrop-blur-sm"
+          className="fixed inset-0 z-[80] flex items-start justify-center overflow-y-auto bg-[#16110d]/70 px-3 pt-[max(1.5rem,env(safe-area-inset-top))] backdrop-blur-sm sm:px-4 sm:pt-[12vh]"
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
           <div className="w-full max-w-2xl bg-[#fbf8f2] p-6 shadow-2xl md:p-9">
             <div className="mb-7 flex items-center justify-between">

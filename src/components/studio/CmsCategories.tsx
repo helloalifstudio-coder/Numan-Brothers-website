@@ -33,8 +33,8 @@ export default function CmsCategories({client,canPublish,media,userId}:Props) {
     <div><h2 className="font-serif text-3xl">Collection pages</h2>
       <p className="mt-2 max-w-3xl text-sm text-stone-600">Edit collection names, descriptions, display order, approved banners and visibility. URL paths stay fixed so existing product links remain stable.</p></div>
     {loading?<p className="text-sm">Loading categories…</p>:
-      <div className="grid gap-5 lg:grid-cols-[300px_1fr]">
-        <div className="max-h-[650px] space-y-1 overflow-y-auto rounded-lg border border-stone-200 bg-white p-3">
+      <div className="grid gap-5 xl:grid-cols-[300px_minmax(0,1fr)]">
+        <div className="max-h-56 space-y-1 overflow-y-auto xl:max-h-[650px] rounded-lg border border-stone-200 bg-white p-3">
           {rows.map((row)=><button type="button" key={row.path} onClick={()=>{setSelected({...row});setError(null);setMessage(null)}}
             className={'block w-full rounded-md px-3 py-3 text-left text-sm '+
               (selected?.path===row.path?'bg-stone-900 text-white':'hover:bg-stone-100')}>

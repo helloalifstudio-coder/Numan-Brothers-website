@@ -202,30 +202,30 @@ export default function CmsStudio(){
         </div>}
         <a href="/" className="text-center text-xs font-semibold text-stone-600">Return to public site <ArrowUpRight size={13} className="inline"/></a>
       </div>:
-      <div className="min-h-svh lg:grid lg:grid-cols-[245px_1fr]">
-        <aside className="bg-[#231d17] px-5 py-7 text-[#f0e6d6] lg:min-h-svh">
+      <div className="min-h-svh lg:grid lg:grid-cols-[245px_minmax(0,1fr)]">
+        <aside className="min-w-0 bg-[#231d17] px-4 py-5 text-[#f0e6d6] sm:px-6 lg:min-h-svh lg:px-5 lg:py-7">
           <h1 className="font-serif text-2xl">Nomaan <em>Brothers</em></h1>
           <p className="mt-2 text-[10px] uppercase tracking-[.2em] text-[#d2b78d]">Content Studio</p>
-          <nav className="mt-9 flex flex-wrap gap-2 lg:flex-col" aria-label="Studio sections">
+          <nav className="mt-5 flex gap-2 overflow-x-auto overscroll-x-contain pb-2 lg:mt-9 lg:flex-col lg:overflow-visible lg:pb-0" aria-label="Studio sections">
             {sections.map((item)=>{const Icon=item.icon;return <button type="button" key={item.id}
               aria-current={section===item.id?'page':undefined} onClick={()=>setSection(item.id)}
-              className={'flex min-h-11 items-center gap-3 rounded-md px-4 py-2.5 text-left text-sm '+
+              className={'flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-md px-3 py-2.5 text-left text-xs sm:text-sm lg:gap-3 lg:px-4 '+
                 (section===item.id?'bg-[#d8bd93] font-semibold text-[#221c17]':'text-[#e2d4c3] hover:bg-[#3c3025]')}>
               <Icon size={17}/>{item.label}</button>})}
           </nav>
-          <div className="mt-9 space-y-3 border-t border-[#66513b] pt-6 text-xs text-[#cfbea8]">
+          <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1 border-t border-[#66513b] pt-3 text-xs text-[#cfbea8] lg:mt-9 lg:block lg:space-y-3 lg:pt-6">
             <p className="truncate font-semibold" title={staff.email}>{staff.email}</p>
             <p className="uppercase tracking-wide">Role: {staff.role}</p>
             <a className="flex min-h-11 items-center gap-2 hover:text-white" href="/" target="_blank" rel="noopener noreferrer">Open storefront <ArrowUpRight size={15}/></a>
             <button type="button" className="flex min-h-11 items-center gap-2 text-[#f0e3d2] hover:text-white" onClick={()=>void logout()}><LogOut size={16}/> Sign out</button>
           </div>
         </aside>
-        <main className="min-w-0 px-5 py-8 md:px-10 md:py-12 xl:px-14">
+        <main className="min-w-0 px-4 py-7 sm:px-6 md:px-10 md:py-12 xl:px-14">
           <div className="mx-auto max-w-7xl space-y-8">
             {mediaError&&<ErrorText message={mediaError}/>}
             {section==='dashboard'&&<section className="space-y-8">
               <div><p className="text-xs font-bold uppercase tracking-[.22em] text-amber-800">Store operations</p>
-                <h2 className="mt-3 font-serif text-4xl">Your collection, organized.</h2>
+                <h2 className="mt-3 font-serif text-3xl sm:text-4xl">Your collection, organized.</h2>
                 <p className="mt-3 text-sm text-stone-600">Manage accurate product content and prepare campaigns for publication.</p></div>
               <div className="grid gap-4 sm:grid-cols-3">
                 {[['Published garments',stats?.published],['Saved product drafts',stats?.drafts],['Uploaded assets',stats?.assets]].map(([label,count])=>
