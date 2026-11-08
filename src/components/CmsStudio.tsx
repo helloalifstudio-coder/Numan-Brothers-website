@@ -3,23 +3,31 @@ import { Helmet } from 'react-helmet-async';
 import { ArrowUpRight, Database, FolderOpen, Image, LayoutDashboard, LockKeyhole, LogOut, Package, FileUp, BookOpen } from 'lucide-react';
 import type { SupabaseClient, User } from '@supabase/supabase-js';
 import { getCmsClient } from '../lib/supabaseClient';
-import { canPublishRole, type CmsMediaRow } from '../lib/cmsData';
+import { canPublishRole } from '../lib/cmsData';
 import { cmsRole, cmsRoleHelp, cmsSignInError } from '../lib/cmsAuth';
 import { ErrorText, Field, inputClass, primaryClass } from './studio/StudioShared';
 import CmsMedia from './studio/CmsMedia';
+import CmsImports from './studio/CmsImports';
 import CmsProducts from './studio/CmsProducts';
 import CmsHomepage from './studio/CmsHomepage';
 import CmsCategories from './studio/CmsCategories';
 
 
-type Section = 'dashboard' | 'products' | 'media' | 'homepage' | 'collections';
+type Section = 'dashboard' | 'products' | 'collections' | 'media' | 'imports' | 'homepage';
 type CmsUser = { id:string;email:string;role:'owner'|'admin'|'editor' };
 const sections: { id:Section;label:string;icon:React.ComponentType<{size?:number}> }[] = [
   {id:'dashboard',label:'Dashboard',icon:LayoutDashboard},
   {id:'products',label:'Products',icon:Package},
   {id:'collections',label:'Collections',icon:FolderOpen},
-  {id:'media',label:'Media & Bulk uploads',icon:Image},
+  {id:'media',label:'Media library',icon:Image},
+  {id:'imports',label:'Bulk imports',icon:FileUp},
   {id:'homepage',label:'Website CMS',icon:BookOpen},
+];
+const studioGroups: {name:string;sections:Section[]}[] = [
+  {name:'Overview',sections:['dashboard']},
+  {name:'Catalogue',sections:['products','collections']},
+  {name:'Media & imports',sections:['media','imports']},
+  {name:'Website',sections:['homepage']},
 ];
 
 export default function CmsStudio(){
@@ -28,14 +36,11 @@ export default function CmsStudio(){
   const [checking,setChecking]=useState(true);
   const [authError,setAuthError]=useState<string|null>(null);
   const [unprovisionedEmail,setUnprovisionedEmail]=useState<string|null>(null);
-  const [serviceStatus,setServiceStatus]=useState<{auth:boolean;catalogue:boolean;privateAccess:boolean}|null>(null);
   const [email,setEmail]=useState('');
   const [password,setPassword]=useState('');
   const [signingIn,setSigningIn]=useState(false);
   const [section,setSection]=useState<Section>('dashboard');
-  const [media,setMedia]=useState<CmsMediaRow[]>([]);
-  const [mediaError,setMediaError]=useState<string|null>(null);
-  const [stats,setStats]=useState<{published:number;drafts:number;assets:number}|null>(null);
+  const [stats,setStats]=useState<{published:number;drafts:number;assets:number;images:number;videos:number}|null>(null);
   const canPublish=canPublishRole(staff?.role);
 
   const applyIdentity=(user:User|null)=>{
@@ -95,40 +100,18 @@ export default function CmsStudio(){
     return()=>{active=false;subscription.unsubscribe()};
   },[client]);
 
-  useEffect(()=>{
-    if(!client)return;
-    let active=true;
-    const status=async()=>{
-      try{
-        const response=await fetch('/api/cms-status',{cache:'no-store',headers:{Accept:'application/json'}});
-        const result=await response.json() as {auth?:{ok:boolean};catalogue?:{ok:boolean};privateAccess?:{ok:boolean}};
-        if(active)setServiceStatus({auth:result.auth?.ok===true,catalogue:result.catalogue?.ok===true,privateAccess:result.privateAccess?.ok===true});
-      }catch{
-        if(active)setServiceStatus({auth:false,catalogue:false,privateAccess:false});
-      }
-    };
-    void status();
-    return()=>{active=false};
-  },[client]);
-
-  const loadMedia=async()=>{
-    if(!client||!staff)return;
-    const {data,error}=await client.from('nb_media')
-      .select('id,storage_path,original_name,mime_type,size_bytes,alt_text,approved,uploaded_by,created_at')
-      .order('created_at',{ascending:false}).limit(300);
-    setMedia((data||[]) as CmsMediaRow[]);
-    setMediaError(error?.message||null);
-  };
   const refreshStats=async()=>{
     if(!client||!staff)return;
-    const [published,drafts,assets]=await Promise.all([
+    const [published,drafts,assets,images,videos]=await Promise.all([
       client.from('nb_products').select('id',{count:'exact',head:true}).eq('status','published'),
       client.from('nb_product_drafts').select('product_id',{count:'exact',head:true}),
       client.from('nb_media').select('id',{count:'exact',head:true}),
+      client.from('nb_media').select('id',{count:'exact',head:true}).like('mime_type','image/%'),
+      client.from('nb_media').select('id',{count:'exact',head:true}).like('mime_type','video/%'),
     ]);
-    setStats({published:published.count||0,drafts:drafts.count||0,assets:assets.count||0});
+    setStats({published:published.count||0,drafts:drafts.count||0,assets:assets.count||0,images:images.count||0,videos:videos.count||0});
   };
-  useEffect(()=>{if(staff&&client){void loadMedia();void refreshStats();}},[staff?.id,client,section]);
+  useEffect(()=>{if(staff&&client&&section==='dashboard')void refreshStats()},[staff?.id,client,section]);
 
   const login=async(event:React.FormEvent)=>{
     event.preventDefault();if(!client)return;
@@ -178,12 +161,12 @@ export default function CmsStudio(){
         <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#e6dccd]"><LockKeyhole size={30}/></div>
         <div className="text-center"><p className="text-xs font-bold uppercase tracking-[.24em] text-amber-800">Private access</p>
           <h1 className="mt-4 font-serif text-4xl">Nomaan Brothers Studio</h1>
-          <p className="mt-4 text-sm leading-7 text-stone-600">Authorized staff only. Your account must be provisioned by the store owner in Supabase Auth.</p></div>
+          <p className="mt-4 text-sm leading-7 text-stone-600">Sign in with your staff account to manage the showroom.</p></div>
         {unprovisionedEmail ? <section className="space-y-4 rounded-xl border border-amber-300 bg-white p-7 shadow-sm" aria-label="CMS role required">
           <h2 className="font-serif text-2xl">Sign-in succeeded · Role needed</h2>
           <p className="text-sm leading-7 text-stone-700">Signed in as <strong>{unprovisionedEmail}</strong>. The account needs an authorized CMS role from the store owner; a Supabase Auth user alone cannot edit products.</p>
           <ErrorText message={authError}/>
-          <p className="text-xs leading-6 text-stone-600">In the Noman Supabase project, set <code>app_metadata.nb_role</code> to <code>owner</code>, <code>admin</code>, or <code>editor</code>. Don't set <code>user_metadata</code>. Then refresh the session.</p>
+          <p className="text-xs leading-6 text-stone-600">Contact the store administrator to activate your account, then refresh permissions.</p>
           <button type="button" onClick={()=>void refreshPermissions()} className={primaryClass+' w-full'}>Refresh CMS permissions</button>
           <button type="button" onClick={()=>void logout()} className="w-full min-h-11 rounded-md border border-stone-300 text-sm font-semibold">Sign out / use another account</button>
         </section> : <form onSubmit={(event)=>void login(event)} className="space-y-5 rounded-xl border border-stone-200 bg-white p-7 shadow-sm">
@@ -191,29 +174,29 @@ export default function CmsStudio(){
           <Field label="Password"><input className={inputClass} type="password" autoComplete="current-password" value={password} required onChange={e=>setPassword(e.target.value)}/></Field>
           <button type="submit" disabled={signingIn} className={primaryClass+' w-full'}>{signingIn?'Signing in…':'Sign in securely'}</button>
           <ErrorText message={authError}/>
-          <p className="text-xs text-stone-500">There is no public self-registration or demo PIN. Ask the owner to invite staff or reset credentials in the Supabase dashboard.</p>
+          <p className="text-xs text-stone-500">Need access? Contact the store administrator.</p>
         </form>}
-        {serviceStatus && <div role="status" className="rounded-md border border-stone-200 bg-[#fffcf7] px-4 py-3 text-xs leading-6 text-stone-600">
-          <p className="font-semibold text-stone-800">Connection checks</p>
-          <p>Supabase Auth: {serviceStatus.auth?'reachable':'unavailable or unverified'}</p>
-          <p>Published catalogue: {serviceStatus.catalogue?'database API reachable':'migrations or API permissions need checking'}</p>
-          <p>Private CMS records: {serviceStatus.privateAccess?'not anonymously accessible':'permission checks need review'}</p>
-          {(!serviceStatus.auth||!serviceStatus.catalogue||!serviceStatus.privateAccess)&&<p>These checks never test your password or CMS role. Review the linked project's Auth and SQL setup before publishing.</p>}
-        </div>}
         <a href="/" className="text-center text-xs font-semibold text-stone-600">Return to public site <ArrowUpRight size={13} className="inline"/></a>
       </div>:
       <div className="min-h-svh lg:grid lg:grid-cols-[245px_minmax(0,1fr)]">
         <aside className="min-w-0 bg-[#231d17] px-4 py-5 text-[#f0e6d6] sm:px-6 lg:min-h-svh lg:px-5 lg:py-7">
           <h1 className="font-serif text-2xl">Nomaan <em>Brothers</em></h1>
           <p className="mt-2 text-[10px] uppercase tracking-[.2em] text-[#d2b78d]">Content Studio</p>
-          <nav className="mt-5 flex gap-2 overflow-x-auto overscroll-x-contain pb-2 lg:mt-9 lg:flex-col lg:overflow-visible lg:pb-0" aria-label="Studio sections">
-            {sections.map((item)=>{const Icon=item.icon;return <button type="button" key={item.id}
-              aria-current={section===item.id?'page':undefined} onClick={()=>setSection(item.id)}
-              className={'flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-md px-3 py-2.5 text-left text-xs sm:text-sm lg:gap-3 lg:px-4 '+
-                (section===item.id?'bg-[#d8bd93] font-semibold text-[#221c17]':'text-[#e2d4c3] hover:bg-[#3c3025]')}>
-              <Icon size={17}/>{item.label}</button>})}
-          </nav>
-          <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1 border-t border-[#66513b] pt-3 text-xs text-[#cfbea8] lg:mt-9 lg:block lg:space-y-3 lg:pt-6">
+          <nav className="mt-5 flex gap-3 overflow-x-auto overscroll-x-contain pb-2 lg:mt-9 lg:flex-col lg:gap-5 lg:overflow-visible lg:pb-0" aria-label="Studio sections">
+             {studioGroups.map(group=><div key={group.name} className="flex shrink-0 gap-2 lg:flex-col">
+               <p className="hidden px-4 text-[10px] font-bold uppercase tracking-[.18em] text-[#c5a57b] lg:block">{group.name}</p>
+               {group.sections.map(id=>{
+                 const item=sections.find(entry=>entry.id===id)!;
+                 const Icon=item.icon;
+                 return <button type="button" key={item.id}
+                   aria-current={section===item.id?'page':undefined} onClick={()=>setSection(item.id)}
+                   className={'flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-md px-3 py-2.5 text-left text-xs sm:text-sm lg:gap-3 lg:px-4 '+
+                     (section===item.id?'bg-[#d8bd93] font-semibold text-[#221c17]':'text-[#e2d4c3] hover:bg-[#3c3025]')}>
+                   <Icon size={17}/>{item.label}</button>;
+               })}
+             </div>)}
+           </nav>
+           <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1 border-t border-[#66513b] pt-3 text-xs text-[#cfbea8] lg:mt-9 lg:block lg:space-y-3 lg:pt-6">
             <p className="truncate font-semibold" title={staff.email}>{staff.email}</p>
             <p className="uppercase tracking-wide">Role: {staff.role}</p>
             <a className="flex min-h-11 items-center gap-2 hover:text-white" href="/" target="_blank" rel="noopener noreferrer">Open storefront <ArrowUpRight size={15}/></a>
@@ -222,13 +205,13 @@ export default function CmsStudio(){
         </aside>
         <main className="min-w-0 px-4 py-7 sm:px-6 md:px-10 md:py-12 xl:px-14">
           <div className="mx-auto max-w-7xl space-y-8">
-            {mediaError&&<ErrorText message={mediaError}/>}
+            
             {section==='dashboard'&&<section className="space-y-8">
               <div><p className="text-xs font-bold uppercase tracking-[.22em] text-amber-800">Store operations</p>
                 <h2 className="mt-3 font-serif text-3xl sm:text-4xl">Your collection, organized.</h2>
                 <p className="mt-3 text-sm text-stone-600">Manage accurate product content and prepare campaigns for publication.</p></div>
-              <div className="grid gap-4 sm:grid-cols-3">
-                {[['Published garments',stats?.published],['Saved product drafts',stats?.drafts],['Uploaded assets',stats?.assets]].map(([label,count])=>
+              <div className="grid gap-4 min-[420px]:grid-cols-2 lg:grid-cols-5">
+                {[['Published garments',stats?.published],['Product drafts',stats?.drafts],['Media records',stats?.assets],['Images',stats?.images],['Videos',stats?.videos]].map(([label,count])=>
                   <div key={label} className="rounded-lg border border-stone-200 bg-white p-6">
                     <p className="text-xs font-semibold text-stone-500">{label}</p>
                     <p className="mt-4 font-serif text-4xl">{count??'—'}</p>
@@ -244,7 +227,7 @@ export default function CmsStudio(){
                     {id:'collections' as Section,title:'Review your collections',detail:"Choose Men’s or Kids’ collections. Update names, descriptions, order and approved banners."},
                     {id:'media' as Section,title:'Upload photos and videos',detail:'Upload approved garment photos or videos. Add a display name and alt text, then approve each asset before using it.'},
                     {id:'products' as Section,title:'Create a product',detail:'Enter a unique SKU, title, slug, size, fabric and collection. Select approved photos, save a draft, and publish.'},
-                    {id:'media' as Section,title:'Bulk upload products and media',detail:'Open Media → Bulk upload & product CSV imports. Upload SKU-named photos, approve and match them to product drafts.'},
+                    {id:'imports' as Section,title:'Bulk upload products and media',detail:'Use Bulk imports for CSV files and SKU-named garment photographs; review drafts before publishing.'},
                     {id:'homepage' as Section,title:'Edit your website',detail:'Change homepage sections, cards, navigation, footer and page text. Reorder sections and save a draft before publishing.'},
                     {id:'products' as Section,title:'Verify live changes',detail:'Open the website and check your published garments, images and descriptions. Edit or archive when necessary.'},
                   ].map((item,index)=><li key={index} className="rounded-lg border border-[#eee5d8] p-4">
@@ -253,7 +236,7 @@ export default function CmsStudio(){
                       <div><h4 className="text-sm font-semibold">{item.title}</h4>
                         <p className="mt-2 text-xs leading-6 text-stone-600">{item.detail}</p>
                         <button type="button" onClick={()=>setSection(item.id)} className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-amber-800 underline underline-offset-4">
-                          Open {item.id==='homepage'?'Website CMS':item.id==='media'?'Media & Bulk uploads':item.id} <ArrowUpRight size={13}/>
+                          Open {sections.find(section=>section.id===item.id)?.label} <ArrowUpRight size={13}/>
                         </button>
                       </div>
                     </div>
@@ -266,11 +249,12 @@ export default function CmsStudio(){
                 <p className="mt-2">Editors may save drafts and upload media. Only owners and admins can approve assets and publish changes. Public visitors can read only published catalogue content.</p>
               </div>
             </section>}
-            {section==='media'&&<CmsMedia client={client} userId={staff.id} canPublish={canPublish} onMediaChange={()=>void loadMedia()}/>}
+            {section==='media'&&<CmsMedia client={client} userId={staff.id} canPublish={canPublish} onMediaChange={()=>void refreshStats()}/>}
+             {section==='imports'&&<CmsImports client={client} userId={staff.id} onMediaChange={()=>void refreshStats()}/>}
 
-            {section==='products'&&<CmsProducts client={client} userId={staff.id} canPublish={canPublish} media={media}/>}
-            {section==='homepage'&&<CmsHomepage client={client} userId={staff.id} canPublish={canPublish} media={media}/>}
-            {section==='collections'&&<CmsCategories client={client} canPublish={canPublish} userId={staff.id} media={media}/>}
+            {section==='products'&&<CmsProducts client={client} userId={staff.id} canPublish={canPublish}/>}
+            {section==='homepage'&&<CmsHomepage client={client} userId={staff.id} canPublish={canPublish}/>}
+            {section==='collections'&&<CmsCategories client={client} canPublish={canPublish} userId={staff.id}/>}
           </div>
         </main>
       </div>}
