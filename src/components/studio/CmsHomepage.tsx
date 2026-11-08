@@ -156,13 +156,13 @@ export default function CmsHomepage({client,userId,canPublish}:Props) {
     <AssetEditor client={client} userId={userId} canPublish={canPublish} label={label}
       selected={form[key]?[form[key]]:[]} onChange={urls=>update(key,urls[0]||'')}/>;
 
-  return <section className="max-w-5xl space-y-7">
+  return <section className="min-w-0 max-w-5xl space-y-7">
     <div><h2 className="font-serif text-3xl">Website CMS</h2>
       <p className="mt-2 text-sm text-stone-600">Manage every website page in one organized workspace. Change text, adjust cards and drag sections up or down. Save a private draft before publishing.</p>
       <p className="mt-2 text-xs font-semibold text-amber-800">Current published version: {version ?? 'None yet'}</p>
     </div>
-    <nav className="flex flex-wrap gap-2" aria-label="Website CMS page selector">
-      {SITE_PAGES.map(tab=><button type="button" key={tab.id} className={page===tab.id?primaryClass:outlineClass}
+    <nav className="flex max-w-full gap-2 overflow-x-auto overscroll-x-contain scroll-px-4 pb-3 lg:flex-wrap" aria-label="Website CMS page selector">
+      {SITE_PAGES.map(tab=><button type="button" key={tab.id} className={(page===tab.id?primaryClass:outlineClass)+' shrink-0'}
         aria-current={page===tab.id?'page':undefined} onClick={()=>setPage(tab.id)}>{tab.title}</button>)}
     </nav>
     {loading?<p className="text-sm">Loading website content…</p>:<>
@@ -179,7 +179,7 @@ export default function CmsHomepage({client,userId,canPublish}:Props) {
             Restore original layout</button>
         </div>
       </section>}
-      {page==='home'&&<div className="grid gap-5 rounded-lg border border-stone-200 bg-white p-5 md:grid-cols-2 md:p-7">
+      {page==='home'&&<div className="nb-responsive-grid grid gap-5 rounded-lg border border-stone-200 bg-white p-4 md:grid-cols-2 md:p-7">
         <div className="md:col-span-2"><h3 className="font-serif text-2xl">Main hero</h3></div>
         <Field label="Headline"><input className={inputClass} value={form.heroTitle} maxLength={180} onChange={e=>update('heroTitle',e.target.value)}/></Field>
         <Field label="Eyebrow label"><input className={inputClass} value={form.heroEyebrow} maxLength={100} onChange={e=>update('heroEyebrow',e.target.value)}/></Field>
@@ -209,7 +209,7 @@ export default function CmsHomepage({client,userId,canPublish}:Props) {
       {page==='footer'&&<section className="rounded-lg border border-stone-200 bg-white p-5 md:p-7">
         <h3 className="font-serif text-2xl">Social media links</h3>
         <p className="mt-2 text-xs leading-6 text-stone-600">Paste the real store's full HTTPS profile URLs. Leave blank to hide each icon. The agency attribution uses Alif Growth Media’s verified website and logo.</p>
-        <div className="mt-4 grid gap-4 md:grid-cols-3">
+        <div className="nb-responsive-grid mt-4 grid gap-4 md:grid-cols-3">
           {(['instagram','facebook','youtube'] as const).map(key=><Field key={key} label={key[0].toUpperCase()+key.slice(1)+' profile URL'}>
             <input type="url" className={inputClass} placeholder="https://..." value={form.socialLinks[key]}
               onChange={e=>setForm(cur=>({...cur,socialLinks:{...cur.socialLinks,[key]:e.target.value}}))}/>
@@ -220,7 +220,7 @@ export default function CmsHomepage({client,userId,canPublish}:Props) {
         <div><p className="text-[11px] font-semibold uppercase tracking-[.2em] text-amber-800">{SITE_PAGES.find(tab=>tab.id===page)?.title}</p>
           <h3 className="mt-2 font-serif text-2xl">Editable text and card content</h3>
           <p className="mt-2 text-xs leading-6 text-stone-600">{SITE_PAGES.find(tab=>tab.id===page)?.description}. Collection data and garment images are managed in their own tabs.</p></div>
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="nb-responsive-grid grid gap-4 md:grid-cols-2">
           {SITE_FIELDS[page].map(field=><label key={field.key}
             className={'block text-xs font-semibold text-stone-700 '+(field.multiline?'md:col-span-2':'')}>
             <span>{field.section} · {field.label}</span>

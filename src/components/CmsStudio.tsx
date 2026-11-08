@@ -178,11 +178,11 @@ export default function CmsStudio(){
         </form>}
         <a href="/" className="text-center text-xs font-semibold text-stone-600">Return to public site <ArrowUpRight size={13} className="inline"/></a>
       </div>:
-      <div className="min-h-svh lg:grid lg:grid-cols-[245px_minmax(0,1fr)]">
+      <div className="nb-studio min-h-svh lg:grid lg:grid-cols-[245px_minmax(0,1fr)]">
         <aside className="min-w-0 bg-[#231d17] px-4 py-5 text-[#f0e6d6] sm:px-6 lg:min-h-svh lg:px-5 lg:py-7">
           <h1 className="font-serif text-2xl">Nomaan <em>Brothers</em></h1>
           <p className="mt-2 text-[10px] uppercase tracking-[.2em] text-[#d2b78d]">Content Studio</p>
-          <nav className="mt-5 flex gap-3 overflow-x-auto overscroll-x-contain pb-2 lg:mt-9 lg:flex-col lg:gap-5 lg:overflow-visible lg:pb-0" aria-label="Studio sections">
+          <nav className="mt-5 flex max-w-full gap-3 overflow-x-auto overscroll-x-contain scroll-px-4 pb-2 lg:mt-9 lg:flex-col lg:gap-5 lg:overflow-visible lg:pb-0" aria-label="Studio sections">
              {studioGroups.map(group=><div key={group.name} className="flex shrink-0 gap-2 lg:flex-col">
                <p className="hidden px-4 text-[10px] font-bold uppercase tracking-[.18em] text-[#c5a57b] lg:block">{group.name}</p>
                {group.sections.map(id=>{
@@ -196,6 +196,7 @@ export default function CmsStudio(){
                })}
              </div>)}
            </nav>
+           <p className="mt-1 text-[11px] text-[#d7c6ad] lg:hidden">Swipe across to see every Studio section.</p>
            <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1 border-t border-[#66513b] pt-3 text-xs text-[#cfbea8] lg:mt-9 lg:block lg:space-y-3 lg:pt-6">
             <p className="truncate font-semibold" title={staff.email}>{staff.email}</p>
             <p className="uppercase tracking-wide">Role: {staff.role}</p>
@@ -203,14 +204,23 @@ export default function CmsStudio(){
             <button type="button" className="flex min-h-11 items-center gap-2 text-[#f0e3d2] hover:text-white" onClick={()=>void logout()}><LogOut size={16}/> Sign out</button>
           </div>
         </aside>
-        <main className="min-w-0 px-4 py-7 sm:px-6 md:px-10 md:py-12 xl:px-14">
-          <div className="mx-auto max-w-7xl space-y-8">
+        <main className="min-w-0 px-4 pb-7 pt-0 sm:px-6 md:px-10 md:pb-12 lg:pt-12 xl:px-14">
+          <div className="sticky top-0 z-30 -mx-4 mb-5 border-b border-stone-200 bg-[#fbf8f2]/95 px-4 py-3 shadow-sm backdrop-blur-lg sm:-mx-6 sm:px-6 md:-mx-10 md:px-10 lg:hidden">
+            <label className="flex min-w-0 items-center gap-3 text-xs font-semibold text-stone-700">
+              <span className="shrink-0">Studio section</span>
+              <select aria-label="Switch Studio section" value={section} onChange={e=>setSection(e.target.value as Section)}
+                className={inputClass+' min-w-0 flex-1'}>
+                {sections.map(item=><option key={item.id} value={item.id}>{item.label}</option>)}
+              </select>
+            </label>
+          </div>
+          <div className="mx-auto max-w-7xl min-w-0 space-y-8">
             
             {section==='dashboard'&&<section className="space-y-8">
               <div><p className="text-xs font-bold uppercase tracking-[.22em] text-amber-800">Store operations</p>
                 <h2 className="mt-3 font-serif text-3xl sm:text-4xl">Your collection, organized.</h2>
                 <p className="mt-3 text-sm text-stone-600">Manage accurate product content and prepare campaigns for publication.</p></div>
-              <div className="grid gap-4 min-[420px]:grid-cols-2 lg:grid-cols-5">
+              <div className="nb-responsive-grid grid gap-4 min-[420px]:grid-cols-2 xl:grid-cols-5">
                 {[['Published garments',stats?.published],['Product drafts',stats?.drafts],['Media records',stats?.assets],['Images',stats?.images],['Videos',stats?.videos]].map(([label,count])=>
                   <div key={label} className="rounded-lg border border-stone-200 bg-white p-6">
                     <p className="text-xs font-semibold text-stone-500">{label}</p>
@@ -222,7 +232,7 @@ export default function CmsStudio(){
                   <h3 id="cms-getting-started" className="mt-2 font-serif text-2xl">How to use your dashboard</h3>
                   <p className="mt-2 text-sm leading-7 text-stone-600">Use the steps below in order. Draft changes stay private until published.</p>
                 </div>
-                <ol className="mt-6 grid gap-4 md:grid-cols-2">
+                <ol className="nb-responsive-grid mt-6 grid gap-4 md:grid-cols-2">
                   {[
                     {id:'collections' as Section,title:'Review your collections',detail:"Choose Men’s or Kids’ collections. Update names, descriptions, order and approved banners."},
                     {id:'media' as Section,title:'Upload photos and videos',detail:'Upload approved garment photos or videos. Add a display name and alt text, then approve each asset before using it.'},

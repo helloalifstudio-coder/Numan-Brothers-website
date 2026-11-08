@@ -115,7 +115,7 @@ jobs:
         run: |
           npm install --prefix /tmp/nb-browser --no-save --no-package-lock playwright@1.58.2
           /tmp/nb-browser/node_modules/.bin/playwright install --with-deps chromium
-      - name: Test every storefront route, mobile widths, navigation and reduced motion
+      - name: Test storefront, Studio, garment pages and 18 responsive viewport sizes
         env:
           NODE_PATH: /tmp/nb-browser/node_modules
           VITE_SUPABASE_URL: https://fixture.supabase.co

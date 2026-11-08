@@ -84,8 +84,8 @@ export default function CmsImports({client,userId,onMediaChange}:Props){
         Upload photos in resumable batches. The owner must approve each image and publish products before the storefront changes.
       </p>
     </div>
-    <div className="grid gap-5 xl:grid-cols-2">
-      <div className="space-y-5 rounded-lg border border-stone-200 bg-white p-6">
+    <div className="nb-responsive-grid grid gap-5 xl:grid-cols-2">
+      <div className="min-w-0 space-y-5 rounded-lg border border-stone-200 bg-white p-3 min-[360px]:p-6">
         <div className="flex items-center gap-2"><FileUp size={22}/><h3 className="font-serif text-2xl">1. Products CSV</h3></div>
         <p className="text-xs leading-6 text-stone-600">Required headers: <code>sku,title,department,category</code>.
           Optional: <code>sizes,fabric,description,price</code>. Separate sizes with <code>|</code>. Existing SKUs are skipped, never silently overwritten.</p>
@@ -95,7 +95,7 @@ export default function CmsImports({client,userId,onMediaChange}:Props){
         {preview.length>0&&<div className="rounded-md bg-stone-50 p-4 text-sm">
           <p className="font-semibold">Review before importing</p>
           <p className="mt-2">{preview.length} rows · {preview.length-totalInvalid} valid · {totalInvalid} invalid</p>
-          <div className="mt-3 max-h-36 overflow-y-auto text-xs text-red-800">
+          <div className="mt-3 max-h-36 overflow-y-auto break-words text-xs text-red-800">
             {preview.filter(row=>row.error).slice(0,15).map(row=>
               <p key={row.rowNumber}>Row {row.rowNumber} · {row.sku}: {row.error}</p>)}
           </div>
@@ -103,7 +103,7 @@ export default function CmsImports({client,userId,onMediaChange}:Props){
         <button type="button" className={primaryClass} disabled={busy||!preview.length}
           onClick={()=>void csvStart()}>{busy?'Import in progress…':'Import validated drafts'}</button>
       </div>
-      <div className="space-y-5 rounded-lg border border-stone-200 bg-white p-6">
+      <div className="min-w-0 space-y-5 rounded-lg border border-stone-200 bg-white p-3 min-[360px]:p-6">
         <div className="flex items-center gap-2"><Images size={22}/><h3 className="font-serif text-2xl">2. Garment photos</h3></div>
         <p className="text-xs leading-6 text-stone-600">
           Use <code>NB-SHW-001_01.jpg</code>, <code>NB-SHW-001_02.jpg</code> and so on.

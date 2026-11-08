@@ -72,17 +72,36 @@ async function inspect(route,width=390,height=844,opts={}){
     assert.equal(status,200,'HTTP '+status+' at '+route);
     await page.locator('h1').first().waitFor({state:'visible',timeout:25000});
     await page.waitForTimeout(150);
-    const layout=await page.evaluate(()=>({
-      screen:innerWidth,
-      documentWidth:document.documentElement.scrollWidth,
-      bodyWidth:document.body.scrollWidth,
-      h1:document.querySelector('h1')?.textContent?.trim()||''
-    }));
+    const layout=await page.evaluate(()=>{
+      const heading=document.querySelector('h1');
+      const rect=heading?.getBoundingClientRect();
+      const nav=Array.from(document.querySelectorAll('header button[aria-label="Open navigation"],header button[aria-label="Search collections"]'))
+        .filter(el=>el.getClientRects().length>0)
+        .map(el=>{const r=el.getBoundingClientRect();return {left:r.left,right:r.right,width:r.width,height:r.height}});
+      return {
+        screen:innerWidth,
+        documentWidth:document.documentElement.scrollWidth,
+        bodyWidth:document.body.scrollWidth,
+        h1:heading?.textContent?.trim()||'',
+        h1Bounds:rect?{left:rect.left,right:rect.right}:null,
+        nav,
+      };
+    });
     assert.ok(layout.documentWidth<=width+2,
       'horizontal page overflow at '+route+' '+width+'px: '+layout.documentWidth);
     assert.ok(layout.bodyWidth<=width+2,
       'body overflow at '+route+' '+width+'px: '+layout.bodyWidth);
     assert.deepEqual(runtimeErrors,[],'page JavaScript errors on '+route+' '+width+'px');
+    assert.ok(layout.h1Bounds&&layout.h1Bounds.left>=-2&&layout.h1Bounds.right<=width+2,
+      'main heading clipped on '+route+' '+width+'px');
+    for(const target of layout.nav) {
+      assert.ok(target.left>=-2&&target.right<=width+2,'header control outside viewport '+route+' '+width+'px');
+      assert.ok(target.width>=40&&target.height>=40,'header control below usable touch size');
+    }
+    if(opts.matrix&&route==='/studio'&&width<=820){
+      const authInput=page.getByRole('textbox',{name:'Staff email'});
+      if(await authInput.count())assert.ok(await authInput.isVisible(),'Studio login must fit');
+    }
     if(route==='/'){
       const hero=page.locator('#v2-home-title');
       assert.equal(await hero.count(),1,'one semantic hero heading');
@@ -96,6 +115,12 @@ async function inspect(route,width=390,height=844,opts={}){
       });
       if(opts.reduce)assert.equal(effect.animation,'none','reduced motion must disable shimmer');
       else assert.match(effect.gradient,/gradient/,'water reflection has CSS gradient');
+      if(opts.matrix&&[280,375,820,1280].includes(width)){
+        await page.getByRole('button',{name:'Search collections'}).click();
+        await page.getByRole('dialog',{name:'Search clothing collections'}).waitFor({state:'visible',timeout:5000});
+        await page.keyboard.press('Escape');
+        await page.getByRole('dialog',{name:'Search clothing collections'}).waitFor({state:'hidden',timeout:5000});
+      }
       if(width<=768 && !opts.reduce){
         await page.getByRole('button',{name:'Open navigation'}).click();
         await page.getByRole('dialog',{name:'Browse collections'}).waitFor({state:'visible',timeout:5000});
@@ -103,7 +128,15 @@ async function inspect(route,width=390,height=844,opts={}){
         await page.getByRole('dialog',{name:'Browse collections'}).waitFor({state:'hidden',timeout:5000});
       }
     }
-    if(!opts.reduce && (route==='/' || route==='/studio' || (width===390 && route==='/men/sherwani'))){
+    if(route==='/'&&live&&width===390){
+      await page.locator('[data-nb-contact-hero]')
+        .evaluate(el=>window.scrollTo(0,el.getBoundingClientRect().bottom+window.scrollY+160));
+      const dock=page.getByTestId('floating-contact-dock');
+      await dock.waitFor({state:'visible',timeout:8000});
+      assert.ok(await dock.locator('a').count()>0,'production must always expose a real contact action');
+      console.log('PASS_LIVE_CONTACT_DOCK',JSON.stringify({base,width,links:await dock.locator('a').count()}));
+    }
+    if(!opts.reduce && (!opts.matrix || [280,390,768,1024,1920].includes(width)) && (route==='/' || route==='/studio' || (width===390 && route==='/men/sherwani'))){
       const name=(live?'live-':'local-')+route.replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'').replace(/^$/,'home')+'-'+width+'.png';
       await page.screenshot({path:join(screenshots,name),animations:'disabled'});
     }
@@ -185,6 +218,25 @@ async function inspectFloatingContactsAndProduct(){
   }finally{await context.close();}
 }
 
+
+/** Screenshot-worthy but bounded layout matrix. UI navigation stays a single
+ * source of truth: no viewport-dependent duplicate route implementations. */
+async function inspectViewportMatrix(){
+  if(live||process.env.NB_MOCK_CMS!=='1')return;
+  const viewports=[
+    [280,653],[320,568],[344,720],[360,740],[375,667],
+    [390,844],[414,896],[430,932],[480,800],[640,800],
+    [768,1024],[820,1180],[1024,768],[1180,820],
+    [1280,800],[1440,900],[1920,1080],[2560,1440]
+  ];
+  const routes=['/','/men/sherwani','/men/kurta-pyjama','/kids',
+    '/contact','/search?q=sherwani','/products/'+mockProduct.slug,'/studio'];
+  for(const [width,height] of viewports){
+    for(const route of routes)await inspect(route,width,height,{matrix:true});
+  }
+  console.log('RESPONSIVE_MATRIX_COMPLETE',JSON.stringify({viewports:viewports.length,routes:routes.length,planned:viewports.length*routes.length}));
+}
+
 try{
   const routes=['/','/men','/kids','/men/sherwani','/men/kurta-pyjama','/men/marriage','/contact','/search?q=sherwani','/studio'];
   for(const route of routes)await inspect(route);
@@ -194,6 +246,7 @@ try{
   if(!skipped)await inspect('/',390,844,{reduce:true});
   if(!skipped)await inspectFloatingContactsAndProduct();
   if(!skipped)await inspectUnconfiguredContactFallback();
+  if(!skipped)await inspectViewportMatrix();
 }finally{await browser.close();}
 if(skipped)console.log('LIVE_CHECK_INCOMPLETE: external deployment is not publicly accessible from this runner.');
 console.log('BROWSER_SMOKE_SUMMARY',JSON.stringify({base,live,checks:results.length,failures:failures.length,skipped}));

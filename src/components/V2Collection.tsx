@@ -11,7 +11,7 @@ interface Props { route: CollectionRoute; products: CatalogProduct[]; bannerImag
   page?:number;pageSize?:number;onPageChange?:(page:number)=>void;
   onNavigate: (path: string) => void;home?:CmsHome;categories?:CmsCategoryRow[]; }
 export function V2ProductGrid({ products, onNavigate,home }: { products: CatalogProduct[]; onNavigate: (path: string) => void;home?:CmsHome }) {
-  return <div className="grid grid-cols-1 gap-x-4 gap-y-9 min-[360px]:grid-cols-2 md:grid-cols-3 md:gap-x-6 md:gap-y-12 lg:grid-cols-4">
+  return <div className="nb-responsive-grid grid grid-cols-1 gap-x-4 gap-y-9 min-[360px]:grid-cols-2 md:grid-cols-3 md:gap-x-6 md:gap-y-12 lg:grid-cols-4">
     {products.map((product, index) => (
       <V2Reveal key={product.id} delay={Math.min(index % 4, 3) * 0.04}>
         <V2Link href={productPath(product)} onNavigate={onNavigate} className="group block">
@@ -22,7 +22,7 @@ export function V2ProductGrid({ products, onNavigate,home }: { products: Catalog
             <span className="absolute bottom-4 right-4 flex h-10 w-10 items-center justify-center rounded-full bg-[#f8f3e9]/95 text-[#352b20] opacity-0 transition-all duration-300 group-hover:opacity-100 group-focus-visible:opacity-100"><ArrowUpRight size={19}/></span>
           </div>
           <p className="mt-4 text-[9px] font-semibold uppercase tracking-[.18em] text-[#a17e4f]">{siteText(home,'footer.brand')}</p>
-          <h3 className="mt-1.5 font-serif text-base leading-snug text-[#2d271f] md:text-xl">{product.title}</h3>
+          <h3 className="mt-1.5 break-words font-serif text-base leading-snug text-[#2d271f] md:text-xl">{product.title}</h3>
           {product.fabric && <p className="mt-1.5 text-xs leading-5 text-[#807366]">{product.fabric}</p>}
           {!!product.originalPrice&&product.originalPrice>0&&<div className="mt-2 flex flex-wrap items-baseline gap-2">
             <strong className="text-sm text-[#30251d]">{(product.offerPrice??product.originalPrice).toLocaleString('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0})}</strong>

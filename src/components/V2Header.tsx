@@ -60,17 +60,17 @@ export default function V2Header({ path, home, categories=[] , onNavigate }: Pro
       <div className="border-b border-[#e7dfd1] bg-[#1d1917] px-4 py-2 text-center text-[9px] font-semibold uppercase tracking-[0.22em] text-[#e7d9bf] md:text-[10px]">
         {siteText(home,'nav.announcement')}
       </div>
-      <div className="relative mx-auto flex h-[76px] max-w-[1440px] items-center justify-between gap-3 px-5 md:h-[90px] md:px-10 xl:px-14">
+      <div className="relative mx-auto flex h-[76px] min-w-0 max-w-[1440px] items-center justify-between gap-2 px-3 min-[360px]:gap-3 min-[360px]:px-5 md:h-[90px] md:px-10 xl:px-14">
         <div className="flex items-center lg:hidden">
           <button type="button" aria-label="Open navigation" onClick={() => { setMobile(true); setOpen(null); }}
             className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[#ded6c8]">
             <Menu className="h-5 w-5" />
           </button>
         </div>
-        <V2Link href="/" onNavigate={go} className="group flex min-w-0 shrink flex-col items-center justify-center text-center lg:items-start lg:text-left"
+        <V2Link href="/" onNavigate={go} className="group flex min-w-0 max-w-[52vw] shrink flex-col items-center justify-center text-center sm:max-w-[45vw] lg:max-w-none lg:items-start lg:text-left"
           aria-label="Nomaan Brothers, return to homepage">
-          <span className="font-serif text-[clamp(1.1rem,5.5vw,1.45rem)] font-medium leading-[.95] tracking-[-0.03em] text-[#201b17] sm:text-[26px] lg:text-[30px]">{siteText(home,'nav.brand')}</span>
-          <span className="mt-1.5 text-[8px] font-semibold uppercase tracking-[.12em] text-[#997b56] sm:tracking-[.22em] lg:text-[9px]">{siteText(home,'nav.tagline')}</span>
+          <span className="max-w-full break-words font-serif text-[clamp(1.1rem,5.5vw,1.45rem)] font-medium leading-[.95] tracking-[-0.03em] text-[#201b17] sm:text-[26px] lg:text-[30px]">{siteText(home,'nav.brand')}</span>
+          <span className="max-w-full break-words text-[8px] font-semibold uppercase tracking-[.12em] text-[#997b56] sm:tracking-[.22em] lg:text-[9px]">{siteText(home,'nav.tagline')}</span>
         </V2Link>
         <nav className="hidden items-center gap-2 lg:flex" aria-label="Shop departments">
           {DEPARTMENTS.map((department) => (
@@ -114,7 +114,7 @@ export default function V2Header({ path, home, categories=[] , onNavigate }: Pro
             animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.22 }}
             className="absolute left-0 top-full hidden w-full border-t border-[#e9dfd1] bg-[#fbf8f2] shadow-[0_26px_55px_-25px_rgba(25,20,16,.3)] lg:block">
-            <div className="mx-auto grid max-w-[1380px] grid-cols-[230px_1fr] gap-10 px-12 py-11">
+            <div className="nb-responsive-grid mx-auto grid max-w-[1380px] grid-cols-[minmax(0,230px)_minmax(0,1fr)] gap-6 px-8 py-10 xl:gap-10 xl:px-12 xl:py-11">
               <div className="border-r border-[#e5d7c4] pr-9">
                 <span className="text-[10px] font-semibold uppercase tracking-[.25em] text-[#a38053]">{siteText(home,'nav.discover')}</span>
                 <h2 className="mt-4 font-serif text-4xl leading-[1.05] text-[#29221c]">{deptLabel(open)}</h2>
@@ -197,9 +197,9 @@ export default function V2Header({ path, home, categories=[] , onNavigate }: Pro
         <motion.div role="dialog" aria-modal="true" aria-label="Search clothing collections"
           className="fixed inset-0 z-[80] flex items-start justify-center overflow-y-auto bg-[#16110d]/70 px-3 pt-[max(1.5rem,env(safe-area-inset-top))] backdrop-blur-sm sm:px-4 sm:pt-[12vh]"
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-          <div className="w-full max-w-2xl bg-[#fbf8f2] p-6 shadow-2xl md:p-9">
-            <div className="mb-7 flex items-center justify-between">
-              <h2 className="font-serif text-3xl">{siteText(home,'nav.searchTitle')}</h2>
+          <div className="max-h-[calc(100svh-2.5rem)] w-full min-w-0 max-w-2xl overflow-y-auto bg-[#fbf8f2] p-4 shadow-2xl min-[360px]:p-6 md:p-9">
+            <div className="mb-7 flex min-w-0 items-center justify-between gap-3">
+              <h2 className="min-w-0 break-words font-serif text-[clamp(1.5rem,6vw,1.875rem)]">{siteText(home,'nav.searchTitle')}</h2>
               <button type="button" aria-label="Close search" onClick={closeAll} className="flex h-11 w-11 items-center justify-center"><X/></button>
             </div>
             <form onSubmit={submitSearch} className="flex gap-2 border-b border-[#bda887] pb-3">

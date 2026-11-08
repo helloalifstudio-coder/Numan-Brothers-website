@@ -121,14 +121,14 @@ export default function AssetEditor({client,label,selected,onChange,multiple=fal
     const copy=[...selected];const [item]=copy.splice(index,1);copy.splice(target,0,item);onChange(copy);
   };
   const categories=COLLECTION_ROUTES.filter(route=>!route.isDepartment&&!route.isGroup&&(!dept||route.department===dept));
-  return <section aria-label={label} className="space-y-3 rounded-lg border border-stone-200 bg-[#fffefb] p-4">
+  return <section aria-label={label} className="min-w-0 space-y-3 rounded-lg border border-stone-200 bg-[#fffefb] p-3 min-[360px]:p-4">
     <div className="flex flex-wrap items-center justify-between gap-3">
       <div><p className={labelClass}>{label}</p><p className="text-xs text-stone-500">Trash removes the image from this page; Delete from Supabase permanently erases the file only after all published and saved-draft references are cleared.</p></div>
       <button type="button" className={outlineClass} onClick={()=>setShowLibrary(x=>!x)}>
         <Pencil size={15}/>{showLibrary?'Close library':'Choose / replace'}
       </button>
     </div>
-    <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="nb-responsive-grid grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
       {selected.map((url,index)=><div key={url} draggable={multiple}
         onDragStart={e=>e.dataTransfer.setData('text/x-nb-selected-index',String(index))}
         onDragOver={e=>e.preventDefault()}
@@ -167,7 +167,7 @@ export default function AssetEditor({client,label,selected,onChange,multiple=fal
         onChange={e=>{void filesFromComputer(Array.from(e.currentTarget.files||[]));e.currentTarget.value='';}}/>
     </div>}
     {showLibrary&&<div className="space-y-3 border-t border-stone-200 pt-4">
-      <div className="grid gap-2 md:grid-cols-[1fr_1fr_1fr]">
+      <div className="nb-responsive-grid grid gap-2 md:grid-cols-3">
         <div><label className={labelClass}>Department</label><select className={inputClass} value={dept} onChange={e=>{setDept(e.target.value as Dept);setCategory('');setPage(0)}}>
           <option value="">All assets</option><option value="men">Men’s Wear</option><option value="kids">Kids Wear</option></select></div>
         <div><label className={labelClass}>Collection</label><select className={inputClass} value={category} onChange={e=>{setCategory(e.target.value);setPage(0)}}>
@@ -176,7 +176,7 @@ export default function AssetEditor({client,label,selected,onChange,multiple=fal
           onChange={e=>{setTerm(e.target.value);setPage(0)}} placeholder="Sherwani 1, SKU…"/></div>
       </div>
       {loading?<p role="status" className="p-3 text-xs">Searching approved media…</p>:rows.length===0?<p className="p-3 text-xs text-stone-500">No approved items in this category yet. Drop a file above or use Media.</p>:
-        <div className="grid max-h-80 grid-cols-2 gap-2 overflow-auto sm:grid-cols-3 xl:grid-cols-4">{rows.map(asset=>{
+        <div className="nb-responsive-grid grid max-h-80 grid-cols-2 gap-2 overflow-auto sm:grid-cols-3 xl:grid-cols-4">{rows.map(asset=>{
           const url=mediaPublicUrl(asset.storage_path);const isSelected=selected.includes(url);
           return <button type="button" key={asset.id} title={asset.original_name} onClick={()=>choose(url)}
             className={'overflow-hidden rounded-md border-2 text-left '+(isSelected?'border-amber-700 bg-amber-50':'border-stone-200 bg-white')}>

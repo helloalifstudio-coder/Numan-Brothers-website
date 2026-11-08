@@ -138,9 +138,9 @@ export default function CmsMedia({client,userId,canPublish,onMediaChange}:Props)
       <h2 className="font-serif text-3xl">Media library</h2>
       <p className="mt-2 max-w-2xl text-sm text-stone-600">Search and manage photographs and videos in pages of 30. Upload assets here, or use Bulk imports for larger photo batches and CSV. Only approved media appears on the website.</p>
     </div>
-    <div className="rounded-lg border border-stone-200 bg-stone-50 p-5 space-y-4">
+    <div className="min-w-0 space-y-4 rounded-lg border border-stone-200 bg-stone-50 p-3 min-[360px]:p-5">
       <div className="flex items-center gap-2"><ImagePlus size={20}/><h3 className="font-semibold">Upload assets</h3></div>
-      <div className="grid gap-3 md:grid-cols-2">
+      <div className="nb-responsive-grid grid gap-3 md:grid-cols-2">
         <label className="block text-xs font-semibold">1. Department
           <select className={inputClass+' mt-1'} value={uploadDept} onChange={e=>{setUploadDept(e.target.value as 'men'|'kids'|'');setUploadCategory('')}}>
             <option value="">General website assets</option><option value="men">Men’s Wear</option><option value="kids">Kids Wear</option>
@@ -160,7 +160,7 @@ export default function CmsMedia({client,userId,canPublish,onMediaChange}:Props)
       </button>
       {uploading && <progress aria-label="Upload progress" max={100} value={progress} className="block w-full"/>}
     </div>
-    <div className="grid gap-3 rounded-md border border-stone-200 bg-white p-4 sm:grid-cols-2 xl:grid-cols-3">
+    <div className="nb-responsive-grid grid gap-3 rounded-md border border-stone-200 bg-white p-3 min-[360px]:p-4 sm:grid-cols-2 xl:grid-cols-3">
       <input className={inputClass} type="search" aria-label="Search media filename or SKU"
         placeholder="Search photos by name or SKU…" value={search}
         onChange={e=>{setSearch(e.target.value);setPage(0);}}/>
@@ -189,7 +189,7 @@ export default function CmsMedia({client,userId,canPublish,onMediaChange}:Props)
     <ErrorText message={error}/>
     {loading ? <p className="text-sm text-stone-500">Loading media…</p> :
       rows.length===0 ? <p className="rounded-lg bg-stone-100 p-8 text-sm">There are no assets yet. Add the owner's approved product photographs first.</p> :
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="nb-responsive-grid grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {rows.map((asset)=>{
           const url=asset.approved ? mediaPublicUrl(asset.storage_path) : (privatePreviews[asset.id] || '');
           return <article key={asset.id} className="overflow-hidden rounded-lg border border-stone-200 bg-white shadow-sm">
@@ -201,7 +201,7 @@ export default function CmsMedia({client,userId,canPublish,onMediaChange}:Props)
               </div>}
             <div className="space-y-2 p-4">
               <p className="truncate text-sm font-semibold" title={asset.original_name}>{asset.original_name}</p>
-              <p className="text-xs text-stone-500">{(asset.size_bytes/1024/1024).toFixed(2)} MB · {asset.mime_type} · {asset.department||'General'} / {asset.category_path||'Unsorted'}</p>
+              <p className="break-words text-xs text-stone-500">{(asset.size_bytes/1024/1024).toFixed(2)} MB · {asset.mime_type} · {asset.department||'General'} / {asset.category_path||'Unsorted'}</p>
               {asset.archived_at&&<p className="text-xs font-bold text-amber-800">Archived (not available in asset pickers)</p>}
               <p className={'text-xs font-semibold ' + (asset.approved?'text-emerald-700':'text-amber-700')}>
                 {asset.approved?'Approved for publication':'Awaiting approval'}

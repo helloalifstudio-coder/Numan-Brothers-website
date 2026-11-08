@@ -208,7 +208,7 @@ export default function CmsProducts({client,userId,canPublish}:Props){
       <div><h2 className="font-serif text-3xl">Products</h2><p className="mt-2 text-sm text-stone-600">Create and edit private drafts; approved owners publish changes atomically.</p></div>
       <button type="button" className={primaryClass} onClick={create}><Plus size={16}/> New product</button>
     </div>
-    <div className="grid gap-3 rounded-lg border border-stone-200 bg-white p-4 sm:grid-cols-[1fr_auto_auto]">
+    <div className="nb-responsive-grid grid gap-3 rounded-lg border border-stone-200 bg-white p-3 min-[360px]:p-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,auto)_minmax(0,auto)]">
       <input className={inputClass} type="search" aria-label="Search products by name or SKU"
         placeholder="Search by garment name or SKU…" value={search} onChange={e=>{setSearch(e.target.value);setPage(0);}}/>
       <select aria-label="Filter product status" className={inputClass} value={statusFilter}
@@ -222,7 +222,7 @@ export default function CmsProducts({client,userId,canPublish}:Props){
       </select>
       <p className="text-xs text-stone-500 sm:col-span-3">{totalCount.toLocaleString('en-IN')} records · 50 per page</p>
     </div>
-    <div className="grid gap-5 xl:grid-cols-[300px_minmax(0,1fr)]">
+    <div className="nb-responsive-grid grid gap-5 xl:grid-cols-[300px_minmax(0,1fr)]">
       <div className="max-h-60 space-y-2 overflow-y-auto xl:max-h-[800px] rounded-lg border border-stone-200 bg-white p-3">
         {loading?<p className="p-3 text-sm">Loading catalogue…</p>:rows.length===0?<p className="p-3 text-sm text-stone-600">No products yet. Add the first genuine garment.</p>:
           rows.map((item)=><button type="button" key={item.id} onClick={()=>open(item)}
@@ -234,13 +234,13 @@ export default function CmsProducts({client,userId,canPublish}:Props){
               {item.live?'Published':'Not published'}{item.draft?' · Draft saved':''}
             </span>
           </button>)}
-        <div className="flex items-center justify-between border-t border-stone-200 pt-3 text-xs">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-stone-200 pt-3 text-xs">
           <button disabled={page===0} onClick={()=>setPage((p)=>Math.max(0,p-1))} className={outlineClass}>Previous</button>
           <span>Page {page+1}</span>
           <button disabled={(page+1)*50>=totalCount} onClick={()=>setPage((p)=>p+1)} className={outlineClass}>Next</button>
         </div>
       </div>
-      <div className="rounded-lg border border-stone-200 bg-white p-5 md:p-7">
+      <div className="min-w-0 rounded-lg border border-stone-200 bg-white p-3 min-[360px]:p-5 md:p-7">
         {!id?<div className="space-y-4 py-14 text-center">
           <p className="font-serif text-3xl">Select a product</p>
           <p className="text-sm text-stone-600">Or click “New product” to start a draft.</p>
@@ -254,7 +254,7 @@ export default function CmsProducts({client,userId,canPublish}:Props){
           </a>}
           <section className="space-y-4 rounded-lg border border-amber-300 bg-[#fcf6ea] p-5">
             <p className="text-xs font-bold uppercase tracking-[.16em] text-amber-900">Step 1 · Where will this garment appear?</p>
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="nb-responsive-grid grid gap-3 sm:grid-cols-2">
               {(['men','kids'] as const).map(dept=><button type="button" key={dept} aria-pressed={form.department===dept}
                 className={(form.department===dept?primaryClass:outlineClass)+' w-full'}
                 onClick={()=>{setForm({...form,department:dept,categoryPaths:[],sku:isNew?'':form.sku,slug:isNew?'':form.slug});setSkuEdited(false)}}>
@@ -269,7 +269,7 @@ export default function CmsProducts({client,userId,canPublish}:Props){
             </label>
             <p className="text-xs leading-6 text-stone-600">Choosing a garment type assigns the first collection and automatically reserves a unique SKU such as NB-KP-00001, NB-PA-00001 or NB-JP-00001. You may edit it. Publishing creates an individual page at /products/your-product-slug; existing UUID links will still work.</p>
           </section>
-          <div className="grid gap-5 md:grid-cols-2">
+          <div className="nb-responsive-grid grid gap-5 md:grid-cols-2">
             <Field label="Garment title"><input className={inputClass} value={form.title} onChange={e=>{
               const title=e.target.value;setForm(cur=>{
                 const oldAuto=[slugify(cur.title),cur.sku.toLowerCase()].filter(Boolean).join('-');
@@ -296,7 +296,7 @@ export default function CmsProducts({client,userId,canPublish}:Props){
           </div>
           <fieldset className="rounded-lg border border-stone-200 p-4">
             <legend className="px-2 text-xs font-semibold">Additional collections (optional)</legend>
-            <div className="grid gap-2 sm:grid-cols-2">
+            <div className="nb-responsive-grid grid gap-2 sm:grid-cols-2">
               {categories.map((c)=><label key={c.path} className="flex min-h-10 cursor-pointer items-center gap-2 text-xs">
                 <input type="checkbox" checked={form.categoryPaths.includes(c.path)}
                   disabled={form.categoryPaths[0]===c.path}
