@@ -105,10 +105,10 @@ export default function App() {
        selectedId && !detail ? <p role="status" className="p-12 text-center text-stone-500">Loading product…</p> :
        product ? <V2Product key={product.id} product={product} home={siteData.homepage}
          whatsappNumber={siteData.homepage.contactWhatsapp} contactPhone={siteData.homepage.contactPhone} onNavigate={navigate}/> :
-       path === '/search' ? <section className="mx-auto min-h-[70vh] max-w-[1360px] px-5 py-16 md:px-12">
+       path === '/search' ? <section className="mx-auto min-h-[70vh] min-w-0 max-w-[1360px] px-4 py-16 min-[360px]:px-5 md:px-12">
          <V2Reveal>
            <p className="mb-5 text-[10px] font-bold uppercase tracking-[.24em] text-[#a37f50]">{siteText(siteData.homepage,'search.eyebrow')}</p>
-           <h1 className="font-serif text-[clamp(3rem,6vw,5.5rem)] tracking-[-.05em] text-[#29221c]">{siteText(siteData.homepage,'search.title')}</h1>
+           <h1 className="break-words font-serif text-[clamp(2.4rem,6vw,5.5rem)] tracking-[-.05em] text-[#29221c]">{siteText(siteData.homepage,'search.title')}</h1>
            <p className="mt-5 mb-12 text-sm text-[#817164]">{searchQuery ? 'Results for "' + searchQuery + '"' : 'Enter a product name or browse a collection.'} · {activeRoutePage?.count ?? '—'} styles</p>
          </V2Reveal>
          {!activeRoutePage ? <p role="status">Searching catalogue…</p> : matches.length ? <V2ProductGrid products={matches} home={siteData.homepage} onNavigate={navigate}/> :
@@ -133,7 +133,7 @@ export default function App() {
            <p className="mb-7 text-[10px] font-bold uppercase tracking-[.27em] text-[#dcba85]">{siteText(siteData.homepage,'contact.eyebrow')}</p>
            <h1 className="max-w-[12ch] break-words font-serif text-[clamp(2.8rem,7vw,7rem)] leading-[1.02] tracking-[-.06em]">{siteText(siteData.homepage,'contact.title')}</h1>
            <p className="mt-8 max-w-xl text-base leading-8 text-[#ded2c3]">{siteText(siteData.homepage,'contact.description')}</p>
-           <div className="mt-10 flex flex-wrap gap-3">
+           <div className="mt-10 flex min-w-0 flex-wrap gap-3">
              <a href="https://www.google.com/maps/search/?api=1&query=Nomaan+Brothers+Dresses+Mandi+Bazar+Warangal"
                target="_blank" rel="noopener noreferrer" className="inline-flex min-h-12 items-center gap-3 bg-[#e2c9a4] px-7 text-xs font-bold uppercase tracking-[.12em] text-[#2b2118]">
                <MapPin size={17}/> {siteText(siteData.homepage,'contact.directions')} <ArrowUpRight size={17}/>
