@@ -39,3 +39,9 @@ test('upload validation and private TUS chunking remain unchanged',()=>{
   assert.match(s,/nb-media-staging/);
   assert.match(s,/resumableUpload\(client, path, file, onProgress\)/);
 });
+
+test('admin studio does not fetch public catalogue data in the background',()=>{
+  const s=source('src/App.tsx');
+  assert.match(s,/if\(isStudioPath\)return;/);
+  assert.match(s,/\}, \[isStudioPath\]\);/);
+});
