@@ -13,6 +13,8 @@ export type CatalogProduct = Product & {
   published?: boolean;
   isPublished?: boolean;
   videoUrl?: string;
+  slug?:string;
+  sku?:string;
   originalPrice?:number;
   offerPrice?:number;
   customizable?:boolean;
@@ -74,8 +76,11 @@ export const productsForCollection = (products: CatalogProduct[], path: string):
   products.filter((product) => inCollection(product, path));
 export const publicProducts = (products: CatalogProduct[]): CatalogProduct[] =>
   products.filter((product) => productPaths(product).length > 0);
-export const productPath = (product: Product): string =>
-  '/products/' + encodeURIComponent(product.id);
+/** Public catalogue uses the unique product slug; existing UUID links still work. */
+export const isProductSlug=(slug:unknown):slug is string =>
+  typeof slug==='string' && slug.length<=120 && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug);
+export const productPath=(product:Pick<Product,'id'> & {slug?:string}):string =>
+  '/products/'+encodeURIComponent(isProductSlug(product.slug)?product.slug:product.id);
 export const productImage = (product: Product): string => {
   const images = Array.isArray(product.images) ? product.images.filter((image) => /^https:\/\//.test(image)) : [];
   return images.find((image) => !image.includes('img.youtube.com')) || images[0] || '';

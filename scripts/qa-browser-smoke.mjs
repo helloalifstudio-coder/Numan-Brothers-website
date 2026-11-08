@@ -14,6 +14,44 @@ const base=(process.env.NB_TEST_URL||'http://127.0.0.1:4173').replace(/\/$/,'');
 const live=process.env.NB_MODE==='live';
 const screenshots='artifacts/browser';
 mkdirSync(screenshots,{recursive:true});
+
+const mockProduct={
+  id:'11111111-1111-4111-8111-111111111111',slug:'ivory-sherwani-nb-sh-00001',
+  sku:'NB-SH-00001',title:'Ivory Heritage Sherwani',department:'men',
+  category_paths:['/men/sherwani'],description:'An elegant sherwani for celebrations.',
+  fabric:'Silk blend',sizes:['40','42','44'],image_urls:[],video_url:null,
+  price:12000,offer_price:9900,customizable:true,status:'published',sort_rank:1,
+  created_at:'2026-10-01T00:00:00Z',updated_at:'2026-10-01T00:00:00Z'
+};
+async function mockCmsRoutes(page){
+  if(process.env.NB_MOCK_CMS!=='1')return;
+  await page.route('https://fixture.supabase.co/**',async route=>{
+    const url=new URL(route.request().url());
+    const path=url.pathname;
+    const json=(body,extra={})=>route.fulfill({status:200,contentType:'application/json',
+      headers:{'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'apikey,authorization,content-type,x-client-info,prefer,accept,accept-profile,content-profile','Access-Control-Allow-Methods':'GET,POST,OPTIONS,HEAD','content-range':'0-0/1',...extra},body:JSON.stringify(body)});
+    if(path.endsWith('/nb_home_public'))return json({content:{
+      contactWhatsapp:'919876543210',contactPhone:'919876543211'
+    }});
+    if(path.endsWith('/nb_categories'))return json([]);
+    if(path.endsWith('/nb_products')){
+      const singleton=(route.request().headers()['accept']||'').includes('vnd.pgrst.object');
+      if(singleton){
+        const match=url.searchParams.get('slug')==='eq.'+mockProduct.slug ||
+          url.searchParams.get('id')==='eq.'+mockProduct.id;
+        return match?json(mockProduct):route.fulfill({status:406,contentType:'application/json',body:JSON.stringify({code:'PGRST116'})});
+      }
+      if(url.searchParams.get('id')==='neq.'+mockProduct.id)return json([],{'content-range':'*/0'});
+      const dept=url.searchParams.get('department');
+      const hasKids=dept==='eq.kids'||(url.searchParams.get('category_paths')||'').includes('/kids/');
+      const search=url.searchParams.get('or')||'';
+      const rows=hasKids||(search&&!search.toLowerCase().includes('sherwani'))?[]:[mockProduct];
+      return json(rows,{'content-range':rows.length?'0-0/1':'*/0'});
+    }
+    return json([]);
+  });
+}
+
 const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
 const failures=[];
 const results=[];
@@ -24,6 +62,7 @@ async function inspect(route,width=390,height=844,opts={}){
   const page=await context.newPage();
   const runtimeErrors=[];
   page.on('pageerror',error=>runtimeErrors.push(String(error.message)));
+  await mockCmsRoutes(page);
   try{
     const response=await page.goto(base+route,{waitUntil:'domcontentloaded',timeout:25000});
     const status=response?.status()||0;
@@ -76,6 +115,46 @@ async function inspect(route,width=390,height=844,opts={}){
   }finally{await context.close();}
 }
 
+
+async function inspectFloatingContactsAndProduct(){
+  if(process.env.NB_MOCK_CMS!=='1')return;
+  const context=await browser.newContext({viewport:{width:375,height:812}});
+  const page=await context.newPage();
+  await mockCmsRoutes(page);
+  try{
+    await page.goto(base+'/',{waitUntil:'domcontentloaded'});
+    await page.locator('#v2-home-title').waitFor({state:'visible'});
+    const dock=page.getByTestId('floating-contact-dock');
+    assert.equal(await dock.count(),0,'contact dock starts hidden above the hero');
+    await page.locator('[data-nb-contact-hero]').evaluate(el=>window.scrollTo(0,el.getBoundingClientRect().bottom+window.scrollY+160));
+    await dock.waitFor({state:'visible',timeout:7000});
+    const whatsapp=dock.getByRole('link',{name:/WhatsApp/});
+    const call=dock.getByRole('link',{name:/Call Nomaan Brothers/});
+    assert.match(await whatsapp.getAttribute('href'),/^https:\/\/wa\.me\/919876543210\?text=/);
+    assert.equal(await call.getAttribute('href'),'tel:+919876543211');
+    const target=await call.boundingBox();
+    assert.ok(target?.height>=44&&target?.width>=44,'touch target must be 44px minimum');
+    console.log('PASS_FLOATING_CONTACT_DOCK',JSON.stringify({width:375,hiddenAboveHero:true,links:2,touchTarget:target?.height}));
+    await page.goto(base+'/products/'+mockProduct.slug,{waitUntil:'domcontentloaded'});
+    await page.getByRole('heading',{level:1,name:mockProduct.title}).waitFor({state:'visible',timeout:7000});
+    assert.equal(await page.getByText('Style code · '+mockProduct.sku).count(),1);
+    const size=page.getByRole('button',{name:'42',exact:true});
+    await size.click();
+    assert.equal(await size.getAttribute('aria-pressed'),'true');
+    const enquire=page.getByRole('link',{name:/Enquire about this design/i}).first();
+    assert.match(await enquire.getAttribute('href'),/Requested%20size%3A%2042/);
+    await page.getByRole('button',{name:/Share this design/}).click();
+    const message=await page.getByRole('status').allTextContents();
+    assert.ok(message.some(text=>text.includes('Link copied')||text.includes('browser address')));
+    const gridLinks=await page.locator('a[href="/products/'+mockProduct.slug+'"]').count();
+    assert.equal(gridLinks,0,'current item must not appear as a related product');
+    console.log('PASS_UNIQUE_PRODUCT_PAGE',JSON.stringify({slug:mockProduct.slug,size:'42',share:true,wa:true}));
+  }catch(error){
+    failures.push({route:'floating-and-product',width:375,error:String(error?.stack||error)});
+    console.error('FAIL_FLOATING_CONTACT_PRODUCT',String(error?.message||error));
+  }finally{await context.close();}
+}
+
 try{
   const routes=['/','/men','/kids','/men/sherwani','/men/kurta-pyjama','/men/marriage','/contact','/search?q=sherwani','/studio'];
   for(const route of routes)await inspect(route);
@@ -83,6 +162,7 @@ try{
     await inspect('/',width,width<=375?740:900);
   }
   if(!skipped)await inspect('/',390,844,{reduce:true});
+  if(!skipped)await inspectFloatingContactsAndProduct();
 }finally{await browser.close();}
 if(skipped)console.log('LIVE_CHECK_INCOMPLETE: external deployment is not publicly accessible from this runner.');
 console.log('BROWSER_SMOKE_SUMMARY',JSON.stringify({base,live,checks:results.length,failures:failures.length,skipped}));

@@ -138,7 +138,7 @@ export function rowToProduct(row: CmsProductRow): CatalogProduct {
     specs: [], badges: [], colors: [], rating: 0, reviewsCount: 0, type: 'Set',
     hasBottom: false, sizeChart: { top: [] }, reviews: [],
   };
-  return { ...p, collectionPaths: row.category_paths || [], department: row.department,
+  return { ...p, slug:row.slug,sku:row.sku,collectionPaths: row.category_paths || [], department: row.department,
     videoUrl: row.video_url && isSafeHttps(row.video_url) ? row.video_url : undefined,
     published: row.status === 'published',
     offerPrice:row.offer_price??undefined,

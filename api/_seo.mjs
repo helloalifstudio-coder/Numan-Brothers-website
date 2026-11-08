@@ -21,12 +21,19 @@ export function renderProductHtml(template,product,canonical=null){
     try{return new URL(x).protocol==='https:'}catch{return false}
   }):[];
   const photo=images[0]?escapeHtml(images[0]):'';
-  const canonicalUrl=canonical ? canonical+'/products/'+encodeURIComponent(product.id):null;
+  const handle=typeof product.slug==='string' && product.slug.length<=120 &&
+    /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(product.slug) ? product.slug : product.id;
+  const canonicalUrl=canonical ? canonical+'/products/'+encodeURIComponent(handle):null;
   const schema={
     '@context':'https://schema.org','@type':'Product',name:product.title,
     sku:product.sku,description:product.description||undefined,
     image:images.length?images:undefined,
     brand:{'@type':'Brand',name:'Nomaan Brothers'},
+    ...(canonicalUrl?{url:canonicalUrl}:{}),
+    ...(Number(product.offer_price??product.price)>0?{offers:{
+      '@type':'Offer',priceCurrency:'INR',price:Number(product.offer_price??product.price),
+      ...(canonicalUrl?{url:canonicalUrl}:{}),
+    }}:{}),
   };
   const tags=[
     '<title>'+title+'</title>',

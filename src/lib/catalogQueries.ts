@@ -52,11 +52,28 @@ export async function loadCataloguePage(
     count:count||0,page,pageSize:PUBLIC_PAGE_SIZE,error:null,
   };
 }
-export async function loadProductById(id:string):Promise<CatalogProduct|null> {
-  if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id))return null;
+const isUuid=(handle:string)=>/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(handle);
+export const isValidProductHandle=(handle:string):boolean =>
+  handle.length<=120 && (isUuid(handle)||/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(handle));
+
+/** Publish-only lookup: readable slugs and existing UUID shares both resolve. */
+export async function loadProductById(handle:string):Promise<CatalogProduct|null> {
+  if(!isValidProductHandle(handle))return null;
   const client=getCmsClient();if(!client)return null;
   const {data,error}=await client.from('nb_products').select(columns)
-    .eq('status','published').eq('id',id).maybeSingle();
+    .eq('status','published').eq(isUuid(handle)?'id':'slug',handle).maybeSingle();
   if(error||!data)return null;
   return rowToProduct(data as CmsProductRow);
+}
+/** Bounded indexed collection recommendations; never expose draft or archived garments. */
+export async function loadRelatedProducts(product:CatalogProduct,limit=4):Promise<CatalogProduct[]> {
+  const route=product.collectionPaths?.[0];
+  const client=getCmsClient();
+  if(!client||!route)return [];
+  const count=Math.min(6,Math.max(1,Math.floor(limit)));
+  const {data,error}=await client.from('nb_products').select(columns)
+    .eq('status','published').neq('id',product.id)
+    .overlaps('category_paths',[route])
+    .order('updated_at',{ascending:false}).limit(count);
+  return error?[]:((data||[]) as CmsProductRow[]).map(rowToProduct);
 }

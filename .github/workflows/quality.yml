@@ -42,6 +42,8 @@ jobs:
         run: node --test tests/responsive-layout.test.mjs
       - name: Studio organization and media-scale regression contracts
         run: node --test tests/studio-media-scale.test.mjs
+      - name: Contact dock and product-detail interaction tests
+        run: bun test tests/commerce-ux.test.ts
       - name: Liquid hero and route-splitting contracts
         run: node --test tests/liquid-hero.test.mjs
       - name: SEO markup injection and sitemap manifest tests
@@ -116,6 +118,9 @@ jobs:
       - name: Test every storefront route, mobile widths, navigation and reduced motion
         env:
           NODE_PATH: /tmp/nb-browser/node_modules
+          VITE_SUPABASE_URL: https://fixture.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_testfixture12345678
+          NB_MOCK_CMS: '1'
         run: |
           bun run dev --host 127.0.0.1 --port 4173 > /tmp/nb-vite-browser.log 2>&1 &
           for i in $(seq 1 30); do

@@ -9,14 +9,16 @@ export default {
   const api=process.env.VITE_SUPABASE_URL||'',key=process.env.VITE_SUPABASE_PUBLISHABLE_KEY||'';
   if(!site||!api||!key)return new Response('Sitemap unavailable',{status:503});
   try{
-    const params=new URLSearchParams({select:'id',status:'eq.published',order:'id.asc',limit:'1000',offset:String(page*1000)});
+    const params=new URLSearchParams({select:'id,slug',status:'eq.published',order:'id.asc',limit:'1000',offset:String(page*1000)});
     const response=await fetch(api+'/rest/v1/nb_products?'+params,
       {headers:{apikey:key,Accept:'application/json'},signal:AbortSignal.timeout(9000)});
     if(!response.ok)throw new Error('Database unavailable');
-    const rows=await response.json() as {id:string}[];
+    const rows=await response.json() as {id:string;slug:string}[];
     if(!Array.isArray(rows)||!rows.length)return new Response('Sitemap not found',{status:404});
     const xml='<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+
-      rows.map(row=>'<url><loc>'+escapeHtml(site+'/products/'+encodeURIComponent(row.id))+'</loc></url>').join('')+'</urlset>';
+      rows.map(row=>'<url><loc>'+escapeHtml(site+'/products/'+encodeURIComponent(
+         /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(row.slug||'')&&row.slug.length<=120?row.slug:row.id
+       ))+'</loc></url>').join('')+'</urlset>';
     return new Response(xml,{status:200,headers:{'Content-Type':'application/xml; charset=utf-8','Cache-Control':'public, s-maxage=900'}});
   }catch{return new Response('Sitemap temporarily unavailable',{status:503,headers:{'Cache-Control':'no-store'}})}
  },

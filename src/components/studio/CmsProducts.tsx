@@ -3,6 +3,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { ArrowLeft, ArrowRight, Plus, Save, Send, Archive, Trash2 } from 'lucide-react';
 import { type CmsProductRow, isSafeHttps } from '../../lib/cmsData';
 import { COLLECTION_ROUTES } from '../../storefront/navigation';
+import { productPath } from '../../storefront/catalog';
 import AssetEditor from './AssetEditor';
 import {ErrorText,Field,inputClass,outlineClass,primaryClass} from './StudioShared';
 
@@ -62,6 +63,7 @@ export default function CmsProducts({client,userId,canPublish}:Props){
   const [loading,setLoading]=useState(true);
   const [page,setPage]=useState(0);
   const [id,setId]=useState<string|null>(null);
+  const [publishedSlug,setPublishedSlug]=useState<string|null>(null);
   const [form,setForm]=useState<Draft>({...blank});
   const [isNew,setIsNew]=useState(false);
   const [skuLoading,setSkuLoading]=useState(false);
@@ -112,7 +114,7 @@ export default function CmsProducts({client,userId,canPublish}:Props){
     setRevisionsLoading(false);
   };
   const open=async(entry:Entry)=>{
-    setIsNew(false);setSkuEdited(true);setId(entry.id);setError(null);setMessage(null);setBusy(true);
+    setIsNew(false);setSkuEdited(true);setId(entry.id);setPublishedSlug(null);setError(null);setMessage(null);setBusy(true);
     setRevisions([]);void loadRevisions(entry.id);
     const [draft,published]=await Promise.all([
       client.from('nb_product_drafts').select('content').eq('product_id',entry.id).maybeSingle(),
@@ -121,12 +123,15 @@ export default function CmsProducts({client,userId,canPublish}:Props){
         .eq('id',entry.id).maybeSingle(),
     ]);
     if(draft.error||published.error)setError(draft.error?.message||published.error?.message||'Cannot open product');
-    else setForm(draft.data?fromUnknown(draft.data.content):
+    else {
+      setPublishedSlug(published.data?.status==='published'?String(published.data.slug||''):null);
+      setForm(draft.data?fromUnknown(draft.data.content):
       published.data?fromPublished(published.data as CmsProductRow):{...blank});
+    }
     setBusy(false);
   };
   const update=<K extends keyof Draft>(key:K,value:Draft[K])=>setForm((current)=>({...current,[key]:value}));
-  const create=()=>{setId(crypto.randomUUID());setIsNew(true);setSkuEdited(false);setForm({...blank});setRevisions([]);setError(null);setMessage(null)};
+  const create=()=>{setId(crypto.randomUUID());setPublishedSlug(null);setIsNew(true);setSkuEdited(false);setForm({...blank});setRevisions([]);setError(null);setMessage(null)};
   const slugify=(value:string)=>value.normalize('NFKD').toLowerCase()
     .replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,110);
   const chooseCategory=async(path:string)=>{
@@ -176,7 +181,8 @@ export default function CmsProducts({client,userId,canPublish}:Props){
     const {data,error}=await client.rpc('nb_publish_product',{p_product_id:id});
     setBusy(false);
     if(error){setError(error.message);return;}
-    setMessage('Product version '+data+' published. Customers can now see the approved content.');
+    setPublishedSlug(form.slug);
+    setMessage('Product version '+data+' published. Your garment now has its own public page.');
     await Promise.all([load(),loadRevisions(id)]);
   };
   const discardDraft=async()=>{
@@ -186,7 +192,7 @@ export default function CmsProducts({client,userId,canPublish}:Props){
     if(error){setError(error.message);setBusy(false);return;}
     const original=active;
     if(original?.live){await open(original);setMessage('Draft discarded; published garment unchanged.');}
-    else{setId(null);setForm({...blank});setMessage('Private draft discarded.');}
+    else{setId(null);setPublishedSlug(null);setForm({...blank});setMessage('Private draft discarded.');}
     await load();setBusy(false);
   };
   const archiveProduct=async()=>{
@@ -194,7 +200,7 @@ export default function CmsProducts({client,userId,canPublish}:Props){
     setBusy(true);setError(null);setMessage(null);
     const {error}=await client.rpc('nb_archive_product',{p_product_id:id});
     if(error)setError(error.message);
-    else{setId(null);setMessage('Product archived and hidden from the live catalogue.');await load();}
+    else{setId(null);setPublishedSlug(null);setMessage('Product archived and hidden from the live catalogue.');await load();}
     setBusy(false);
   };
   return <section className="space-y-7">
@@ -241,7 +247,11 @@ export default function CmsProducts({client,userId,canPublish}:Props){
         </div>:<div className="space-y-6">
           <button type="button" className="flex items-center gap-2 text-xs text-stone-600" onClick={()=>setId(null)}><ArrowLeft size={14}/> Back to product list</button>
           <h3 className="font-serif text-2xl">{active?.label||'New product draft'}</h3>
-          <p className="text-xs text-stone-500">{id}</p>
+          <p className="break-all text-xs text-stone-500">{id}</p>
+          {publishedSlug&&id&&<a href={productPath({id,slug:publishedSlug})} target="_blank" rel="noopener noreferrer"
+            className="inline-flex min-h-11 items-center gap-2 border border-[#bd9e72] bg-[#f6ecdd] px-4 text-sm font-semibold text-[#5a3e26] hover:bg-[#ead8bf]">
+            View live garment page <ArrowRight size={16}/>
+          </a>}
           <section className="space-y-4 rounded-lg border border-amber-300 bg-[#fcf6ea] p-5">
             <p className="text-xs font-bold uppercase tracking-[.16em] text-amber-900">Step 1 · Where will this garment appear?</p>
             <div className="grid gap-3 sm:grid-cols-2">
@@ -257,7 +267,7 @@ export default function CmsProducts({client,userId,canPublish}:Props){
                 {categories.map(c=><option key={c.path} value={c.path}>{c.title}</option>)}
               </select>
             </label>
-            <p className="text-xs leading-6 text-stone-600">Choosing a garment type assigns the first collection and automatically reserves a unique SKU such as NB-KP-00001, NB-PA-00001 or NB-JP-00001. You may edit it. The URL slug is the readable product address.</p>
+            <p className="text-xs leading-6 text-stone-600">Choosing a garment type assigns the first collection and automatically reserves a unique SKU such as NB-KP-00001, NB-PA-00001 or NB-JP-00001. You may edit it. Publishing creates an individual page at /products/your-product-slug; existing UUID links will still work.</p>
           </section>
           <div className="grid gap-5 md:grid-cols-2">
             <Field label="Garment title"><input className={inputClass} value={form.title} onChange={e=>{
