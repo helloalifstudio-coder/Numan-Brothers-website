@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ArrowLeft, ArrowRight, ArrowUpRight, ChevronLeft, ChevronRight, MapPin, MessageCircle, Sparkles, Phone, Scissors } from 'lucide-react';
 import type { Product } from '../types';
-import { productImage, type CatalogProduct } from '../storefront/catalog';
+import { productImage, productPath, type CatalogProduct } from '../storefront/catalog';
+import {loadRelatedProducts} from '../lib/catalogQueries';
+import {callingContact,whatsappContact} from '../lib/contactLinks';
 import { getRelatedCollectionLinks } from '../storefront/navigation';
 import { productTheme } from '../storefront/productTheme';
 import V2Link from './V2Link';
@@ -21,26 +23,47 @@ export default function V2Product({ product, whatsappNumber, contactPhone, home,
   const theme = productTheme(garment);
   const images = (product.images || []).filter(image => /^https:\/\//i.test(image));
   const [selectedImage, setSelectedImage] = useState(0);
+  const [selectedSize,setSelectedSize]=useState('');
+  const [shareStatus,setShareStatus]=useState('');
+  const [related,setRelated]=useState<CatalogProduct[]>([]);
+  useEffect(()=>{
+    let active=true;
+    void loadRelatedProducts(garment,4).then(rows=>{if(active)setRelated(rows)});
+    return()=>{active=false};
+  },[garment.id]);
   const visual = images[selectedImage] || productImage(product);
   const siblings = getRelatedCollectionLinks(theme.collectionPath)
     .filter(link => link.path !== theme.collectionPath).slice(0, 5);
   const videoUrl = garment.videoUrl;
   const playableVideo = typeof videoUrl === 'string' && /^https:\/\//i.test(videoUrl) &&
     (/\.(mp4|webm)(\?|$)/i.test(videoUrl) || videoUrl.includes('/storage/v1/object/public/nb-media-public/'));
-  const call=contactPhone && /^[1-9][0-9]{9,14}$/.test(contactPhone)?'tel:+'+contactPhone:null;
+  const call=callingContact(contactPhone);
   const original=garment.originalPrice??null;
   const discounted=garment.offerPrice!=null&&original!=null&&garment.offerPrice<original?garment.offerPrice:null;
   const price=(n:number)=>n.toLocaleString('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0});
-  const customizationContact=whatsappNumber&&/^[1-9][0-9]{9,14}$/.test(whatsappNumber)
-    ? 'https://wa.me/'+whatsappNumber+'?text='+
-      encodeURIComponent('Hello Nomaan Brothers, I would like to customize '+product.title+' with my fabric choice and measurements.') : null;
-  const contact = whatsappNumber && /^[1-9][0-9]{9,14}$/.test(whatsappNumber)
-    ? 'https://wa.me/' + whatsappNumber + '?text=' +
-      encodeURIComponent('Hello Nomaan Brothers, I would like to enquire about ' + product.title + ' (' + product.id + ').')
-    : null;
+  const sizeNote=selectedSize?' Requested size: '+selectedSize+'.':'';
+  const customizationContact=whatsappContact(whatsappNumber,
+    'Hello Nomaan Brothers, I would like to customize '+product.title+' with fabric and measurements.'+sizeNote);
+  const contact=whatsappContact(whatsappNumber,
+    'Hello Nomaan Brothers, I would like to enquire about '+product.title+
+    ' (SKU '+(garment.sku||product.id)+').'+sizeNote);
+  const share=async()=>{
+    const link=window.location.origin+productPath(garment);
+    if(navigator.share){
+      try{await navigator.share({title:product.title,url:link});setShareStatus('Shared successfully');return;}
+      catch(error){if(error instanceof DOMException&&error.name==='AbortError')return;}
+    }
+    try{
+      if(!navigator.clipboard?.writeText)throw new Error('Clipboard unavailable');
+      await navigator.clipboard.writeText(link);
+      setShareStatus('Link copied');
+    }catch{
+      setShareStatus('Use the browser address bar to copy this product link.');
+    }
+  };
 
   return <div className="min-h-[72vh] bg-[#fbf8f2] pb-24 lg:pb-0">
-    <section className="relative isolate overflow-hidden pb-20 pt-7 md:pb-28 md:pt-11" style={{ backgroundColor: theme.backdrop }}>
+    <section data-nb-contact-hero className="relative isolate overflow-hidden pb-20 pt-7 md:pb-28 md:pt-11" style={{ backgroundColor: theme.backdrop }}>
       <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
         {visual && <img key={visual} src={visual} alt="" loading="eager" decoding="async"
           className="absolute inset-[-12%] h-[124%] w-[124%] object-cover object-center opacity-55 blur-[68px] saturate-[.72] motion-safe:animate-[nb-ambient-arrival_850ms_ease-out_both] md:blur-[95px]"/>}
@@ -116,7 +139,15 @@ export default function V2Product({ product, whatsappNumber, contactPhone, home,
               </p>
               <h1 className="font-serif break-words text-[clamp(2.3rem,4.5vw,5.3rem)] leading-[1.04] tracking-[-.055em] text-[#251d18]">{product.title}</h1>
               <p className="mt-4 text-[11px] font-medium uppercase tracking-[.15em] text-[#8b745b]">{theme.collectionLabel} / Nomaan Brothers</p>
-              <div className="mt-8 h-px w-full bg-[#dfd3c3]"/>
+              <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+                {garment.sku&&<p className="break-all text-xs font-semibold tracking-[.09em] text-[#8a745b]">Style code · {garment.sku}</p>}
+                <button type="button" onClick={()=>void share()}
+                  className="inline-flex min-h-11 items-center gap-2 border-b border-[#957c5b] text-xs font-semibold text-[#6b5133] hover:text-[#29221b]">
+                  Share this design <ArrowUpRight size={15}/>
+                </button>
+              </div>
+              <p role="status" aria-live="polite" className="text-xs text-[#78624b]">{shareStatus}</p>
+              <div className="mt-7 h-px w-full bg-[#dfd3c3]"/>
               <p className="mt-7 text-sm leading-8 text-[#5c5147]">
                 {product.description?.trim() || 'Discover the details of this occasionwear design, thoughtfully selected for the collection.'}
               </p>
@@ -126,6 +157,18 @@ export default function V2Product({ product, whatsappNumber, contactPhone, home,
                   <span className="bg-emerald-100 px-2 py-1 text-xs font-bold text-emerald-800">{Math.round((1-discounted/original)*100)}% off</span></>}
               </div>}
               <p className="mt-3 text-xs leading-6 text-[#7c7064]">{siteText(home,'product.pricing')}</p>
+              {Array.isArray(product.sizes)&&product.sizes.length>0&&<fieldset className="mt-7">
+                <legend className="text-xs font-bold uppercase tracking-[.12em] text-[#624a31]">Choose your size for an enquiry</legend>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {product.sizes.map(size=><button key={size} type="button" aria-pressed={selectedSize===size}
+                    onClick={()=>setSelectedSize(current=>current===size?'':size)}
+                    className={'inline-flex min-h-11 min-w-11 items-center justify-center border px-4 text-sm font-semibold transition-colors '+
+                      (selectedSize===size?'border-[#30251b] bg-[#30251b] text-white':'border-[#c7b69e] bg-white text-[#594735] hover:border-[#725839]')}>
+                    {size}
+                  </button>)}
+                </div>
+                <p className="mt-2 text-xs leading-6 text-[#81705e]">Size selection is included in your message, not a stock reservation. Confirm availability with the showroom.</p>
+              </fieldset>}
               {garment.customizable&&<section className="mt-6 border border-[#d8c5a6] bg-[#f4eada] p-5">
                 <p className="flex items-center gap-2 font-serif text-xl"><Scissors size={20}/>{siteText(home,'product.customTitle')}</p>
                 <p className="mt-3 text-xs leading-6 text-[#6c5640]">{siteText(home,'product.customText')}</p>
@@ -137,8 +180,8 @@ export default function V2Product({ product, whatsappNumber, contactPhone, home,
               </section>}
               <dl className="mt-8 space-y-4 border-y border-[#dfd3c3] py-6 text-sm">
                 {product.fabric && <div className="flex flex-wrap justify-between gap-4"><dt className="text-[#857565]">Fabric</dt><dd className="max-w-[65%] text-right font-medium text-[#362b21]">{product.fabric}</dd></div>}
-                {Array.isArray(product.sizes) && product.sizes.length > 0 && <div className="flex flex-wrap justify-between gap-4"><dt className="text-[#857565]">Listed sizes</dt><dd className="max-w-[65%] text-right font-medium text-[#362b21]">{product.sizes.join(', ')}</dd></div>}
-                <div className="flex flex-wrap justify-between gap-4"><dt className="text-[#857565]">Product reference</dt><dd className="max-w-[65%] break-all text-right font-medium text-[#362b21]">{product.id}</dd></div>
+                {Array.isArray(product.sizes) && product.sizes.length > 0 && <div className="flex flex-wrap justify-between gap-4"><dt className="text-[#857565]">Sizing</dt><dd className="max-w-[65%] text-right font-medium text-[#362b21]">Confirm fit in store</dd></div>}
+                <div className="flex flex-wrap justify-between gap-4"><dt className="text-[#857565]">Style reference</dt><dd className="max-w-[65%] break-all text-right font-medium text-[#362b21]">{garment.sku||product.id}</dd></div>
               </dl>
               <div className="mt-8 space-y-3">
                 {call&&<a href={call} className="flex min-h-12 items-center gap-3 border border-[#baa381] px-6 text-xs font-bold uppercase">
@@ -180,11 +223,28 @@ export default function V2Product({ product, whatsappNumber, contactPhone, home,
         </V2Link>)}
       </div>
     </section>
-    {contact && <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[#d8c6ab] bg-[#fcf7ee]/95 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 shadow-[0_-10px_35px_rgba(0,0,0,.08)] backdrop-blur-md lg:hidden">
-      <a href={contact} target="_blank" rel="noopener noreferrer"
-        className="flex min-h-12 items-center justify-center gap-3 bg-[#30251b] px-5 text-xs font-bold uppercase tracking-[.11em] text-white">
-        <MessageCircle size={17}/> Enquire about this design <ArrowUpRight size={17}/>
-      </a>
-    </div>}
+    {related.length>0&&<section className="mx-auto max-w-[1400px] px-5 pb-20 md:px-12 lg:px-20" aria-labelledby="related-garments-title">
+      <div className="mb-7 flex flex-wrap items-end justify-between gap-3 border-b border-[#d7c8b4] pb-6">
+        <div>
+          <p className="mb-2 text-[10px] font-bold uppercase tracking-[.2em] text-[#9e7850]">Selected for your occasion</p>
+          <h2 id="related-garments-title" className="font-serif text-[clamp(2rem,4vw,3rem)] leading-tight text-[#2e251e]">You may also like</h2>
+        </div>
+        <V2Link href={theme.collectionPath} onNavigate={onNavigate} className="inline-flex min-h-11 items-center gap-2 text-xs font-semibold text-[#75512c] underline underline-offset-4">
+          Browse the collection <ArrowRight size={16}/>
+        </V2Link>
+      </div>
+      <div className="grid grid-cols-2 gap-x-3 gap-y-7 sm:gap-x-5 lg:grid-cols-4">
+        {related.map(item=><V2Link key={item.id} href={productPath(item)} onNavigate={onNavigate} className="group min-w-0">
+          <div className="aspect-[3/4] overflow-hidden bg-[#e7dccb]">
+            {productImage(item)?<img src={productImage(item)} alt={item.title} loading="lazy" decoding="async"
+              className="h-full w-full object-cover object-top transition-transform duration-500 motion-safe:group-hover:scale-[1.04]"/>:
+              <div className="flex h-full items-center justify-center font-serif text-xl text-[#6a5844]">Nomaan</div>}
+          </div>
+          <p className="mt-3 line-clamp-2 font-serif text-base leading-snug text-[#322a21] sm:text-xl">{item.title}</p>
+          {item.originalPrice&&item.originalPrice>0&&<p className="mt-1 text-sm font-semibold text-[#775533]">{price(item.offerPrice??item.originalPrice)}</p>}
+          <span className="mt-2 inline-flex min-h-8 items-center gap-1 text-xs font-semibold text-[#705131]">Explore design <ArrowUpRight size={13}/></span>
+        </V2Link>)}
+      </div>
+    </section>}
   </div>;
 }
