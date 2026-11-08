@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { type CmsCategoryRow, type CmsMediaRow } from '../../lib/cmsData';
+import { type CmsCategoryRow } from '../../lib/cmsData';
 import {ErrorText,Field,inputClass,primaryClass,outlineClass} from './StudioShared';
 import AssetEditor from './AssetEditor';
 
-interface Props {client:SupabaseClient;canPublish:boolean;media:CmsMediaRow[];userId:string;}
-export default function CmsCategories({client,canPublish,media,userId}:Props) {
+interface Props {client:SupabaseClient;canPublish:boolean;userId:string;}
+export default function CmsCategories({client,canPublish,userId}:Props) {
   const [rows,setRows]=useState<CmsCategoryRow[]>([]);
   const [selected,setSelected]=useState<CmsCategoryRow|null>(null);
   const [loading,setLoading]=useState(true);
@@ -53,7 +53,7 @@ export default function CmsCategories({client,canPublish,media,userId}:Props) {
               disabled={!canPublish} onChange={(e)=>setSelected({...selected,description:e.target.value})}/></Field>
             <AssetEditor client={client} userId={userId} canPublish={canPublish}
               department={selected.department} categoryPath={selected.path}
-              label="Collection banner image" media={media}
+              label="Collection banner image"
               selected={selected.image_url?[selected.image_url]:[]}
               onChange={urls=>setSelected({...selected,image_url:urls[0]||null})}/>
             {canPublish?<button type="button" className={primaryClass} disabled={saving} onClick={()=>void save()}>

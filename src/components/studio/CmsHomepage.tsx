@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import {type CmsHome,type CmsMediaRow,HOME_TEMPLATE,cleanHome,isSafeHttps} from '../../lib/cmsData';
+import {type CmsHome,HOME_TEMPLATE,cleanHome,isSafeHttps} from '../../lib/cmsData';
 import { SITE_PAGES,SITE_FIELDS,siteText,HOME_SECTIONS,FEATURED_CARDS,normalizeOrder,type SitePage } from '../../lib/siteContent';
 import {ErrorText,Field,inputClass,outlineClass,primaryClass} from './StudioShared';
 import AssetEditor from './AssetEditor';
 
-interface Props {client:SupabaseClient; userId:string; canPublish:boolean; media:CmsMediaRow[];}
-export default function CmsHomepage({client,userId,canPublish,media}:Props) {
+interface Props {client:SupabaseClient; userId:string; canPublish:boolean; }
+export default function CmsHomepage({client,userId,canPublish}:Props) {
   const [form,setForm]=useState<CmsHome>(HOME_TEMPLATE);
   const [publishedForm,setPublishedForm]=useState<CmsHome>(HOME_TEMPLATE);
   const [videoEditor,setVideoEditor]=useState<string|null>(null);
@@ -104,7 +104,7 @@ export default function CmsHomepage({client,userId,canPublish,media}:Props) {
             </div>
             {videoEditor===id&&<div className="w-full">
               <AssetEditor client={client} userId={userId} canPublish={canPublish}
-                label={item.title+' · section video'} allowVideo media={media}
+                label={item.title+' · section video'} allowVideo
                 selected={form.sectionVideos[id]?[form.sectionVideos[id]]:[]}
                 onChange={urls=>setForm(current=>{
                   const sectionVideos={...current.sectionVideos};
@@ -153,7 +153,7 @@ export default function CmsHomepage({client,userId,canPublish,media}:Props) {
     setMessage('Website content version '+data+' is published. Reload the public pages to see it.');
   };
   const assets = (key:'heroImage'|'menImage'|'kidsImage'|'storyImage'|'customizationImage',label:string)=>
-    <AssetEditor client={client} userId={userId} canPublish={canPublish} label={label} media={media}
+    <AssetEditor client={client} userId={userId} canPublish={canPublish} label={label}
       selected={form[key]?[form[key]]:[]} onChange={urls=>update(key,urls[0]||'')}/>;
 
   return <section className="max-w-5xl space-y-7">

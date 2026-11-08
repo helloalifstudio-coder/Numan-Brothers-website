@@ -37,7 +37,7 @@ export function AssetPicker({
       const term=query.replace(/[^a-zA-Z0-9 _.-]/g,' ').trim().slice(0,60);
       let request=client.from('nb_media')
         .select('id,storage_path,original_name,mime_type,size_bytes,alt_text,approved,uploaded_by,created_at',{count:'exact'})
-        .eq('approved',true).like('mime_type',allowVideo?'video/%':'image/%');
+        .eq('approved',true).is('archived_at',null).like('mime_type',allowVideo?'video/%':'image/%');
       if(term)request=request.ilike('original_name','%'+term+'%');
       const result=await request.order('created_at',{ascending:false}).range(page*24,page*24+23);
       if(!active)return;

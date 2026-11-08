@@ -1,12 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { ArrowLeft, ArrowRight, Plus, Save, Send, Archive, Trash2 } from 'lucide-react';
-import { type CmsProductRow, type CmsMediaRow, isSafeHttps } from '../../lib/cmsData';
+import { type CmsProductRow, isSafeHttps } from '../../lib/cmsData';
 import { COLLECTION_ROUTES } from '../../storefront/navigation';
 import AssetEditor from './AssetEditor';
 import {ErrorText,Field,inputClass,outlineClass,primaryClass} from './StudioShared';
 
-interface Props {client:SupabaseClient;userId:string;canPublish:boolean;media:CmsMediaRow[];}
+interface Props {client:SupabaseClient;userId:string;canPublish:boolean;}
 interface Draft {
   sku:string;slug:string;title:string;department:'men'|'kids';categoryPaths:string[];
   description:string;fabric:string;sizes:string[];imageUrls:string[];videoUrl:string;
@@ -57,7 +57,7 @@ function validate(form:Draft):string|null {
     return 'Offer price must be lower than the original price.';
   return null;
 }
-export default function CmsProducts({client,userId,canPublish,media}:Props){
+export default function CmsProducts({client,userId,canPublish}:Props){
   const [rows,setRows]=useState<Entry[]>([]);
   const [loading,setLoading]=useState(true);
   const [page,setPage]=useState(0);
@@ -77,8 +77,7 @@ export default function CmsProducts({client,userId,canPublish,media}:Props){
   const [revisionsLoading,setRevisionsLoading]=useState(false);
   const active=rows.find((r)=>r.id===id);
   const categories=COLLECTION_ROUTES.filter((c)=>!c.isDepartment && !c.isGroup && c.department===form.department);
-  // The media prop is just a recent preview cache. The asset picker queries
-  // approved images by page; the publishing RPC verifies every URL in SQL.
+  // Asset pickers query only when opened; published URLs are verified server-side.
   const load=async()=>{
     setLoading(true);setError(null);
     let query=client.from('nb_studio_product_index')
@@ -300,11 +299,10 @@ export default function CmsProducts({client,userId,canPublish,media}:Props){
           <div className="space-y-3">
             <h4 className="font-serif text-2xl">Step 2 · Garment photos and video</h4>
             <p className="text-xs leading-6 text-stone-600">Drag photographs directly from your computer. Owner/admin uploads are securely approved and attached automatically. Or browse the selected Men's/Kids' media category. Use the trash icon to detach one photo without deleting it from the library.</p>
-            <AssetEditor client={client} userId={userId} canPublish={canPublish} label="Product photos · first is the cover" multiple
-              media={media} department={form.department} categoryPath={form.categoryPaths[0]||''}
+            <AssetEditor client={client} userId={userId} canPublish={canPublish} label="Product photos · first is the cover" multiple department={form.department} categoryPath={form.categoryPaths[0]||''}
               selected={form.imageUrls} onChange={urls=>update('imageUrls',urls)}/>
             <AssetEditor client={client} userId={userId} canPublish={canPublish} label="Optional garment video"
-              allowVideo media={media} department={form.department} categoryPath={form.categoryPaths[0]||''}
+              allowVideo department={form.department} categoryPath={form.categoryPaths[0]||''}
               selected={form.videoUrl?[form.videoUrl]:[]} onChange={urls=>update('videoUrl',urls[0]||'')}/>
           </div>
           <Field label="Or external HTTPS video / streaming link"><input type="url" className={inputClass} value={form.videoUrl} onChange={e=>update('videoUrl',e.target.value)} placeholder="https://..."/></Field>
