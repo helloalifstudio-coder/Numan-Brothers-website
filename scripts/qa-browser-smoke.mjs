@@ -144,8 +144,8 @@ async function inspectFloatingContactsAndProduct(){
     const enquire=page.getByRole('link',{name:/Enquire about this design/i}).first();
     assert.match(await enquire.getAttribute('href'),/Requested%20size%3A%2042/);
     await page.getByRole('button',{name:/Share this design/}).click();
-    const message=await page.getByRole('status').allTextContents();
-    assert.ok(message.some(text=>text.includes('Link copied')||text.includes('browser address')));
+    await page.getByRole('status').filter({hasText:/Link copied|browser address|Shared successfully/})
+      .first().waitFor({state:'visible',timeout:5000});
     const gridLinks=await page.locator('a[href="/products/'+mockProduct.slug+'"]').count();
     assert.equal(gridLinks,0,'current item must not appear as a related product');
     console.log('PASS_UNIQUE_PRODUCT_PAGE',JSON.stringify({slug:mockProduct.slug,size:'42',share:true,wa:true}));
