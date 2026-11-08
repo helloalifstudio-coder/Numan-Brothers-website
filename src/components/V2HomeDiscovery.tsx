@@ -48,15 +48,15 @@ export default function V2HomeDiscovery({ products, home, categories=[], onNavig
           {siteText(home,'home.directorySearch')} <ArrowUpRight size={17}/>
         </V2Link>
       </V2Reveal>
-      <div className="mt-11 flex w-full max-w-[520px] gap-2 rounded-full border border-[#c9b69b] bg-[#f6f0e6]/65 p-1.5 sm:mt-14" role="group" aria-label="Choose a collection department">
+      <div className="mt-11 flex w-full max-w-[520px] min-w-0 gap-1 rounded-full border border-[#c9b69b] bg-[#f6f0e6]/65 p-1 sm:mt-14 sm:gap-2 sm:p-1.5" role="group" aria-label="Choose a collection department">
         {(['men','kids'] as const).map(id => <button key={id} type="button"
           aria-pressed={active === id} onClick={() => setActive(id)}
-          className={'flex min-h-12 flex-1 items-center justify-center gap-3 rounded-full px-5 text-xs font-bold uppercase tracking-[.12em] transition-colors '+
+          className={'flex min-h-12 min-w-0 flex-1 items-center justify-center gap-1 rounded-full px-2 text-[11px] font-bold uppercase tracking-[.06em] transition-colors min-[360px]:gap-3 min-[360px]:px-5 min-[360px]:text-xs min-[360px]:tracking-[.12em] '+
             (active === id ? 'bg-[#29221b] text-[#f7ead5] shadow-md' : 'text-[#655647] hover:bg-white/75')}>
           {getDepartment(id).title} <ArrowRight size={15} className={active === id ? 'opacity-100' : 'opacity-45'}/>
         </button>)}
       </div>
-      <div className="mt-7 grid gap-5 lg:grid-cols-[minmax(0,.78fr)_minmax(0,1.22fr)]">
+      <div className="nb-responsive-grid mt-7 grid gap-5 lg:grid-cols-[minmax(0,.78fr)_minmax(0,1.22fr)]">
         <div className="relative isolate min-h-[310px] overflow-hidden bg-[#342a22] text-white md:min-h-[400px] lg:min-h-[530px]">
           {photo ? <img key={active + photo} src={photo} alt="" loading="lazy" decoding="async"
             className="absolute inset-0 h-full w-full object-cover object-top opacity-65 motion-safe:animate-[nb-ambient-arrival_850ms_ease-out_both]"/> :
@@ -70,13 +70,13 @@ export default function V2HomeDiscovery({ products, home, categories=[], onNavig
               <h3 className="font-serif break-words text-[clamp(2.3rem,4.7vw,5.5rem)] leading-[1.04] tracking-[-.055em]">{siteText(home,active==='men'?'home.menCardTitle':'home.kidsCardTitle')}</h3>
               <p className="mt-5 max-w-sm text-sm leading-7 text-[#efdec7]">{featured}</p>
               <V2Link href={department.path} onNavigate={onNavigate}
-                className="mt-7 inline-flex min-h-12 items-center gap-3 border border-[#f1dabc]/80 px-6 text-[11px] font-semibold uppercase tracking-[.12em] text-white transition-colors hover:bg-[#f3dfbd] hover:text-[#29221b]">
+                className="mt-7 inline-flex min-h-12 max-w-full flex-wrap items-center gap-2 border border-[#f1dabc]/80 px-4 min-[360px]:gap-3 min-[360px]:px-6 text-[11px] font-semibold uppercase tracking-[.12em] text-white transition-colors hover:bg-[#f3dfbd] hover:text-[#29221b]">
                 Explore all {siteText(home,active==='men'?'home.menCardTitle':'home.kidsCardTitle')} <ArrowUpRight size={17}/>
               </V2Link>
             </div>
           </div>
         </div>
-        <div key={active} className={'grid content-start gap-3 sm:grid-cols-2 ' + (cards.length===1?'sm:grid-cols-1':'')}>
+        <div key={active} className={'nb-responsive-grid grid min-w-0 content-start gap-3 sm:grid-cols-2 ' + (cards.length===1?'sm:grid-cols-1':'')}>
           {cards.map((group, index) =>
             <div key={group.title} className="border border-[#d6c7b2] bg-[#f8f3e9] p-6 shadow-[0_15px_32px_-28px_rgba(50,35,15,.5)] md:p-7">
               <div className="flex items-start justify-between gap-3 border-b border-[#e3d7c5] pb-5">

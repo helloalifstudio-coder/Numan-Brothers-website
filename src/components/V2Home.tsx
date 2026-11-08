@@ -55,11 +55,11 @@ export default function V2Home({ products, home, categories=[], onNavigate }: Pr
           </div>}
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#211b17] via-[#211b17]/90 to-[#211b17]/30 md:via-[#211b17]/75 md:to-transparent" />
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#211b17]/70 via-transparent to-[#211b17]/10" />
-      <div className="relative mx-auto flex min-h-[620px] max-w-[1440px] flex-col justify-center px-5 pb-28 pt-16 sm:px-6 sm:pt-20 md:min-h-[730px] md:px-12 lg:min-h-[min(860px,calc(100svh-106px))] lg:px-20">
+      <div className="relative mx-auto flex min-h-[620px] min-w-0 max-w-[1440px] flex-col justify-center px-4 pb-28 pt-16 min-[360px]:px-5 sm:px-6 sm:pt-20 md:min-h-[730px] md:px-12 lg:min-h-[min(860px,calc(100svh-106px))] lg:px-20">
         <motion.div style={reduce ? undefined : { y: textY }} className="relative z-10 min-w-0 max-w-[660px]">
           <motion.div initial={reduce ? false : { opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: .7, ease: [0.22,1,0.36,1] }}>
-            <div className="mb-8 flex items-center gap-4 text-[10px] font-semibold uppercase tracking-[.26em] text-[#e9c797]">
+            <div className="mb-8 flex min-w-0 items-center gap-3 break-words text-[10px] font-semibold uppercase tracking-[.19em] text-[#e9c797] min-[360px]:gap-4 min-[360px]:tracking-[.26em]">
               <span className="h-px w-10 bg-[#cba777]"/> {home.heroEyebrow}
             </div>
             <h1 id="v2-home-title" className="nb-liquid-hero max-w-[12ch] font-serif break-words text-[clamp(2.8rem,10vw,8.1rem)] font-normal leading-[.98] tracking-[-.065em] sm:leading-[.93]">
@@ -97,7 +97,7 @@ export default function V2Home({ products, home, categories=[], onNavigate }: Pr
     </section>
 
     <nav aria-label="Explore popular collections" style={homeSectionStyle(home,'quick')} className="border-b border-[#e0d4c2] bg-[#f2eadd] px-5 md:px-12 lg:px-20">
-      <div className="mx-auto flex max-w-[1330px] items-center gap-5 overflow-x-auto py-4 md:gap-8">
+      <div className="mx-auto flex max-w-[1330px] items-center gap-5 overflow-x-auto overscroll-x-contain scroll-px-4 py-4 md:gap-8">
         <span className="shrink-0 text-[10px] font-bold uppercase tracking-[.18em] text-[#8d704d]">{siteText(home,'home.quickLabel')}</span>
         <div className="h-6 w-px shrink-0 bg-[#d2c2ac]" aria-hidden="true"/>
         <V2Link href="/men/sherwani" onNavigate={onNavigate} className="inline-flex min-h-11 shrink-0 items-center gap-2 text-xs font-semibold text-[#4b3827] hover:text-[#a17848]">{siteText(home,'home.quickSherwani')} <ArrowUpRight size={15}/></V2Link>
@@ -119,13 +119,13 @@ export default function V2Home({ products, home, categories=[], onNavigate }: Pr
         </div>
         <p className="max-w-xs text-sm leading-7 text-[#73685e]">{siteText(home,'home.departmentDescription')}</p>
       </V2Reveal>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
-        <V2Reveal className="group relative min-h-[490px] overflow-hidden bg-[#332b24] text-white md:min-h-[620px]">
+      <div className="nb-responsive-grid grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
+        <V2Reveal className="group relative min-h-[390px] overflow-hidden bg-[#332b24] text-white min-[360px]:min-h-[490px] md:min-h-[560px] xl:min-h-[620px]">
           {(home.menImage || getImage('/men')) && <img src={home.menImage || getImage('/men')} loading="lazy" decoding="async" alt="Traditional menswear collection preview"
             className="absolute inset-0 h-full w-full object-cover object-top opacity-75 transition-transform duration-700 group-hover:scale-[1.045]"/>}
           <div className="absolute inset-0 bg-gradient-to-t from-[#1b1815]/95 via-[#1b1815]/5 to-black/5"/>
-          <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-5 px-7 pb-9 md:px-11 md:pb-12">
-            <div><span className="text-[10px] uppercase tracking-[.27em] text-[#ebd6b2]">{siteText(home,'home.menCardEyebrow')}</span>
+          <div className="absolute inset-x-0 bottom-0 flex min-w-0 items-end justify-between gap-3 px-5 pb-7 min-[360px]:px-7 min-[360px]:pb-9 md:px-8 md:pb-10 xl:px-11 xl:pb-12">
+            <div className="min-w-0"><span className="text-[10px] uppercase tracking-[.27em] text-[#ebd6b2]">{siteText(home,'home.menCardEyebrow')}</span>
               <h3 className="mt-3 font-serif text-[clamp(2.35rem,10vw,3rem)] tracking-[-.04em] md:text-6xl">{siteText(home,'home.menCardTitle')}</h3>
               <p className="mt-3 text-sm text-[#eee2d2]">{siteText(home,'home.menCardDescription')}</p>
             </div>
@@ -133,7 +133,7 @@ export default function V2Home({ products, home, categories=[], onNavigate }: Pr
               className="flex h-13 w-13 shrink-0 items-center justify-center rounded-full border border-white/70 transition-colors hover:bg-white hover:text-[#241d17]"><ArrowUpRight/></V2Link>
           </div>
         </V2Reveal>
-        <V2Reveal delay={0.1} className="group relative min-h-[490px] overflow-hidden bg-[#c7bba4] md:min-h-[620px]">
+        <V2Reveal delay={0.1} className="group relative min-h-[390px] overflow-hidden bg-[#c7bba4] min-[360px]:min-h-[490px] md:min-h-[560px] xl:min-h-[620px]">
           {/* An illustrated placeholder avoids presenting adult product photographs as kidswear. */}
           {home.kidsImage ? <img src={home.kidsImage} alt="Kidswear collection preview" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover object-top"/> : <>
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_70%_20%,#eee3cb_0,transparent_50%),linear-gradient(130deg,#c2ad8a,#f4e5cc_70%,#a58e6b)]"/>
@@ -142,8 +142,8 @@ export default function V2Home({ products, home, categories=[], onNavigate }: Pr
           </>}
           <div className="absolute left-10 top-10 flex h-24 w-24 items-center justify-center rounded-full border border-[#9b7f58]/55 text-[9px] uppercase tracking-[.18em] text-[#816744] md:h-28 md:w-28">Little<br/>Traditions</div>
           <div className="absolute inset-0 bg-gradient-to-t from-[#6d5135]/70 via-transparent to-transparent"/>
-          <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-5 px-7 pb-9 text-white md:px-11 md:pb-12">
-            <div><span className="text-[10px] uppercase tracking-[.27em] text-[#fff1d9]">{siteText(home,'home.kidsCardEyebrow')}</span>
+          <div className="absolute inset-x-0 bottom-0 flex min-w-0 items-end justify-between gap-3 px-5 pb-7 text-white min-[360px]:px-7 min-[360px]:pb-9 md:px-8 md:pb-10 xl:px-11 xl:pb-12">
+            <div className="min-w-0"><span className="text-[10px] uppercase tracking-[.27em] text-[#fff1d9]">{siteText(home,'home.kidsCardEyebrow')}</span>
               <h3 className="mt-3 font-serif text-[clamp(2.35rem,10vw,3rem)] tracking-[-.04em] md:text-6xl">{siteText(home,'home.kidsCardTitle')}</h3>
               <p className="mt-3 text-sm text-[#fff2df]">{siteText(home,'home.kidsCardDescription')}</p>
             </div>
@@ -167,7 +167,7 @@ export default function V2Home({ products, home, categories=[], onNavigate }: Pr
             <h2 id="featured-title" className="font-serif text-[clamp(2.8rem,5vw,5.1rem)] leading-[1.02] tracking-[-.045em] text-[#29221b]">{siteText(home,'home.featureTitle')}</h2></div>
           <V2Link href="/men" onNavigate={onNavigate} className="inline-flex items-center gap-3 border-b border-[#a98d6a] pb-2 text-[11px] font-bold uppercase tracking-[.14em] text-[#6b502d]">{siteText(home,'home.featureCta')} <ArrowRight size={16}/></V2Link>
         </V2Reveal>
-        <div className="grid gap-5 md:grid-cols-3">
+        <div className="nb-responsive-grid grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
           {edits.map((edit, i) => (
             <V2Reveal key={edit.route} delay={i * 0.075} style={featuredCardStyle(home,edit.id)} className={'group overflow-hidden ' + edit.tone}>
               <V2Link href={edit.route} onNavigate={onNavigate} className="block">
@@ -190,10 +190,10 @@ export default function V2Home({ products, home, categories=[], onNavigate }: Pr
     </section>
 
     <section style={homeSectionStyle(home,'story')} className="relative overflow-hidden bg-[#211b17] px-5 py-24 text-[#f9efe0] md:px-12 md:py-32 lg:px-20">
-      <div className="mx-auto grid max-w-[1330px] items-center gap-14 md:grid-cols-[.93fr_1.07fr] md:gap-20">
+      <div className="nb-responsive-grid mx-auto grid max-w-[1330px] items-center gap-12 lg:grid-cols-[minmax(0,.93fr)_minmax(0,1.07fr)] lg:gap-16 xl:gap-20">
         <V2Reveal>
           <p className="mb-6 text-[10px] font-semibold uppercase tracking-[.29em] text-[#d8b581]">{siteText(home,'home.storyEyebrow')}</p>
-          <h2 className="max-w-[14ch] font-serif text-[clamp(3.1rem,5.3vw,6rem)] leading-[1.03] tracking-[-.045em]">{home.storyTitle}</h2>
+          <h2 className="max-w-[14ch] break-words font-serif text-[clamp(2.7rem,5.3vw,6rem)] leading-[1.03] tracking-[-.045em]">{home.storyTitle}</h2>
           <p className="mt-7 max-w-md text-sm leading-8 text-[#d7cabc]">{home.storyDescription}</p>
           <V2Link href="/men/marriage" onNavigate={onNavigate} className="mt-9 inline-flex items-center gap-4 border-b border-[#d8bd93] pb-3 text-xs font-semibold uppercase tracking-[.12em] text-[#ead7b8]">{siteText(home,'home.storyCta')} <ArrowDownRight size={17}/></V2Link>
         </V2Reveal>
@@ -209,7 +209,7 @@ export default function V2Home({ products, home, categories=[], onNavigate }: Pr
 
     <section id="tailoring" style={homeSectionStyle(home,'customization')}
       className="scroll-mt-24 overflow-hidden bg-[#e7d7c0] px-5 py-24 text-[#30251b] md:px-12 md:py-32 lg:px-20">
-      <div className="mx-auto grid max-w-[1320px] items-center gap-12 lg:grid-cols-2 lg:gap-20">
+      <div className="nb-responsive-grid mx-auto grid max-w-[1320px] items-center gap-12 lg:grid-cols-2 lg:gap-20">
         <div>
           <p className="mb-6 text-xs font-bold uppercase tracking-[.25em] text-[#916a3a]"><Scissors size={18} className="mr-2 inline"/>
             {siteText(home,'home.customEyebrow')}</p>

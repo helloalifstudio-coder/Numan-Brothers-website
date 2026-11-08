@@ -85,7 +85,7 @@ export default function V2Product({ product, whatsappNumber, contactPhone, home,
           <span aria-hidden="true" className="text-white/40">/</span>
           <span aria-current="page" className="max-w-[32ch] truncate font-semibold text-white">{product.title}</span>
         </nav>
-        <div className="grid items-start gap-9 lg:grid-cols-[minmax(0,1.04fr)_minmax(0,.96fr)] lg:gap-12 xl:gap-20">
+        <div className="nb-responsive-grid grid items-start gap-9 lg:grid-cols-[minmax(0,1.04fr)_minmax(0,.96fr)] lg:gap-12 xl:gap-20">
           <V2Reveal>
             <div className="relative mx-auto max-w-[700px]">
               <div className="absolute -left-3 -top-3 h-32 w-32 border-l border-t border-white/45 md:-left-5 md:-top-5" aria-hidden="true"/>
@@ -133,7 +133,7 @@ export default function V2Product({ product, whatsappNumber, contactPhone, home,
             </div>
           </V2Reveal>
           <V2Reveal delay={0.12} className="lg:sticky lg:top-32 lg:self-start">
-            <div className="border border-[#fff9ed]/60 bg-[#fcf8f0]/95 px-6 py-9 shadow-[0_28px_90px_-30px_rgba(0,0,0,.5)] backdrop-blur-xl sm:px-9 sm:py-12 xl:px-12">
+            <div className="min-w-0 border border-[#fff9ed]/60 bg-[#fcf8f0]/95 px-4 py-7 shadow-[0_28px_90px_-30px_rgba(0,0,0,.5)] backdrop-blur-xl min-[360px]:px-6 min-[360px]:py-9 sm:px-9 sm:py-12 xl:px-12">
               <p className="mb-6 flex items-center gap-3 text-[10px] font-bold uppercase tracking-[.22em] text-[#85623d]">
                 <span className="h-px w-8" style={{ backgroundColor: theme.accent }}/>{theme.name}
               </p>
@@ -233,7 +233,7 @@ export default function V2Product({ product, whatsappNumber, contactPhone, home,
           Browse the collection <ArrowRight size={16}/>
         </V2Link>
       </div>
-      <div className="grid grid-cols-2 gap-x-3 gap-y-7 sm:gap-x-5 lg:grid-cols-4">
+      <div className="nb-responsive-grid grid grid-cols-2 gap-x-3 gap-y-7 sm:gap-x-5 lg:grid-cols-4">
         {related.map(item=><V2Link key={item.id} href={productPath(item)} onNavigate={onNavigate} className="group min-w-0">
           <div className="aspect-[3/4] overflow-hidden bg-[#e7dccb]">
             {productImage(item)?<img src={productImage(item)} alt={item.title} loading="lazy" decoding="async"
