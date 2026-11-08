@@ -29,7 +29,7 @@ async function mockCmsRoutes(page){
     const url=new URL(route.request().url());
     const path=url.pathname;
     const json=(body,extra={})=>route.fulfill({status:200,contentType:'application/json',
-      headers:{'Access-Control-Allow-Origin':'*','content-range':'0-0/1',...extra},body:JSON.stringify(body)});
+      headers:{'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'apikey,authorization,content-type,x-client-info,prefer,accept,accept-profile,content-profile','Access-Control-Allow-Methods':'GET,POST,OPTIONS,HEAD','content-range':'0-0/1',...extra},body:JSON.stringify(body)});
     if(path.endsWith('/nb_home_public'))return json({content:{
       contactWhatsapp:'919876543210',contactPhone:'919876543211'
     }});
@@ -41,6 +41,7 @@ async function mockCmsRoutes(page){
           url.searchParams.get('id')==='eq.'+mockProduct.id;
         return match?json(mockProduct):route.fulfill({status:406,contentType:'application/json',body:JSON.stringify({code:'PGRST116'})});
       }
+      if(url.searchParams.get('id')==='neq.'+mockProduct.id)return json([],{'content-range':'*/0'});
       const dept=url.searchParams.get('department');
       const hasKids=dept==='eq.kids'||(url.searchParams.get('category_paths')||'').includes('/kids/');
       const search=url.searchParams.get('or')||'';
