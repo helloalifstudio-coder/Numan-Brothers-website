@@ -204,7 +204,7 @@ export default function CmsStudio(){
             <button type="button" className="flex min-h-11 items-center gap-2 text-[#f0e3d2] hover:text-white" onClick={()=>void logout()}><LogOut size={16}/> Sign out</button>
           </div>
         </aside>
-        <main className="min-w-0 px-4 pb-7 pt-0 sm:px-6 md:px-10 md:pb-12 xl:px-14">
+        <main className="min-w-0 px-4 pb-7 pt-0 sm:px-6 md:px-10 md:pb-12 lg:pt-12 xl:px-14">
           <div className="sticky top-0 z-30 -mx-4 mb-5 border-b border-stone-200 bg-[#fbf8f2]/95 px-4 py-3 shadow-sm backdrop-blur-lg sm:-mx-6 sm:px-6 md:-mx-10 md:px-10 lg:hidden">
             <label className="flex min-w-0 items-center gap-3 text-xs font-semibold text-stone-700">
               <span className="shrink-0">Studio section</span>

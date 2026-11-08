@@ -151,7 +151,8 @@ a { text-decoration: none; }
 
 /* Fluid viewport contracts. Never mask genuine page overflow on html/body. */
 :where(main, article, section, fieldset, form, nav) { min-width: 0; }
-:where(input, select, textarea, progress, video, img) { max-width: 100%; }
+:where(input, select, textarea, progress, video) { max-width: 100%; }
+:where(img):not(.absolute) { max-width: 100%; }
 :where(input, select, textarea, progress) { min-width: 0; }
 :where(h1, h2, h3, h4, dd) { overflow-wrap: anywhere; }
 :where(.nb-responsive-grid) > * { min-width: 0; }
