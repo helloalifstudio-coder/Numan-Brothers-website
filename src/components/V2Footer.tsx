@@ -23,7 +23,7 @@ export default function V2Footer({ onNavigate,home,categories=[] }: {onNavigate:
   const label=(path:string,fallback:string)=>categories.find(c=>c.path===path)?.label||fallback;
   return <footer className="bg-[#1d1916] px-6 pt-20 text-[#eee4d5] md:px-12 md:pt-24 lg:px-20">
     <div className="mx-auto max-w-[1330px]">
-      <div className="grid gap-12 border-b border-[#594738] pb-20 md:grid-cols-[1.5fr_1fr_1fr_1fr]">
+      <div className="grid gap-10 border-b border-[#594738] pb-16 sm:grid-cols-2 md:gap-12 lg:grid-cols-[1.5fr_1fr_1fr_1fr] lg:pb-20">
         <div className="max-w-xs">
           <V2Link href="/" onNavigate={onNavigate} className="font-serif text-4xl leading-[1.05] tracking-[-.05em]">{siteText(home,'footer.brand')}</V2Link>
           <p className="mt-5 text-[10px] font-semibold uppercase tracking-[.23em] text-[#d8b586]">{siteText(home,'footer.tagline')}</p>

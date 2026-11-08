@@ -13,7 +13,7 @@ interface Props {products: Product[]; home: CmsHome; categories?:CmsCategoryRow[
 
 function SectionVideo({url,label}:{url?:string;label:string}){
   return url?<div className="mx-auto mt-10 max-w-[1050px] overflow-hidden rounded-md border border-[#a7906e]/25 bg-[#1c1714]">
-    <video controls preload="metadata" playsInline src={url} aria-label={label} className="aspect-video w-full object-cover"/>
+    <video controls preload="none" playsInline src={url} aria-label={label} className="aspect-video w-full object-cover"/>
   </div>:null;
 }
 export default function V2Home({ products, home, categories=[], onNavigate }: Props) {
@@ -44,23 +44,25 @@ export default function V2Home({ products, home, categories=[], onNavigate }: Pr
     {/* An immersive cover with a real heading and accessible normal scrolling. */}
     <section ref={hero} style={homeSectionStyle(home,'hero')} className="relative isolate min-h-[620px] overflow-hidden bg-[#211b17] text-[#fff8ed] md:min-h-[730px] lg:min-h-[min(860px,calc(100svh-106px))]" aria-labelledby="v2-home-title">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_28%_35%,#5d4939_0,transparent_56%)]" />
-      {home.sectionVideos.hero&&<video aria-hidden="true" src={home.sectionVideos.hero} autoPlay muted loop playsInline
-        preload="metadata" className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-50"/>}
-      <div className="absolute inset-y-0 right-0 w-[100%] md:w-[65%] lg:w-[57%]">
-        {photo && <motion.img src={photo} alt="" fetchPriority="high" loading="eager" decoding="async"
-          className="h-full w-full scale-[1.10] object-cover object-center opacity-[.60] md:opacity-90"
-          style={reduce ? undefined : { y: imageY }} />}
-      </div>
+      {home.sectionVideos.hero
+        ? <video aria-hidden="true" src={home.sectionVideos.hero} poster={photo || undefined}
+            autoPlay={!reduce} muted loop playsInline preload="none"
+            className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-60 md:opacity-80"/>
+        : <div className="absolute inset-y-0 right-0 w-[100%] md:w-[65%] lg:w-[57%]">
+            {photo && <motion.img src={photo} alt="" fetchPriority="high" loading="eager" decoding="async"
+              className="h-full w-full scale-[1.10] object-cover object-center opacity-[.60] md:opacity-90"
+              style={reduce ? undefined : { y: imageY }} />}
+          </div>
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#211b17] via-[#211b17]/90 to-[#211b17]/30 md:via-[#211b17]/75 md:to-transparent" />
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#211b17]/70 via-transparent to-[#211b17]/10" />
-      <div className="relative mx-auto flex min-h-[620px] max-w-[1440px] flex-col justify-center px-6 pb-24 pt-20 md:min-h-[730px] md:px-12 lg:min-h-[min(860px,calc(100svh-106px))] lg:px-20">
-        <motion.div style={reduce ? undefined : { y: textY }} className="relative z-10 max-w-[660px]">
+      <div className="relative mx-auto flex min-h-[620px] max-w-[1440px] flex-col justify-center px-5 pb-28 pt-16 sm:px-6 sm:pt-20 md:min-h-[730px] md:px-12 lg:min-h-[min(860px,calc(100svh-106px))] lg:px-20">
+        <motion.div style={reduce ? undefined : { y: textY }} className="relative z-10 min-w-0 max-w-[660px]">
           <motion.div initial={reduce ? false : { opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: .7, ease: [0.22,1,0.36,1] }}>
             <div className="mb-8 flex items-center gap-4 text-[10px] font-semibold uppercase tracking-[.26em] text-[#e9c797]">
               <span className="h-px w-10 bg-[#cba777]"/> {home.heroEyebrow}
             </div>
-            <h1 id="v2-home-title" className="max-w-[12ch] font-serif break-words text-[clamp(2.8rem,10vw,8.1rem)] font-normal leading-[.93] tracking-[-.065em]">
+            <h1 id="v2-home-title" className="nb-liquid-hero max-w-[12ch] font-serif break-words text-[clamp(2.8rem,10vw,8.1rem)] font-normal leading-[.98] tracking-[-.065em] sm:leading-[.93]">
               {home.heroTitle}
             </h1>
             <p className="mt-8 max-w-[465px] text-sm leading-8 text-[#e0d6c7] md:text-base">

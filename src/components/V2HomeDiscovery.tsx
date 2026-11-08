@@ -38,7 +38,7 @@ export default function V2HomeDiscovery({ products, home, categories=[], onNavig
       <V2Reveal className="flex flex-wrap items-end justify-between gap-7">
         <div className="max-w-[760px]">
           <p className="mb-4 inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[.26em] text-[#876641]"><Compass size={15}/> {siteText(home,'home.directoryEyebrow')}</p>
-          <h2 id="directory-title" className="font-serif text-[clamp(2.8rem,5.8vw,5.8rem)] leading-[1.04] tracking-[-.055em] text-[#28221c]">
+          <h2 id="directory-title" className="font-serif break-words text-[clamp(2.45rem,5.8vw,5.8rem)] leading-[1.04] tracking-[-.055em] text-[#28221c]">
             {siteText(home,'home.directoryTitle')}
           </h2>
           <p className="mt-6 max-w-xl text-sm leading-7 text-[#665a4c]">{siteText(home,'home.directoryDescription')}</p>
@@ -67,7 +67,7 @@ export default function V2HomeDiscovery({ products, home, categories=[], onNavig
           <div className="relative flex h-full min-h-[310px] flex-col justify-between p-7 md:min-h-[400px] md:p-10 lg:min-h-[530px]">
             <span className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[.21em] text-[#f0d6ad]"><Sparkles size={15}/> Discover / {active==='men'?'01':'02'}</span>
             <div>
-              <h3 className="font-serif text-[clamp(2.9rem,4.7vw,5.5rem)] leading-[1] tracking-[-.055em]">{siteText(home,active==='men'?'home.menCardTitle':'home.kidsCardTitle')}</h3>
+              <h3 className="font-serif break-words text-[clamp(2.3rem,4.7vw,5.5rem)] leading-[1.04] tracking-[-.055em]">{siteText(home,active==='men'?'home.menCardTitle':'home.kidsCardTitle')}</h3>
               <p className="mt-5 max-w-sm text-sm leading-7 text-[#efdec7]">{featured}</p>
               <V2Link href={department.path} onNavigate={onNavigate}
                 className="mt-7 inline-flex min-h-12 items-center gap-3 border border-[#f1dabc]/80 px-6 text-[11px] font-semibold uppercase tracking-[.12em] text-white transition-colors hover:bg-[#f3dfbd] hover:text-[#29221b]">

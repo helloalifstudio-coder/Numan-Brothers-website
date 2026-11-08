@@ -102,7 +102,7 @@ export default function V2Product({ product, whatsappNumber, contactPhone, home,
                 <div className="flex items-center gap-2 border-b border-white/10 px-5 py-3 text-[10px] font-semibold uppercase tracking-[.16em] text-[#e5c89e]">
                   <Sparkles size={14}/> {siteText(home,'product.videoTitle')}
                 </div>
-                {playableVideo ? <video src={videoUrl} controls preload="metadata" playsInline poster={images[0]}
+                {playableVideo ? <video src={videoUrl} controls preload="none" playsInline poster={images[0]}
                   className="aspect-video w-full" aria-label={'Video of ' + product.title}/> :
                   <a href={videoUrl} target="_blank" rel="noopener noreferrer"
                     className="flex min-h-20 items-center justify-center gap-3 text-sm font-medium text-white">{siteText(home,'product.videoCta')} <ArrowUpRight size={17}/></a>}
@@ -114,7 +114,7 @@ export default function V2Product({ product, whatsappNumber, contactPhone, home,
               <p className="mb-6 flex items-center gap-3 text-[10px] font-bold uppercase tracking-[.22em] text-[#85623d]">
                 <span className="h-px w-8" style={{ backgroundColor: theme.accent }}/>{theme.name}
               </p>
-              <h1 className="font-serif text-[clamp(2.7rem,4.5vw,5.3rem)] leading-[1.04] tracking-[-.055em] text-[#251d18]">{product.title}</h1>
+              <h1 className="font-serif break-words text-[clamp(2.3rem,4.5vw,5.3rem)] leading-[1.04] tracking-[-.055em] text-[#251d18]">{product.title}</h1>
               <p className="mt-4 text-[11px] font-medium uppercase tracking-[.15em] text-[#8b745b]">{theme.collectionLabel} / Nomaan Brothers</p>
               <div className="mt-8 h-px w-full bg-[#dfd3c3]"/>
               <p className="mt-7 text-sm leading-8 text-[#5c5147]">
