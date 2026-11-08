@@ -40,6 +40,8 @@ jobs:
         run: bun test tests/navigation.test.ts tests/cms-security.test.ts tests/cms-data.test.ts tests/metadata.test.ts tests/catalog-queries.test.ts tests/bulk-csv.test.ts tests/seo-routes.test.ts tests/catalog-load.test.ts tests/import-recovery.test.ts tests/premium-storefront.test.ts tests/architecture-cms.test.ts tests/cms-auth-flow.test.ts tests/site-content.test.ts
       - name: Mobile/tablet layout regression contracts
         run: node --test tests/responsive-layout.test.mjs
+      - name: Studio organization and media-scale regression contracts
+        run: node --test tests/studio-media-scale.test.mjs
       - name: SEO markup injection and sitemap manifest tests
         run: node --test tests/seo.test.mjs
       - name: Media approval permission and published-asset contract tests

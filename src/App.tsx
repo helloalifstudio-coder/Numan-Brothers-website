@@ -20,11 +20,13 @@ const CmsStudio = React.lazy(() => import('./components/CmsStudio'));
 /** Public catalogue is read-only. All editorial mutations happen in the authenticated studio. */
 export default function App() {
   const { path, url, navigate } = useStoreHistory();
+  const isStudioPath = path === '/studio' || path.startsWith('/studio/');
   const [siteData, setSiteData] = useState<PublishedData>({
     products: [], homepage: HOME_TEMPLATE, categories: [], error: null,
   });
   const [catalogLoading, setCatalogLoading] = useState(true);
   useEffect(() => {
+    if(isStudioPath)return;
     let active = true;
     const reload = async () => {
       const next = await loadPublishedData();
@@ -33,7 +35,7 @@ export default function App() {
     void reload();
     window.addEventListener('focus', reload);
     return () => { active = false; window.removeEventListener('focus', reload); };
-  }, []);
+  }, [isStudioPath]);
 
   const published = useMemo(() => publicProducts(siteData.products), [siteData.products]);
   const rawCollection=getCollection(path);
@@ -71,7 +73,7 @@ export default function App() {
     collection ? collection.title : product ? product.title :
     path === '/search' ? 'Search Collections' : path === '/contact' ? 'Visit Our Showroom' : 'Page Not Found';
 
-  if (path === '/studio' || path.startsWith('/studio/')) {
+  if (isStudioPath) {
     return <Suspense fallback={<p role="status" className="p-12">Loading private studio…</p>}><CmsStudio/></Suspense>;
   }
 

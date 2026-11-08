@@ -10,7 +10,7 @@ import {ErrorText,inputClass,labelClass,outlineClass,primaryClass} from './Studi
 const MEDIA_COLS='id,storage_path,original_name,mime_type,size_bytes,alt_text,department,category_path,archived_at,approved,uploaded_by,created_at';
 type Dept='men'|'kids'|'';
 interface Props {
-  client:SupabaseClient;label:string;media:CmsMediaRow[];
+  client:SupabaseClient;label:string;
   selected:string[];onChange:(urls:string[])=>void;multiple?:boolean;allowVideo?:boolean;
   userId?:string;canPublish?:boolean;department?:Dept;categoryPath?:string;
   onUploaded?:()=>void;
@@ -39,6 +39,7 @@ export default function AssetEditor({client,label,selected,onChange,multiple=fal
   const input=useRef<HTMLInputElement>(null);
   useEffect(()=>{setDept(department);setCategory(categoryPath);setPage(0)},[department,categoryPath]);
   useEffect(()=>{
+    if(!showLibrary){setLoading(false);return;}
     let alive=true;setLoading(true);
     const timer=setTimeout(async()=>{
       const search=term.replace(/[^a-zA-Z0-9 _.-]/g,' ').trim().slice(0,60);
@@ -54,7 +55,7 @@ export default function AssetEditor({client,label,selected,onChange,multiple=fal
       setLoading(false);setError(error?.message||null);
     },220);
     return()=>{alive=false;clearTimeout(timer)};
-  },[client,term,dept,category,page,allowVideo,reload]);
+  },[client,term,dept,category,page,allowVideo,reload,showLibrary]);
   const choose=(url:string)=>{
     if(multiple)onChange(selected.includes(url)?selected.filter(x=>x!==url):[...selected,url]);
     else onChange(selected.includes(url)?[]:[url]);

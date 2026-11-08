@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import {ImagePlus,CheckCircle2,Upload,Archive,Trash2,RotateCcw} from 'lucide-react';
 import {COLLECTION_ROUTES} from '../../storefront/navigation';
-import CmsImports from './CmsImports';
 import { type CmsMediaRow, mediaPublicUrl } from '../../lib/cmsData';
-import { uploadCmsFile, MAX_MEDIA_SIZE } from '../../lib/cmsUpload';
+import { uploadCmsFile } from '../../lib/cmsUpload';
 import { ErrorText, inputClass, outlineClass, primaryClass } from './StudioShared';
 
 interface Props { client: SupabaseClient; userId:string; canPublish:boolean; onMediaChange:()=>void; }
@@ -24,18 +23,21 @@ export default function CmsMedia({client,userId,canPublish,onMediaChange}:Props)
   const [filterDept,setFilterDept] = useState<'men'|'kids'|''>('');
   const [filterCategory,setFilterCategory] = useState('');
   const [archivedFilter,setArchivedFilter] = useState<'active'|'archived'>('active');
-  const [showBulk,setShowBulk] = useState(false);
   const [privatePreviews,setPrivatePreviews] = useState<Record<string,string>>({});
   const [search,setSearch] = useState('');
   const [approvalFilter,setApprovalFilter] = useState('all');
+  const [typeFilter,setTypeFilter] = useState<'all'|'image'|'video'>('all');
+  const requestSequence=useRef(0);
   const [page,setPage] = useState(0);
   const [total,setTotal] = useState(0);
   const refresh = async () => {
+    const seq=++requestSequence.current;
     setLoading(true);
     let request=client.from('nb_media')
       .select('id,storage_path,original_name,mime_type,size_bytes,alt_text,department,category_path,archived_at,approved,uploaded_by,created_at',{count:'exact'});
     const term=search.replace(/[^a-zA-Z0-9 _.-]/g,' ').trim().slice(0,60);
     if(term)request=request.ilike('original_name','%'+term+'%');
+    if(typeFilter!=='all')request=request.like('mime_type',typeFilter+'/%');
     if(approvalFilter==='approved')request=request.eq('approved',true);
     if(approvalFilter==='pending')request=request.eq('approved',false);
     if(filterDept)request=request.eq('department',filterDept);
@@ -44,6 +46,7 @@ export default function CmsMedia({client,userId,canPublish,onMediaChange}:Props)
     else request=request.is('archived_at',null);
     const {data,count,error} = await request.order('created_at',{ascending:false})
       .range(page*30,page*30+29);
+    if(seq!==requestSequence.current)return;
     setTotal(count||0);
     const assets=(data||[]) as CmsMediaRow[];
     setRows(assets);
@@ -54,17 +57,18 @@ export default function CmsMedia({client,userId,canPublish,onMediaChange}:Props)
     setError(error?.message || null);
     setLoading(false);
   };
-  useEffect(()=>{const timer=setTimeout(()=>void refresh(),220);return()=>clearTimeout(timer)},[client,page,search,approvalFilter,filterDept,filterCategory,archivedFilter]);
+  useEffect(()=>{const timer=setTimeout(()=>void refresh(),220);return()=>clearTimeout(timer)},[client,page,search,typeFilter,approvalFilter,filterDept,filterCategory,archivedFilter]);
 
   const upload = async () => {
     if (!selection?.length || uploading) return;
+    if(selection.length>100){setError('Choose up to 100 files here, or use Bulk imports for larger batches.');return;}
     setUploading(true);setError(null);
     try {
       for (const file of Array.from(selection)) {
         setProgress(0);
         await uploadCmsFile(client,file,userId,setProgress,{department:uploadDept||null,categoryPath:uploadCategory||null});
       }
-      setSelection(null);
+      setSelection(null);setProgress(0);
       await refresh();
       onMediaChange();
     } catch (cause) {
@@ -132,7 +136,7 @@ export default function CmsMedia({client,userId,canPublish,onMediaChange}:Props)
   return <section className="space-y-7">
     <div>
       <h2 className="font-serif text-3xl">Media library</h2>
-      <p className="mt-2 max-w-2xl text-sm text-stone-600">Organize images and videos by Men’s or Kids’ Wear and by garment type. Upload individually or in bulk, edit names, then approve before publishing. Archived files remain recoverable; Delete permanently removes unused file bytes and its database record.</p>
+      <p className="mt-2 max-w-2xl text-sm text-stone-600">Search and manage photographs and videos in pages of 30. Upload assets here, or use Bulk imports for larger photo batches and CSV. Only approved media appears on the website.</p>
     </div>
     <div className="rounded-lg border border-stone-200 bg-stone-50 p-5 space-y-4">
       <div className="flex items-center gap-2"><ImagePlus size={20}/><h3 className="font-semibold">Upload assets</h3></div>
@@ -149,22 +153,21 @@ export default function CmsMedia({client,userId,canPublish,onMediaChange}:Props)
       <input aria-label="Choose photos or videos" type="file" multiple
         accept="image/jpeg,image/png,image/webp,image/avif,image/gif,video/mp4,video/webm"
         className={inputClass} onChange={(e)=>setSelection(e.currentTarget.files)}/>
-      <p className="text-xs text-stone-500">50 MB maximum per file (server-side bucket limit also applies). Current project storage quotas are enforced by Supabase.</p>
+      <p className="text-xs text-stone-500">Choose up to 100 files, 50 MB maximum each. Large files use resumable uploads; total capacity depends on the Supabase plan.</p>
+      {selection?.length?<p role="status" className="text-xs font-semibold text-stone-700">{selection.length} files selected</p>:null}
       <button type="button" className={primaryClass} onClick={()=>void upload()} disabled={!selection?.length || uploading}>
         <Upload size={16}/>{uploading ? 'Uploading ' + progress + '%' : 'Upload selected files'}
       </button>
       {uploading && <progress aria-label="Upload progress" max={100} value={progress} className="block w-full"/>}
     </div>
-    <div className="flex flex-wrap gap-3">
-      <button type="button" className={showBulk?primaryClass:outlineClass} onClick={()=>setShowBulk(x=>!x)}>
-        {showBulk?'Close bulk import':'Bulk upload & product CSV imports'}
-      </button>
-    </div>
-    {showBulk&&<div className="rounded-xl border border-amber-200 bg-[#fffcf7] p-4"><CmsImports client={client} userId={userId} onMediaChange={onMediaChange}/></div>}
-    <div className="grid gap-3 rounded-md border border-stone-200 bg-white p-4 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="grid gap-3 rounded-md border border-stone-200 bg-white p-4 sm:grid-cols-2 xl:grid-cols-3">
       <input className={inputClass} type="search" aria-label="Search media filename or SKU"
         placeholder="Search photos by name or SKU…" value={search}
         onChange={e=>{setSearch(e.target.value);setPage(0);}}/>
+      <select className={inputClass} aria-label="Media type" value={typeFilter}
+        onChange={e=>{setTypeFilter(e.target.value as 'all'|'image'|'video');setPage(0);}}>
+        <option value="all">All media</option><option value="image">Images</option><option value="video">Videos</option>
+      </select>
       <select className={inputClass} aria-label="Media approval status" value={approvalFilter}
         onChange={e=>{setApprovalFilter(e.target.value);setPage(0);}}>
         <option value="all">All assets</option><option value="pending">Pending approval</option>
@@ -177,7 +180,11 @@ export default function CmsMedia({client,userId,canPublish,onMediaChange}:Props)
         <option value="">All garment types</option>{collectionsFor(filterDept).map(c=><option key={c.path} value={c.path}>{c.title}</option>)}</select>
       <select className={inputClass} aria-label="Media archive status" value={archivedFilter} onChange={e=>{setArchivedFilter(e.target.value as 'active'|'archived');setPage(0)}}>
         <option value="active">Active media</option><option value="archived">Archived media</option></select>
-      <p className="text-xs text-stone-500 sm:col-span-2 xl:col-span-4">{total.toLocaleString('en-IN')} media records · 30 per page</p>
+      <div className="flex flex-wrap items-center justify-between gap-3 sm:col-span-2 xl:col-span-3">
+        <p role="status" className="text-xs text-stone-500">{total.toLocaleString('en-IN')} matching assets · 30 per page</p>
+        <button type="button" className="min-h-11 text-xs font-semibold text-amber-900 underline underline-offset-4"
+          onClick={()=>{setSearch('');setTypeFilter('all');setApprovalFilter('all');setFilterDept('');setFilterCategory('');setArchivedFilter('active');setPage(0);}}>Clear filters</button>
+      </div>
     </div>
     <ErrorText message={error}/>
     {loading ? <p className="text-sm text-stone-500">Loading media…</p> :
@@ -186,7 +193,7 @@ export default function CmsMedia({client,userId,canPublish,onMediaChange}:Props)
         {rows.map((asset)=>{
           const url=asset.approved ? mediaPublicUrl(asset.storage_path) : (privatePreviews[asset.id] || '');
           return <article key={asset.id} className="overflow-hidden rounded-lg border border-stone-200 bg-white shadow-sm">
-            {url ? (asset.mime_type.startsWith('image/') ? <img loading="lazy" src={url} alt={asset.alt_text || asset.original_name} className="aspect-[4/3] w-full bg-stone-100 object-cover"/> :
+            {url ? (asset.mime_type.startsWith('image/') ? <img loading="lazy" decoding="async" src={url} alt={asset.alt_text || asset.original_name} className="aspect-[4/3] w-full bg-stone-100 object-cover"/> :
               <video preload="none" controls src={url} className="aspect-[4/3] w-full bg-stone-950" aria-label={asset.original_name}/>) :
               <div className="flex aspect-[4/3] flex-col items-center justify-center gap-3 bg-stone-100 p-4 text-center">
                 <p className="text-xs text-stone-600">Private pending asset</p>
