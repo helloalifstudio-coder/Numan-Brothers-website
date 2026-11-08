@@ -42,6 +42,8 @@ jobs:
         run: node --test tests/responsive-layout.test.mjs
       - name: Studio organization and media-scale regression contracts
         run: node --test tests/studio-media-scale.test.mjs
+      - name: Liquid hero and route-splitting contracts
+        run: node --test tests/liquid-hero.test.mjs
       - name: SEO markup injection and sitemap manifest tests
         run: node --test tests/seo.test.mjs
       - name: Media approval permission and published-asset contract tests
@@ -95,3 +97,51 @@ jobs:
       - name: Verify unconfigured review build is not search-indexable
         run: |
           node -e "const fs=require('fs');const html=fs.readFileSync('dist/index.html','utf8');const robots=fs.readFileSync('dist/robots.txt','utf8');if(!html.includes('name=\"robots\" content=\"noindex')||!robots.includes('Disallow: /'))process.exit(1)"
+
+  browser-ui-smoke:
+    needs: typecheck-and-build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.0'
+      - name: Install locked dependencies
+        run: bun install --frozen-lockfile
+      - name: Install pinned Playwright Chromium
+        run: |
+          npm install --prefix /tmp/nb-browser --no-save --no-package-lock playwright@1.58.2
+          /tmp/nb-browser/node_modules/.bin/playwright install --with-deps chromium
+      - name: Test every storefront route, mobile widths, navigation and reduced motion
+        env:
+          NODE_PATH: /tmp/nb-browser/node_modules
+        run: |
+          bun run dev --host 127.0.0.1 --port 4173 > /tmp/nb-vite-browser.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/ -o /dev/null; then break; fi
+            sleep 1
+          done
+          node scripts/qa-browser-smoke.mjs
+      - name: Test live customer website after main deploy
+        if: github.ref == 'refs/heads/main'
+        env:
+          NODE_PATH: /tmp/nb-browser/node_modules
+          NB_MODE: live
+          NB_TEST_URL: https://numan-brothers-website.vercel.app
+        run: node scripts/qa-browser-smoke.mjs
+      - name: Test live Studio deployment after main deploy
+        if: github.ref == 'refs/heads/main'
+        env:
+          NODE_PATH: /tmp/nb-browser/node_modules
+          NB_MODE: live
+          NB_TEST_URL: https://numan-brothers-cms-showroom.vercel.app
+        run: node scripts/qa-browser-smoke.mjs
+      - name: Retain mobile and desktop screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: storefront-browser-evidence
+          path: artifacts/browser/
+          retention-days: 14
+          if-no-files-found: ignore
