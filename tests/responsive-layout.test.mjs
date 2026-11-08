@@ -40,3 +40,26 @@ test('product CTAs keep room for mobile safe areas', () => {
   assert.doesNotMatch(product, /fixed inset-x-0 bottom-0/);
   assert.match(src('src/components/V2Collection.tsx'), /min-\[360px\]:grid-cols-2/);
 });
+
+test('phone, tablet and desktop widths use minmax grids and fluid assets',()=>{
+  const css=src('src/index.css');
+  assert.match(css,/nb-responsive-grid/);
+  assert.match(css,/overflow-wrap: anywhere/);
+  assert.match(css,/:where\(input, select, textarea, progress\)/);
+  const home=src('src/components/V2Home.tsx');
+  assert.match(home,/sm:grid-cols-2 xl:grid-cols-3/);
+  assert.match(home,/lg:grid-cols-\[minmax\(0,.93fr\)_minmax\(0,1.07fr\)\]/);
+  const footer=src('src/components/V2Footer.tsx');
+  assert.match(footer,/xl:grid-cols-\[minmax\(0,1.5fr\)_repeat\(3,minmax\(0,1fr\)\)\]/);
+});
+test('Studio offers sticky mobile section navigation and responsive forms',()=>{
+  const s=src('src/components/CmsStudio.tsx');
+  assert.match(s,/Switch Studio section/);
+  assert.match(s,/sticky top-0 z-30/);
+  const fields=src('src/components/studio/StudioShared.tsx');
+  assert.match(fields,/min-w-0 max-w-full/);
+  assert.match(fields,/whitespace-normal text-center/);
+  for(const p of ['CmsProducts','CmsMedia','CmsImports','CmsCategories','AssetEditor','CmsHomepage']){
+    assert.match(src('src/components/studio/'+p+'.tsx'),/nb-responsive-grid|overflow-x-auto/);
+  }
+});
