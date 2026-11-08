@@ -35,7 +35,7 @@ test('product CTAs keep room for mobile safe areas', () => {
   const product = src('src/components/V2Product.tsx');
   assert.match(product, /pb-24 lg:pb-0/);
   const dock = src('src/components/FloatingContactDock.tsx');
-  assert.match(dock, /env\\(safe-area-inset-bottom\\)/);
+  assert.match(dock, /env\(safe-area-inset-bottom\)/);
   assert.match(dock, /min-h-13 min-w-13/);
   assert.doesNotMatch(product, /fixed inset-x-0 bottom-0/);
   assert.match(src('src/components/V2Collection.tsx'), /min-\[360px\]:grid-cols-2/);
