@@ -42,7 +42,7 @@ export default function V2Home({ products, home, categories=[], onNavigate }: Pr
 
   return <div className="flex flex-col overflow-hidden bg-[#fbf8f2]">
     {/* An immersive cover with a real heading and accessible normal scrolling. */}
-    <section ref={hero} style={homeSectionStyle(home,'hero')} className="relative isolate min-h-[620px] overflow-hidden bg-[#211b17] text-[#fff8ed] md:min-h-[730px] lg:min-h-[min(860px,calc(100svh-106px))]" aria-labelledby="v2-home-title">
+    <section ref={hero} data-nb-contact-hero style={homeSectionStyle(home,'hero')} className="relative isolate min-h-[620px] overflow-hidden bg-[#211b17] text-[#fff8ed] md:min-h-[730px] lg:min-h-[min(860px,calc(100svh-106px))]" aria-labelledby="v2-home-title">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_28%_35%,#5d4939_0,transparent_56%)]" />
       {home.sectionVideos.hero
         ? <video aria-hidden="true" src={home.sectionVideos.hero} poster={photo || undefined}

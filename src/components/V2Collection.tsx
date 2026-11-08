@@ -44,7 +44,7 @@ export default function V2Collection({ route, products, bannerImage, totalCount,
     .map(item=>({...item,label:categories.find(c=>c.path===item.path)?.label||item.label}));
   const matches = productsForCollection(products, route.path);
   return <div className="min-h-[70vh] bg-[#fbf8f2] pb-24">
-    <section className="relative isolate overflow-hidden bg-[#2b241e] px-5 py-20 text-[#f7edde] md:px-12 md:py-28 lg:px-20">
+    <section data-nb-contact-hero className="relative isolate overflow-hidden bg-[#2b241e] px-5 py-20 text-[#f7edde] md:px-12 md:py-28 lg:px-20">
       {bannerImage && <img src={bannerImage} alt="" aria-hidden="true" loading="eager" decoding="async"
         className="pointer-events-none absolute inset-0 h-full w-full object-cover object-center opacity-35 blur-[36px] saturate-75 md:blur-[54px]"/>}
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#261b16]/95 via-[#271e18]/85 to-[#271e18]/60" aria-hidden="true"/>

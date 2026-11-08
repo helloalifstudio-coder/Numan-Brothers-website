@@ -9,6 +9,7 @@ import { productPath, publicProducts } from './storefront/catalog';
 import { getCollection } from './storefront/navigation';
 import { useStoreHistory } from './storefront/history';
 import V2Header from './components/V2Header';
+import FloatingContactDock from './components/FloatingContactDock';
 import V2Home from './components/V2Home';
 
 import V2Footer from './components/V2Footer';
@@ -83,7 +84,9 @@ export default function App() {
   return <div className="min-h-screen bg-[#fbf8f2]">
     <Helmet>
       <title>{title} | {siteText(siteData.homepage,'seo.brand')}</title>
-      <meta name="description" content={siteText(siteData.homepage,'seo.description')} />
+      <meta name="description" content={product?.description?.trim().slice(0,210)||siteText(siteData.homepage,'seo.description')} />
+      {product&&<meta property="og:type" content="product"/>}
+      {product?.images?.[0]&&<meta property="og:image" content={product.images[0]}/>}
       <meta name="theme-color" content="#fbf8f2"/>
       <meta property="og:title" content={title + ' | '+siteText(siteData.homepage,'seo.brand')} />
     </Helmet>
@@ -123,7 +126,7 @@ export default function App() {
              onClick={()=>setPage(current=>current+1)}>Next</button>
          </nav>}
        </section> :
-       path === '/contact' ? <section className="relative min-h-[70vh] overflow-hidden bg-[#2b241e] px-6 py-20 text-[#f8eddd] md:px-12 md:py-32">
+       path === '/contact' ? <section data-nb-contact-hero className="relative min-h-[70vh] overflow-hidden bg-[#2b241e] px-6 py-20 text-[#f8eddd] md:px-12 md:py-32">
          <div className="pointer-events-none absolute -right-24 top-0 h-[600px] w-[600px] rounded-full bg-[radial-gradient(circle,#644f38,transparent_70%)]"/>
          <div className="relative mx-auto max-w-[1050px]">
            <V2Link href="/" onNavigate={navigate} className="mb-12 inline-flex items-center gap-2 text-[11px] uppercase tracking-[.18em] text-[#dcc6a4]"><ArrowLeft size={15}/> {siteText(siteData.homepage,'contact.back')}</V2Link>
@@ -156,5 +159,6 @@ export default function App() {
       </Suspense>
     </main>
     <V2Footer home={siteData.homepage} categories={siteData.categories} onNavigate={navigate}/>
+    <FloatingContactDock home={siteData.homepage} path={path} product={product}/>
   </div>;
 }
