@@ -52,7 +52,7 @@ export default function V2Home({ products, home, categories=[], onNavigate }: Pr
             {photo && <motion.img src={photo} alt="" fetchPriority="high" loading="eager" decoding="async"
               className="h-full w-full scale-[1.10] object-cover object-center opacity-[.60] md:opacity-90"
               style={reduce ? undefined : { y: imageY }} />}
-          </div>
+          </div>}
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#211b17] via-[#211b17]/90 to-[#211b17]/30 md:via-[#211b17]/75 md:to-transparent" />
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#211b17]/70 via-transparent to-[#211b17]/10" />
       <div className="relative mx-auto flex min-h-[620px] max-w-[1440px] flex-col justify-center px-5 pb-28 pt-16 sm:px-6 sm:pt-20 md:min-h-[730px] md:px-12 lg:min-h-[min(860px,calc(100svh-106px))] lg:px-20">
