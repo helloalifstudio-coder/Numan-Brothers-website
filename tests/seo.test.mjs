@@ -36,3 +36,17 @@ describe('SEO HTML safety and crawlability',()=>{
     assert.ok(seoRoutes.every(x=>x.title&&x.description));
   });
 });
+
+describe('Per-product SEO metadata',()=>{
+  it('uses the published slug and true INR price',()=>{
+    const html=renderProductHtml(template,{
+      id:'11111111-1111-4111-8111-111111111111',slug:'royal-ivory-sherwani',
+      sku:'NB-SH-00001',title:'Royal Ivory Sherwani',department:'men',
+      description:'Hand finished',image_urls:['https://cdn.example.com/royal.webp'],
+      price:12000,offer_price:9900,
+    },'https://nomaan.example');
+    assert.match(html,/<link rel="canonical" href="https:\/\/nomaan\.example\/products\/royal-ivory-sherwani"/);
+    assert.match(html,/"priceCurrency":"INR"/);
+    assert.match(html,/"price":9900/);
+  });
+});

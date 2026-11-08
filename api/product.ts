@@ -13,13 +13,14 @@ function template():string {
 export default {
   async fetch(request:Request):Promise<Response>{
     if(request.method!=='GET')return new Response('Method not allowed',{status:405});
-    const id=new URL(request.url).searchParams.get('id')||'';
+    const handle=new URL(request.url).searchParams.get('id')||'';
+    const isUuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(handle);
     const headers={
       'Content-Type':'text/html; charset=utf-8',
       'X-Content-Type-Options':'nosniff',
       'Cache-Control':'public, s-maxage=90, stale-while-revalidate=600',
     };
-    if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id))
+    if(handle.length>120 || !(isUuid||/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(handle)))
       return new Response('Invalid product',{status:404,headers});
     const api=process.env.VITE_SUPABASE_URL||'';
     const key=process.env.VITE_SUPABASE_PUBLISHABLE_KEY||'';
@@ -30,9 +31,9 @@ export default {
     catch{return new Response('Build template unavailable',{status:503,headers:{...headers,'Cache-Control':'no-store'}})}
     try{
       const url=new URL(api+'/rest/v1/nb_products');
-      url.searchParams.set('id','eq.'+id);
+      url.searchParams.set(isUuid?'id':'slug','eq.'+handle);
       url.searchParams.set('status','eq.published');
-      url.searchParams.set('select','id,sku,title,department,description,fabric,image_urls,status');
+      url.searchParams.set('select','id,slug,sku,title,department,description,fabric,image_urls,price,offer_price,status');
       url.searchParams.set('limit','1');
       const response=await fetch(url,{headers:{apikey:key,Accept:'application/json'},
         signal:AbortSignal.timeout(10000),redirect:'error'});
