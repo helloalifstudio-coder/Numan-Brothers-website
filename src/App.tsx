@@ -10,11 +10,14 @@ import { getCollection } from './storefront/navigation';
 import { useStoreHistory } from './storefront/history';
 import V2Header from './components/V2Header';
 import V2Home from './components/V2Home';
-import V2Collection, { V2ProductGrid } from './components/V2Collection';
-import V2Product from './components/V2Product';
+
 import V2Footer from './components/V2Footer';
 import V2Link from './components/V2Link';
 import V2Reveal from './components/V2Reveal';
+// Keep the landing page eager; secondary catalogue and garment editors load on demand.
+const V2Collection = React.lazy(() => import('./components/V2Collection'));
+const V2ProductGrid = React.lazy(() => import('./components/V2Collection').then(module => ({ default: module.V2ProductGrid })));
+const V2Product = React.lazy(() => import('./components/V2Product'));
 const CmsStudio = React.lazy(() => import('./components/CmsStudio'));
 
 /** Public catalogue is read-only. All editorial mutations happen in the authenticated studio. */
@@ -89,6 +92,7 @@ export default function App() {
       {!catalogLoading && siteData.error && <div role="status" className="border-b border-amber-200 bg-amber-50 px-6 py-3 text-center text-xs text-amber-900">
         The online catalogue is temporarily unavailable. Contact the showroom for current styles.
       </div>}
+      <Suspense fallback={<div className="flex min-h-[45vh] items-center justify-center px-5 text-sm text-stone-600" role="status">Loading collection…</div>}>
       {path === '/' ? <V2Home products={published} home={siteData.homepage} categories={siteData.categories} onNavigate={navigate}/> :
        collection ? (activeRoutePage ? <V2Collection route={collection} products={matches}
          bannerImage={categoryOverride?.image_url && isSafeHttps(categoryOverride.image_url) ? categoryOverride.image_url : undefined}
@@ -110,7 +114,7 @@ export default function App() {
             <p className="mt-4 text-sm leading-7 text-[#766b5e]">{siteText(siteData.homepage,'search.emptyText')}</p>
             <V2Link href="/men" onNavigate={navigate} className="mt-7 inline-flex items-center gap-2 text-sm font-semibold text-[#805e38]">{siteText(siteData.homepage,'search.browse')} <ArrowRight size={16}/></V2Link>
           </div>}
-         {activeRoutePage && activeRoutePage.count>activeRoutePage.pageSize && <nav aria-label="Search results pages" className="mt-10 flex justify-center gap-3">
+         {activeRoutePage && activeRoutePage.count>activeRoutePage.pageSize && <nav aria-label="Search results pages" className="mt-10 flex flex-wrap items-center justify-center gap-3">
            <button type="button" className="min-h-11 border border-stone-300 px-5 disabled:opacity-40"
              disabled={page===0} onClick={()=>setPage(current=>Math.max(0,current-1))}>Previous</button>
            <span className="self-center text-sm">Page {page+1} of {Math.ceil(activeRoutePage.count/activeRoutePage.pageSize)}</span>
@@ -124,7 +128,7 @@ export default function App() {
          <div className="relative mx-auto max-w-[1050px]">
            <V2Link href="/" onNavigate={navigate} className="mb-12 inline-flex items-center gap-2 text-[11px] uppercase tracking-[.18em] text-[#dcc6a4]"><ArrowLeft size={15}/> {siteText(siteData.homepage,'contact.back')}</V2Link>
            <p className="mb-7 text-[10px] font-bold uppercase tracking-[.27em] text-[#dcba85]">{siteText(siteData.homepage,'contact.eyebrow')}</p>
-           <h1 className="max-w-[12ch] font-serif text-[clamp(3.6rem,7vw,7rem)] leading-[1] tracking-[-.06em]">{siteText(siteData.homepage,'contact.title')}</h1>
+           <h1 className="max-w-[12ch] break-words font-serif text-[clamp(2.8rem,7vw,7rem)] leading-[1.02] tracking-[-.06em]">{siteText(siteData.homepage,'contact.title')}</h1>
            <p className="mt-8 max-w-xl text-base leading-8 text-[#ded2c3]">{siteText(siteData.homepage,'contact.description')}</p>
            <div className="mt-10 flex flex-wrap gap-3">
              <a href="https://www.google.com/maps/search/?api=1&query=Nomaan+Brothers+Dresses+Mandi+Bazar+Warangal"
@@ -145,10 +149,11 @@ export default function App() {
        </section> :
        <section className="mx-auto min-h-[60vh] max-w-3xl px-6 py-24 text-center">
          <p className="text-[10px] font-bold uppercase tracking-[.24em] text-[#9e7a4f]">404 / Unavailable collection</p>
-         <h1 className="mt-7 font-serif text-5xl">We couldn't find this page.</h1>
+         <h1 className="mt-7 font-serif text-[clamp(2.4rem,7vw,3.4rem)]">We couldn't find this page.</h1>
          <p className="mt-6 text-sm text-[#74685d]">Use the collection navigation to discover available styles.</p>
          <V2Link href="/" onNavigate={navigate} className="mt-9 inline-flex min-h-12 items-center gap-3 bg-[#32271d] px-7 text-xs font-semibold uppercase tracking-[.12em] text-white">Return home <ArrowRight size={16}/></V2Link>
        </section>}
+      </Suspense>
     </main>
     <V2Footer home={siteData.homepage} categories={siteData.categories} onNavigate={navigate}/>
   </div>;

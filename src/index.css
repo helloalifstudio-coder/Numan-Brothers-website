@@ -112,3 +112,39 @@ a { text-decoration: none; }
 @media (max-width: 640px) {
   h1, h2, h3 { overflow-wrap: anywhere; }
 }
+
+/* The hero lettering reflects moving light on water; the readable HTML heading
+   remains the only source of text (no canvas, WebGL or duplicate pseudo-text). */
+.nb-liquid-hero {
+  color: #fff5df;
+  text-shadow: 0 4px 26px rgba(15, 10, 6, .48);
+}
+@keyframes nb-liquid-caustics {
+  0% { background-position: 0% 50%, 0% 50%; }
+  48% { background-position: 96% 48%, 53% 50%; }
+  100% { background-position: 12% 53%, 100% 50%; }
+}
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  @media (prefers-reduced-motion: no-preference) {
+    .nb-liquid-hero {
+      background-image:
+        radial-gradient(ellipse at 42% 42%, #fffdf7 0%, #f5e9cf 25%, #bcd4d4 46%, #fdf2d8 68%, #f5dbab 100%),
+        linear-gradient(105deg, #ddc4a3 0%, #fffef9 17%, #bcd7d9 30%, #f9e9c8 45%, #ffffff 59%, #d8bd93 77%, #fffdf4 95%);
+      background-size: 190% 160%, 260% 100%;
+      background-position: 0% 50%, 0% 50%;
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: nb-liquid-caustics 12s ease-in-out infinite alternate;
+    }
+  }
+}
+/* Never hide or distort the headline for people requesting less movement. */
+@media (prefers-reduced-motion: reduce) {
+  .nb-liquid-hero {
+    background: none;
+    color: #fff5df;
+    -webkit-text-fill-color: currentColor;
+    animation: none;
+  }
+}

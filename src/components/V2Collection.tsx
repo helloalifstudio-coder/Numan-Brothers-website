@@ -64,7 +64,7 @@ export default function V2Collection({ route, products, bannerImage, totalCount,
     <div className="mx-auto max-w-[1440px] px-5 pt-12 md:px-12 lg:px-20">
       {links.length > 0 && (
         <section className="mb-16" aria-label="Related collection categories">
-          <div className="mb-7 flex items-center justify-between border-b border-[#e2d7c8] pb-4">
+          <div className="mb-7 flex flex-wrap items-center justify-between gap-3 border-b border-[#e2d7c8] pb-4">
             <h2 className="font-serif text-2xl text-[#2a241e]">{siteText(home,'collection.explore')} {department.title}</h2>
             <span className="text-[10px] uppercase tracking-[.15em] text-[#9c8059]">{links.length} categories</span>
           </div>
@@ -78,7 +78,7 @@ export default function V2Collection({ route, products, bannerImage, totalCount,
           </div>
         </section>
       )}
-      <div className="mb-9 flex items-end justify-between gap-5 border-b border-[#e2d7c8] pb-5">
+      <div className="mb-9 flex flex-wrap items-end justify-between gap-5 border-b border-[#e2d7c8] pb-5">
         <h2 className="font-serif text-[31px] tracking-[-.035em] text-[#2a241e] md:text-4xl">{siteText(home,'collection.heading')}</h2>
         <p className="text-xs text-[#84766a]">{totalCount ?? matches.length} {(totalCount ?? matches.length) === 1 ? 'style' : 'styles'}</p>
       </div>
