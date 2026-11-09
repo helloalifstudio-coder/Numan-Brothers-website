@@ -100,7 +100,9 @@ async function inspect(route,width=390,height=844,opts={}){
     assert.ok(layout.bodyWidth<=width+2,
       'body overflow at '+route+' '+width+'px: '+layout.bodyWidth);
     assert.deepEqual(runtimeErrors,[],'page JavaScript errors on '+route+' '+width+'px');
-    if(route==='/'&&width===390){
+    // Live deployments may still serve the previous release during rollout.
+    // Enforce the new icon count on the candidate build, not stale production.
+    if(!live && route==='/'&&width===390){
       const nav=page.locator('footer').getByRole('navigation',{name:'Nomaan Brothers social media channels'});
       await nav.waitFor({state:'attached',timeout:5000});
       assert.equal(await nav.locator('img').count(),1,
