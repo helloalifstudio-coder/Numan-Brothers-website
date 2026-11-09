@@ -22,14 +22,14 @@ interface Props {product:Product;whatsappNumber?:string;contactPhone?:string;hom
 export default function V2Product({ product, whatsappNumber, contactPhone, home, onNavigate }: Props) {
   const garment = product as CatalogProduct;
   const theme = productTheme(garment);
-  const images = (product.images || []).filter(image => /^https:\/\//i.test(image));
+  const images = (product.images || []).filter(image => /^https:\/\//i.test(image) || (garment.slug==='sample-plain-sherwani' && /^\/editorial\/(sherwani|kurta|jodhpuri)[.]svg$/.test(image)));
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedSize,setSelectedSize]=useState('');
   const [shareStatus,setShareStatus]=useState('');
   const [related,setRelated]=useState<CatalogProduct[]>([]);
   useEffect(()=>{
     let active=true;
-    void loadRelatedProducts(garment,4).then(rows=>{if(active)setRelated(rows)});
+    if(garment.slug!=='sample-plain-sherwani')void loadRelatedProducts(garment,4).then(rows=>{if(active)setRelated(rows)});
     return()=>{active=false};
   },[garment.id]);
   const visual = images[selectedImage] || productImage(product);
