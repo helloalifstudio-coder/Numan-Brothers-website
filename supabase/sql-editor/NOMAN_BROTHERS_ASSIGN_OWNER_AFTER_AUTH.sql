@@ -27,7 +27,8 @@ declare
   owner_id uuid;
   conflicting_staff integer;
 begin
-  if owner_email !~* '^[^[:space:]@]+@[^[:space:]@]+[.][^[:space:]@]+
+  if owner_email !~* '^[^[:space:]@]+@[^[:space:]@]+[.][^[:space:]@]+$' then
+    raise exception 'Configure owner_email with the actual verified owner email from Authentication > Users';
   end if;
 
   select id into owner_id
