@@ -23,7 +23,7 @@ const mockProduct={
   price:12000,offer_price:9900,customizable:true,status:'published',sort_rank:1,
   created_at:'2026-10-01T00:00:00Z',updated_at:'2026-10-01T00:00:00Z'
 };
-async function mockCmsRoutes(page,{emptyContacts=false,heroVideo=false}={}){
+async function mockCmsRoutes(page,{emptyContacts=false,heroVideo=false,configuredSocial=false}={}){
   if(process.env.NB_MOCK_CMS!=='1')return;
   await page.route('https://fixture.supabase.co/**',async route=>{
     const url=new URL(route.request().url());
@@ -35,6 +35,10 @@ async function mockCmsRoutes(page,{emptyContacts=false,heroVideo=false}={}){
     if(path.endsWith('/nb_home_public'))return json({content:emptyContacts?{}:{
       contactWhatsapp:'919876543210',contactPhone:'919876543211',
       sectionVideos:heroVideo?{hero:'https://fixture.supabase.co/intro-film.mp4'}:{},
+      socialLinks:configuredSocial?{
+        instagram:'https://www.instagram.com/nomaanbrothers/',
+        facebook:'https://instagram.com/pretending-to-be-facebook',
+      }:{},
     }});
     if(path.endsWith('/nb_categories'))return json([]);
     if(path.endsWith('/nb_products')){
@@ -96,6 +100,17 @@ async function inspect(route,width=390,height=844,opts={}){
     assert.ok(layout.bodyWidth<=width+2,
       'body overflow at '+route+' '+width+'px: '+layout.bodyWidth);
     assert.deepEqual(runtimeErrors,[],'page JavaScript errors on '+route+' '+width+'px');
+    if(route==='/'&&width===390){
+      const nav=page.locator('footer').getByRole('navigation',{name:'Nomaan Brothers social media channels'});
+      await nav.waitFor({state:'attached',timeout:5000});
+      assert.equal(await nav.locator('img').count(),9,
+        'all nine local social brand icons must be present on the footer');
+      const src=await nav.locator('img').evaluateAll(els=>els.map(img=>img.getAttribute('src')));
+      assert.ok(src.every(x=>/^\/social\/[a-z-]+\.svg$/.test(x)),
+        'icons must be local SVG assets, not external CDNs');
+      if(!live)assert.equal(await nav.locator('a').count(),0,
+        'unconfigured social accounts must not become fake or broken links');
+    }
     assert.ok(layout.h1Bounds&&layout.h1Bounds.left>=-2&&layout.h1Bounds.right<=width+2,
       'main heading clipped on '+route+' '+width+'px');
     for(const target of layout.nav) {
@@ -229,6 +244,35 @@ async function inspectFloatingContactsAndProduct(){
   }finally{await context.close();}
 }
 
+
+async function inspectConfiguredSocialIcons(){
+  if(live||process.env.NB_MOCK_CMS!=='1')return;
+  for(const width of [320,390,1440]){
+    const context=await browser.newContext({viewport:{width,height:850}});
+    const page=await context.newPage();
+    page.setDefaultTimeout(8000);
+    await mockCmsRoutes(page,{configuredSocial:true});
+    try{
+      await page.goto(base+'/contact',{waitUntil:'domcontentloaded'});
+      const footer=page.locator('footer').getByRole('navigation',{name:'Nomaan Brothers social media channels'});
+      await footer.waitFor({state:'attached',timeout:8000});
+      assert.equal(await footer.locator('img').count(),9,'all nine social icons visible');
+      const instagram=footer.getByRole('link',{name:'Visit Nomaan Brothers on Instagram'});
+      // The footer renders the empty CMS template before the approved
+      // homepage fetch resolves. Wait for hydration instead of racing it.
+      await instagram.waitFor({state:'attached',timeout:7000});
+      assert.equal(await footer.locator('a').count(),1,'only official-domain accounts link');
+      assert.equal(await instagram.getAttribute('href'),'https://www.instagram.com/nomaanbrothers/');
+      assert.equal(await footer.getByRole('img',{name:'Facebook profile not connected yet'}).count(),1);
+      const contact=page.locator('main').getByRole('navigation',{name:'Nomaan Brothers social media channels'});
+      assert.equal(await contact.locator('a').count(),1,'contact page shows the same verified profile link');
+      console.log('PASS_SOCIAL_FOOTER',JSON.stringify({width,icons:9,verifiedLinks:1}));
+    }catch(error){
+      failures.push({route:'social-footer',width,error:String(error?.stack||error)});
+      console.error('FAIL_SOCIAL_FOOTER',width,String(error?.message||error));
+    }finally{await context.close();}
+  }
+}
 
 async function inspectCinematicHeroIntro(){
   if(live||process.env.NB_MOCK_CMS!=='1')return;
@@ -383,6 +427,7 @@ try{
   if(!skipped)await inspectViewportMatrix();
   if(!skipped)await inspectEditorialRoutes();
   if(!skipped)await inspectCinematicHeroIntro();
+  if(!skipped)await inspectConfiguredSocialIcons();
 }finally{await browser.close();}
 if(skipped)console.log('LIVE_CHECK_INCOMPLETE: external deployment is not publicly accessible from this runner.');
 console.log('BROWSER_SMOKE_SUMMARY',JSON.stringify({base,live,checks:results.length,failures:failures.length,skipped}));

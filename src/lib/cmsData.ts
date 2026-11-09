@@ -50,6 +50,29 @@ export interface CmsCategoryRow {
 
 export const SOCIAL_KEYS = ['instagram','facebook','youtube','pinterest','threads','x','tiktok','snapchat','linkedin'] as const;
 export type SocialKey = typeof SOCIAL_KEYS[number];
+/** Exact provider hosts, plus their legitimate subdomains. Prevents linking a
+ * platform-labeled social icon to an unrelated phishing website. */
+const SOCIAL_DOMAINS:Record<SocialKey,readonly string[]>={
+  instagram:['instagram.com','instagr.am'],
+  facebook:['facebook.com','fb.me','fb.com'],
+  youtube:['youtube.com','youtu.be'],
+  pinterest:['pinterest.com','pin.it'],
+  threads:['threads.com','threads.net'],
+  x:['x.com','twitter.com'],
+  tiktok:['tiktok.com'],
+  snapchat:['snapchat.com'],
+  linkedin:['linkedin.com','lnkd.in'],
+};
+export function isValidSocialProfile(key:SocialKey,value:string):boolean{
+  const url=value.trim();
+  if(!url || url.length>500 || !isSafeHttps(url))return false;
+  try{
+    const parsed=new URL(url);
+    if(parsed.port || parsed.pathname==='/' && !parsed.searchParams.has('id'))return false;
+    const host=parsed.hostname.toLowerCase();
+    return SOCIAL_DOMAINS[key].some(domain=>host===domain||host.endsWith('.'+domain));
+  }catch{return false;}
+}
 export const POLICY_KEYS = ['privacy','terms','returns'] as const;
 export type PolicyKey = typeof POLICY_KEYS[number];
 export type FeaturedImageKey = 'one'|'two'|'three';
@@ -120,7 +143,7 @@ export const cleanHome = (value: unknown): CmsHome => {
   return {...base,
     socialLinks:Object.fromEntries(SOCIAL_KEYS.map(key=>{
       const url=socials[key];
-      return [key,typeof url==='string'&&isSafeHttps(url)?url.slice(0,500):''];
+      return [key,typeof url==='string'&&isValidSocialProfile(key,url)?url.trim().slice(0,500):''];
     })) as CmsHome['socialLinks'],
     featuredImages:Object.fromEntries((['one','two','three'] as const).map(key=>[
       key,typeof featured[key]==='string'&&isSafeHttps(featured[key] as string)?String(featured[key]).slice(0,900):'',

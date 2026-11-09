@@ -1,69 +1,74 @@
-# Nomaan Brothers — V2 Storefront & CMS
+# Nomaan Brothers — Production storefront and CMS
 
-A luxury ethnic menswear and kidswear browse-and-enquire catalogue for Nomaan Brothers, Warangal. Maintained by Alif Growth Media.
+A mobile-first, browse-and-enquire catalogue for the traditional menswear and kidswear showroom in Mandi Bazar, Warangal. Built by Alif Growth Media. **The source of truth is the `main` branch.**
 
-## Current release status
-This source branch is a **production-hardening candidate, not a live production launch**. It has not been connected to a client-owned Supabase project; the actual security policies, data and media must be verified on that project before merging or switching traffic.
+## Live services
 
-The separate connected Supabase project named **gym** belongs to another application. It has deliberately **not** been modified or reused.
+- Customer storefront: https://numan-brothers-website.vercel.app/
+- Staff CMS: https://numan-brothers-cms-showroom.vercel.app/studio
+- GitHub: https://github.com/helloalifstudio-coder/Numan-Brothers-website
+- Data: dedicated Nomaan Brothers Supabase project, with Auth, RLS, PostgreSQL and approved media storage.
 
-## Implemented modules
-- Responsive storefront with Men's Wear and Kids Wear hierarchy, shareable product/category URLs and accessible navigation.
-- Motion-driven editorial homepage with reduced-motion alternatives.
-- Authenticated /studio with CMS product drafts, publishing, image/video uploads, media approval, page management and owner/editor role boundaries.
-- Supabase PostgreSQL tables, restricted RLS and Storage policies, atomic homepage/product publication and revision history.
-- Published-content-only storefront reads. No demo catalogue, legacy PIN login, public write APIs, fake discounts or fake rewards.
-- CI: frozen Bun install, TypeScript, Bun unit tests, PostgreSQL role/RLS simulation and Vite build.
+**What is live vs pending:** A responsive public website and Studio are deployed. Some content cannot be completed without client approval: real photos and brand film, verified social links, approved privacy/return/terms statements and actual garments. Decorative sample artwork is illustrative; the Plain Sherwani demo is labeled **NOT FOR SALE**, not database stock. Payments, POS and accurate inventory are outside this catalogue's scope.
 
-## Development
+## Features
 
-Install Bun 1.4.0 and run:
+- Responsive Men’s Wear, Kids Wear and category routes; per-product pages with SKU, gallery and WhatsApp catalogue sharing.
+- Five-second cinematic hero opener, left-slide reveal, skip/replay and reduced-motion/data-saver alternatives.
+- Footer and contact pages with nine **locally bundled social brand SVGs**. Empty accounts appear as disabled icons; publishing an HTTPS official profile in Studio activates the link.
+- Public legal-policy pages edited through Studio; empty policies clearly indicate pending owner approval.
+- First-party customer reviews held pending until an authorized staff member moderates them.
+- CMS for product drafts, category selection, generated SKUs, media approvals, bulk import, homepage sections, policy text, social URLs and revisions.
+- Read-only storefront access to published records; restricted Supabase row-level and Storage policies.
+- GitHub Actions typecheck, tests, PostgreSQL permission checks, production build and 18-breakpoint Chromium smoke checks, including live deployments.
 
-    bun install --frozen-lockfile
-    bun run dev
+## Local development
 
-Checks:
+Use Bun 1.4.0 (see `bun.lock`) and Node 22.
 
-    bun run lint
-    bun test
-    bun run build
-    node --test tests/client-preflight.test.mjs
+```bash
+bun install --frozen-lockfile
+cp .env.example .env  # enter public project values; never commit .env
+bun run dev
+bun run lint
+bun test
+bun run build
+```
 
-## Environment
-Create .env locally using .env.example. For Vercel use the two **frontend public values** of the dedicated Nomaan Supabase project:
+Production environment variables must be **public Supabase credentials only**:
 
-    VITE_SUPABASE_URL=https://NEW_PROJECT_REF.supabase.co
-    VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_NEW_PROJECT_KEY
+```env
+VITE_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_YOUR_KEY
+```
 
-Never use a secret key or database password as a VITE_ variable. Do not use another client's project.
+**Never** expose service-role, secret or database password in `VITE_` variables.
 
-## Database and CMS
-- Schema: supabase/migrations/20261107060000_nomaan_cms.sql
-- Studio: /studio (manual staff provisioning via Supabase Auth)
-- Product drafts/versions: nb_product_drafts, nb_product_revisions, nb_products
-- Homepage drafts/versions: nb_home_drafts, nb_home_revisions, nb_home_public
-- Media: nb_media plus private nb-media-staging and approved nb-media-public Storage buckets (Phase 2; not live-tested)
-- Categories: nb_categories (seeded with user-requested category names, not inventory).
+## Operating the live CMS
 
-Full setup and go/no-go instructions:
-- docs/ARCHITECTURE_FRONTEND_CMS_PAYMENTS.md (live vs candidate systems, frontend/backend map, payments, CMS vs code versions)
-- docs/ACTIVATE_LIVE_CMS.md (new Vercel review URL, nine SQL migrations, Supabase function, Auth owner and Vercel env handover)
-- docs/NOMAN_SQL_EDITOR_COPY_PASTE.md (one-shot fresh Noman Supabase SQL Editor installer, verification and API key setup)
-- docs/SUPABASE_STAGING_INSTALL.md (all nine SQL migrations, Auth, Storage and deployment setup)
-- docs/SUPABASE_STAGING_TEST_MATRIX.md (actual image/video/role/load acceptance evidence)
-- docs/CLIENT_ONBOARDING.md (client-owned fork, new Supabase, Vercel and read-only commissioning)
-- docs/PHASE1_SECURITY_REVIEW.md (Phase 1 audit, controls, unresolved security blockers)
-- docs/CMS_DEPLOYMENT.md
-- docs/CMS_RELEASE_GATE.md
-- docs/RELEASE_ACCEPTANCE.md (hard launch blockers)
-- docs/CMS_USER_GUIDE.md (staff usage and imports)
-- docs/OPERATIONS.md (backups, incidents and recovery)
+1. In Supabase Auth, provision a verified staff email and assign a server-controlled `app_metadata.nb_role` of `owner`, `admin` or `editor` as appropriate; user metadata does not grant publisher access.
+2. Open **Studio → Website CMS**. Upload and approve media via the Media workflow, select imagery and a compressed brand film, and edit text, profiles or policies.
+3. For a social account, use its official HTTPS profile page (Instagram, Facebook, YouTube, Pinterest, Threads, X, TikTok, Snapchat or LinkedIn). Platform-host validation rejects unrelated destinations. **Save draft → Publish website changes**.
+4. Products require the correct Men’s/Kids’ category and generated SKU. Publish only approved photos and verified descriptions; confirm mobile UI and WhatsApp sharing from the product page.
+5. Review incoming customer feedback under **Customer Reviews**. Public submissions stay pending; approve genuine reviews only.
+6. Review both Vercel deployments and the GitHub Actions quality gate before changing production traffic.
 
-## Boundaries and known pending work
-**Production gate:** Phase 2 source introduces private staging and approved-public media promotion, but this has NOT been deployed or validated on a client Supabase project. Treat the old public bucket as insecure until the reviewed migration and real Storage tests prove otherwise. Never use the unrelated gym project.
+## Branch policy
 
-The website is *browse and enquire*, not an online payment system. Future ERP/POS is the authoritative stock, prices and tax source. SEO SSR/prerender code exists but requires real Vercel routing, HTTP-status, crawler and indexing acceptance tests. Real photography, contact numbers and the meanings of "Sadi" and Sherwani "Plain Suits" need owner confirmation.
+`main` is the only persistent branch. For substantial changes, open a short-lived pull request branch and merge after quality checks. A post-success GitHub Actions maintenance job checks each temporary `agm/` branch against its **exact unchanged merged PR head** and deletes it; unmerged, protected, or modified work is preserved. No extra Netlify builds or previews are created.
 
-The legacy Firebase rules in the repository are deny-all, **but that file is not deployed to Firebase**. Back up and secure the old live Firebase project in a controlled migration.
+**Admin follow-up:** Configure GitHub branch protection/rulesets for `main` (required status checks, prevent force pushes, approved changes where appropriate); that repository setting is separate from source code.
 
-This CMS uses built-in React components and Supabase rather than integrating external Refine/Puck packages yet. The prior research identified them as candidate enhancements, not current dependencies.
+## Documentation
+
+- [Production operations and commissioning](docs/OPERATIONS.md)
+- [Studio user guide](docs/CMS_USER_GUIDE.md)
+- [Client deployment](docs/CLIENT_ONBOARDING.md)
+- [SQL Editor installation and migrations](docs/NOMAN_SQL_EDITOR_COPY_PASTE.md)
+- [Cinematic intro and video upload](docs/2026-11-09-cinematic-hero-production.md)
+- [Social logos and license attribution](docs/SOCIAL_ICON_LICENSES.md)
+- [Release acceptance checklist](docs/RELEASE_ACCEPTANCE.md)
+
+## Release caveats
+
+Browser automation and SQL permission simulation are strong regression checks but do not guarantee every real browser/device or authenticated user flow. Before full client signoff, perform real iPhone/Android/Safari QA, staff login and upload/publish tests, restore-point validation, accessibility review, and a content/legal approval pass. Verified phone/account details, policies and real product photographs must come from the business owner.
