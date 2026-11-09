@@ -33,11 +33,11 @@ export default function V2Home({ products, home, categories=[], onNavigate }: Pr
 
   const edits = [
     { id:'one', eyebrow: siteText(home,'home.card1Eyebrow'), title:siteText(home,'home.card1Title'), description:siteText(home,'home.card1Text'), route: '/men/sherwani',
-      image: home.featuredImages.one || getImage('/men/sherwani', photo), tone: 'bg-[#2b2926]' },
+      image: home.featuredImages.one || getImage('/men/sherwani', photo) || '/editorial/sherwani.svg', tone: 'bg-[#2b2926]' },
     { id:'two', eyebrow:siteText(home,'home.card2Eyebrow'), title:siteText(home,'home.card2Title'), description:siteText(home,'home.card2Text'), route: '/men/kurta-pyjama',
-      image: home.featuredImages.two || getImage('/men/kurta-pyjama', photoTwo), tone: 'bg-[#44392d]' },
+      image: home.featuredImages.two || getImage('/men/kurta-pyjama', photoTwo) || '/editorial/kurta.svg', tone: 'bg-[#44392d]' },
     { id:'three', eyebrow:siteText(home,'home.card3Eyebrow'), title:siteText(home,'home.card3Title'), description:siteText(home,'home.card3Text'), route: '/men/jodhpuri',
-      image: home.featuredImages.three || getImage('/men/jodhpuri', ''), tone: 'bg-[#545045]' },
+      image: home.featuredImages.three || getImage('/men/jodhpuri', '') || '/editorial/jodhpuri.svg', tone: 'bg-[#545045]' },
   ];
 
   return <div className="flex flex-col overflow-hidden bg-[#fbf8f2]">
@@ -89,7 +89,7 @@ export default function V2Home({ products, home, categories=[], onNavigate }: Pr
                    preload="metadata" poster={photo||undefined} aria-label="Nomaan Brothers brand film"
                    className="h-full w-full object-cover"/>
                : <>
-                   {photo?<img src={photo} alt="" className="absolute inset-0 h-full w-full object-cover opacity-75"/>:
+                   {(photo||'/editorial/sherwani.svg')?<img src={photo||'/editorial/sherwani.svg'} alt="" className="absolute inset-0 h-full w-full object-cover opacity-75"/>:
                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_18%,#c6a47c_0%,transparent_42%),linear-gradient(145deg,#856544,#241b16_80%)]"/>}
                    <div className="absolute inset-0 bg-gradient-to-t from-[#17110d]/90 via-transparent to-[#17110d]/15"/>
                    <div className="absolute inset-x-0 bottom-0 p-7 text-white sm:p-10">
@@ -136,7 +136,7 @@ export default function V2Home({ products, home, categories=[], onNavigate }: Pr
       </V2Reveal>
       <div className="nb-responsive-grid grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
         <V2Reveal className="group relative min-h-[390px] overflow-hidden bg-[#332b24] text-white min-[360px]:min-h-[490px] md:min-h-[560px] xl:min-h-[620px]">
-          {(home.menImage || getImage('/men')) && <img src={home.menImage || getImage('/men')} loading="lazy" decoding="async" alt="Traditional menswear collection preview"
+          {(home.menImage || getImage('/men') || '/editorial/sherwani.svg') && <img src={home.menImage || getImage('/men') || '/editorial/sherwani.svg'} loading="lazy" decoding="async" alt="Traditional menswear collection preview"
             className="absolute inset-0 h-full w-full object-cover object-top opacity-75 transition-transform duration-700 group-hover:scale-[1.045]"/>}
           <div className="absolute inset-0 bg-gradient-to-t from-[#1b1815]/95 via-[#1b1815]/5 to-black/5"/>
           <div className="absolute inset-x-0 bottom-0 flex min-w-0 items-end justify-between gap-3 px-5 pb-7 min-[360px]:px-7 min-[360px]:pb-9 md:px-8 md:pb-10 xl:px-11 xl:pb-12">
@@ -150,7 +150,7 @@ export default function V2Home({ products, home, categories=[], onNavigate }: Pr
         </V2Reveal>
         <V2Reveal delay={0.1} className="group relative min-h-[390px] overflow-hidden bg-[#c7bba4] min-[360px]:min-h-[490px] md:min-h-[560px] xl:min-h-[620px]">
           {/* An illustrated placeholder avoids presenting adult product photographs as kidswear. */}
-          {home.kidsImage ? <img src={home.kidsImage} alt="Kidswear collection preview" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover object-top"/> : <>
+          {(home.kidsImage || '/editorial/kids.svg') ? <img src={home.kidsImage || '/editorial/kids.svg'} alt="Illustrative kidswear editorial artwork (not current stock)" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover object-top"/> : <>
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_70%_20%,#eee3cb_0,transparent_50%),linear-gradient(130deg,#c2ad8a,#f4e5cc_70%,#a58e6b)]"/>
             <div className="absolute left-[45%] top-[12%] h-[370px] w-[240px] rotate-[-16deg] rounded-[48%_48%_12%_12%] border-[22px] border-[#8e7250]/25 bg-[#d6c19b]/30 shadow-[30px_40px_90px_rgba(50,34,18,.2)] md:h-[460px] md:w-[290px]"/>
             <div className="absolute left-[30%] top-[17%] h-[330px] w-[170px] rotate-[15deg] rounded-[46%_46%_18%_18%] border-[12px] border-[#f8ead1]/45 bg-[#d9bf93]/15 md:h-[430px] md:w-[210px]"/>
@@ -216,7 +216,7 @@ export default function V2Home({ products, home, categories=[], onNavigate }: Pr
           <div className="absolute -right-5 -top-5 h-full w-full border border-[#a88e70]/50" aria-hidden="true"/>
           {home.sectionVideos.story?<video controls playsInline preload="metadata" src={home.sectionVideos.story}
               className="relative z-10 aspect-[4/5] w-full object-cover" aria-label="Brand story film"/>:
-           getImage('/men/kurta-pyjama', photoTwo) ? <img src={getImage('/men/kurta-pyjama', photoTwo)} alt="Traditional garment styling" loading="lazy" decoding="async" className="relative z-10 aspect-[4/5] w-full object-cover object-top"/> :
+           (getImage('/men/kurta-pyjama', photoTwo)||'/editorial/kurta.svg') ? <img src={getImage('/men/kurta-pyjama', photoTwo)||'/editorial/kurta.svg'} alt="Editorial garment illustration" loading="lazy" decoding="async" className="relative z-10 aspect-[4/5] w-full object-cover object-top"/> :
             <div aria-hidden="true" className="relative z-10 aspect-[4/5] w-full bg-[radial-gradient(circle_at_70%_30%,#7f674c,transparent_60%)]"/>}
         </V2Reveal>
       </div>
