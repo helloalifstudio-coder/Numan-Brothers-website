@@ -43,7 +43,7 @@ export default function V2Footer({ onNavigate,home,categories=[] }: {onNavigate:
           <p className="flex items-start gap-3 text-sm leading-7 text-[#cfc3b5]"><MapPin size={18} className="mt-1 shrink-0"/> {siteText(home,'footer.address')}</p>
           <V2Link href="/contact" onNavigate={onNavigate} className="mt-6 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[.12em] text-[#e6c69d]">{siteText(home,'footer.cta')} <ArrowUpRight size={16}/></V2Link>
           <div className="mt-7 border-t border-[#594738] pt-5">
-            <h3 className="mb-4 text-[10px] font-bold uppercase tracking-[.2em] text-[#d8b586]">Connect on social</h3>
+            <h3 className="mb-4 text-[10px] font-bold uppercase tracking-[.2em] text-[#d8b586]">Instagram</h3>
             <SocialLinks home={home} showUnconfigured/>
           </div>
         </div>
