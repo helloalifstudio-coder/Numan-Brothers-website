@@ -1,8 +1,12 @@
-# Third-party brand icons
+# Instagram brand icon
 
-Social brand marks are used for nominative navigation to their respective official accounts. The logos remain trademarks of their respective owners; their inclusion does not imply sponsorship or endorsement.
+Only Instagram is displayed in the public footer and contact page.
 
-- Instagram, Facebook, YouTube, Pinterest, Threads, X, TikTok and Snapchat: [Simple Icons](https://github.com/simple-icons/simple-icons), individual SVGs from the project's develop/icons directory; the icon artwork is provided as CC0 1.0 and project copyright/trademark policies remain applicable. Source: https://github.com/simple-icons/simple-icons
-- LinkedIn logo: [Font Awesome Free](https://fontawesome.com/license/free), brand icon by Fonticons, Inc., CC BY 4.0 (attribution: © Fonticons, Inc., Font Awesome Free 6.7.2). Source: https://github.com/FortAwesome/Font-Awesome/blob/6.x/svgs/brands/linkedin-in.svg
+The locally bundled `public/social/instagram.svg` icon comes from
+[Simple Icons](https://github.com/simple-icons/simple-icons), CC0 1.0.
+Instagram remains a trademark of its owner. The icon does not imply
+sponsorship or endorsement, and there is no third-party icon CDN.
 
-All nine SVG files are local static assets under `public/social/`. No third-party icon CDN is requested by visitors, and the browser receives no executable JavaScript from these assets. Only verified, HTTPS social profile URLs entered in Studio become links. An unconfigured profile is displayed as a disabled icon, never a fabricated destination.
+The link destination must be the exact shop-owner-provided HTTPS Instagram
+profile, saved and published via Studio. No default/guessed account is linked;
+the icon remains non-clickable until that URL is configured.
