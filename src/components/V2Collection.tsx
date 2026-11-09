@@ -4,6 +4,7 @@ import { CatalogProduct, productImage, productPath, productsForCollection } from
 import { CollectionRoute, getDepartment, getRelatedCollectionLinks } from '../storefront/navigation';
 import V2Link from './V2Link';
 import V2Reveal from './V2Reveal';
+import ShareCatalogue from './ShareCatalogue';
 import type { CmsHome,CmsCategoryRow } from '../lib/cmsData';
 import {siteText} from '../lib/siteContent';
 
@@ -59,6 +60,10 @@ export default function V2Collection({ route, products, bannerImage, totalCount,
         <p className="mb-6 text-[10px] font-semibold uppercase tracking-[.28em] text-[#ddb98b]">{siteText(home,'collection.eyebrow')} / {department.title}</p>
         <h1 className="max-w-[850px] font-serif break-words text-[clamp(2.65rem,8vw,7.4rem)] leading-[1] tracking-[-.06em]">{route.title}</h1>
         <p className="mt-7 max-w-xl text-sm leading-8 text-[#e0d2c1]">{route.description}</p>
+         <div className="rounded-xl bg-[#fbf8f2] p-3 text-[#29221c] sm:inline-block">
+           <ShareCatalogue title={route.title} path={route.path} compact/>
+         </div>
+         <p className="mt-3 max-w-lg text-xs leading-6 text-[#e5d0b2]">Share this catalogue to browse all published garments and photographs, including later pages.</p>
       </div>
     </section>
     <div className="mx-auto max-w-[1440px] px-5 pt-12 md:px-12 lg:px-20">
