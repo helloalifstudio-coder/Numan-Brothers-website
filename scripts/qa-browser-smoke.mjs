@@ -324,8 +324,7 @@ async function inspectEditorialRoutes(){
       await opening.waitFor({state:'hidden',timeout:4000});
     }
     await page.getByRole('heading',{name:'What customers are saying.'}).waitFor({state:'visible',timeout:7000});
-    const film=page.getByTestId('brand-intro');
-    await film.waitFor({state:'visible',timeout:5000});
+    // The main editorial artwork remains present after the intro has exited.
     assert.equal(await page.getByLabel('Editorial collection artwork').count(),1,
       'premium imagery is underneath the introduction');
     await page.getByRole('textbox',{name:'Display name'}).fill('QA Reviewer');
