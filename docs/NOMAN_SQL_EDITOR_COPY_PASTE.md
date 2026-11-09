@@ -25,6 +25,8 @@ If the client project already contains **all 15 Noman `nb_*` tables**, back it u
 
 **Important:** Owner email/password are **not** credentials for the Supabase organization Dashboard. They are Supabase **Auth user credentials** for `/studio`; the Dashboard owner separately controls billing and infrastructure. Protect both.
 
+**Before testing password or email changes**, set Supabase Auth Email provider to require confirmation and enable Secure Email Change, Secure Password Change/current-password verification where supported. Configure project Site URL/redirect allowlist to the live client website and reliable SMTP delivery; the default email provider is limited and may not deliver repeated security codes. These settings are not contained in database SQL.
+
 ## Edge Function — separate required deployment
 
 The CMS uses `supabase/functions/nb-media-approval/index.ts` for authorized media approval, revocation, archive and hard delete. Deploy that function to the **same** client project (JWT required):
