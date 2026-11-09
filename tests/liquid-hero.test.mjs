@@ -6,7 +6,7 @@ const source=(path)=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 
 test('water-reflection is visual only; editable hero title stays a real accessible heading',()=>{
   const home=source('src/components/V2Home.tsx');
-  assert.match(home,/<h1 id="v2-home-title" className="nb-liquid-hero/);
+  assert.match(home,/<h1 id="v2-home-title" tabIndex=\{-1\} className="nb-liquid-hero/);
   assert.match(home,/\{home\.heroTitle\}/);
   assert.doesNotMatch(home,/data-text=\{home\.heroTitle\}|dangerouslySetInnerHTML/);
   const css=source('src/index.css');
