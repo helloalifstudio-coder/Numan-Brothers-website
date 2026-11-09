@@ -70,6 +70,9 @@ jobs:
         run: |
           psql -v ON_ERROR_STOP=1 -f tests/sql/bootstrap.sql
           psql -v ON_ERROR_STOP=1 -f supabase/sql-editor/NOMAN_BROTHERS_INSTALL_FRESH_PROJECT.sql
+          # Validate that an already-installed project can rerun the existing-table
+          # SQL Editor reconciliation without duplicate-schema or policy failures.
+          psql -v ON_ERROR_STOP=1 -f supabase/sql-editor/NOMAN_BROTHERS_COMPLETE_EXISTING_TABLES.sql
           psql -v ON_ERROR_STOP=1 -f tests/sql/assert_management.sql
           psql -v ON_ERROR_STOP=1 -f tests/sql/assert.sql
           psql -v ON_ERROR_STOP=1 -f tests/sql/assert_imports.sql
