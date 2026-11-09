@@ -191,6 +191,11 @@ export default function CmsHomepage({client,userId,canPublish}:Props) {
            <AssetEditor client={client} userId={userId} canPublish={canPublish} allowVideo label="Hero opening film · MP4/WebM, portrait-safe crop"
              selected={form.sectionVideos.hero?[form.sectionVideos.hero]:[]}
              onChange={urls=>setForm(current=>({...current,sectionVideos:{...current.sectionVideos,hero:urls[0]||''}}))}/>
+           <p className="mt-3 text-xs leading-6 text-stone-600">For fast mobile playback use a compressed H.264 MP4, 5–8 seconds, ideally under 5 MB. Keep the subject centered because phone and desktop crops differ. The video starts muted. Upload via Media, save your draft, then publish before reviewing.</p>
+           <a href="/" target="_blank" rel="noopener noreferrer"
+             className="mt-4 inline-flex min-h-11 items-center border-b border-[#99744a] text-xs font-semibold text-[#674b2d] hover:text-[#2e2115]">
+             Preview published cinematic introduction ↗
+           </a>
          </div>
         <div className="md:col-span-2 border-t border-stone-200 pt-6"><h3 className="font-serif text-2xl">Department cover images</h3></div>
         <div>{assets('menImage',"Men's Wear photograph")}</div>
