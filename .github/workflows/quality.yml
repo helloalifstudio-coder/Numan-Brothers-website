@@ -82,6 +82,8 @@ jobs:
           psql -v ON_ERROR_STOP=1 -f tests/sql/assert_reviews.sql
           psql -v ON_ERROR_STOP=1 -f tests/sql/assert_media_lifecycle_scale.sql
           psql -v ON_ERROR_STOP=1 -f tests/sql/assert_client_sku.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/sql-editor/NOMAN_BROTHERS_ASSIGN_OWNER_AFTER_AUTH.sql
+          psql -v ON_ERROR_STOP=1 -f tests/sql/assert_owner_bootstrap.sql
       - name: Reject production deployments without client CMS credentials
         run: |
           if env VERCEL_ENV=production VITE_SUPABASE_URL= VITE_SUPABASE_PUBLISHABLE_KEY= VITE_SUPABASE_ANON_KEY= bun run build; then
