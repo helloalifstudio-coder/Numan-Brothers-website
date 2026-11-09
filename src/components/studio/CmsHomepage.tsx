@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import {type CmsHome,HOME_TEMPLATE,cleanHome,isSafeHttps,isValidSocialProfile,SOCIAL_KEYS,POLICY_KEYS} from '../../lib/cmsData';
+import {type CmsHome,HOME_TEMPLATE,cleanHome,isSafeHttps,isValidSocialProfile,POLICY_KEYS} from '../../lib/cmsData';
 import { SITE_PAGES,SITE_FIELDS,siteText,HOME_SECTIONS,FEATURED_CARDS,normalizeOrder,type SitePage } from '../../lib/siteContent';
 import {ErrorText,Field,inputClass,outlineClass,primaryClass} from './StudioShared';
 import AssetEditor from './AssetEditor';
@@ -123,8 +123,8 @@ export default function CmsHomepage({client,userId,canPublish}:Props) {
       if(form.contactWhatsapp && !/^[1-9][0-9]{9,14}$/.test(form.contactWhatsapp))throw new Error('WhatsApp must be a verified international number (10–15 digits, including country code).');
       if(form.contactPhone && !/^[1-9][0-9]{9,14}$/.test(form.contactPhone))
         throw new Error('Phone number must contain an international country code, digits only.');
-      if(SOCIAL_KEYS.some(key=>form.socialLinks[key].trim()&&!isValidSocialProfile(key,form.socialLinks[key])))
-        throw new Error('Each social profile must be a valid HTTPS link to the matching platform account, not a general website or another service.');
+      if(form.socialLinks.instagram.trim()&&!isValidSocialProfile('instagram',form.socialLinks.instagram))
+        throw new Error('Instagram must be the shop-owned HTTPS profile URL.');
       const content=cleanHome(form);
       const byteCount=new TextEncoder().encode(JSON.stringify(content)).length;
       if(byteCount>28000)throw new Error('Website content is too long ('+byteCount+' bytes). Shorten long paragraphs before saving.');
