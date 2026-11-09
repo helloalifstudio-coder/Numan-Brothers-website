@@ -42,7 +42,7 @@ describe('owner-only self-service Auth account settings',()=>{
     expect(sql).toContain('email_confirmed_at is not null');
     expect(sql).toContain('conflicting_staff');
     expect(sql).toContain('raw_app_meta_data');
-    expect(sql).not.toContain('admin@1234');
+    expect(sql).not.toMatch(/password\\s*(?::=|=)\\s*'[^']+'/i);
     expect(sql).not.toContain('encrypted_password');
     expect(sql).not.toContain('INSERT INTO auth.users');
   });
