@@ -4,6 +4,7 @@ import { CatalogProduct, productImage, productPath, productsForCollection } from
 import { CollectionRoute, getDepartment, getRelatedCollectionLinks } from '../storefront/navigation';
 import V2Link from './V2Link';
 import V2Reveal from './V2Reveal';
+import {SAMPLE_SHERWANI} from '../storefront/sampleProduct';
 import ShareCatalogue from './ShareCatalogue';
 import type { CmsHome,CmsCategoryRow } from '../lib/cmsData';
 import {siteText} from '../lib/siteContent';
@@ -87,7 +88,16 @@ export default function V2Collection({ route, products, bannerImage, totalCount,
         <h2 className="font-serif text-[31px] tracking-[-.035em] text-[#2a241e] md:text-4xl">{siteText(home,'collection.heading')}</h2>
         <p className="text-xs text-[#84766a]">{totalCount ?? matches.length} {(totalCount ?? matches.length) === 1 ? 'style' : 'styles'}</p>
       </div>
-      {matches.length ? <V2ProductGrid products={matches} home={home} onNavigate={onNavigate}/> :
+      {route.path==='/men/sherwani/plain'&&<aside className="mb-9 rounded-xl border border-[#bea178] bg-[#f5ead9] p-5">
+         <p className="text-[10px] font-bold uppercase tracking-[.18em] text-[#8f6637]">Interactive preview · Not inventory</p>
+         <h3 className="mt-2 font-serif text-2xl">Explore our test Plain Sherwani</h3>
+         <p className="mt-2 text-sm leading-6 text-[#66523e]">Review gallery, sizes and WhatsApp sharing before real stock photographs are approved.</p>
+         <V2Link href={'/products/'+SAMPLE_SHERWANI.slug} onNavigate={onNavigate}
+           className="mt-4 inline-flex min-h-12 items-center gap-2 border-b border-[#9e7547] text-sm font-semibold text-[#6b4a25]">
+           Open demo garment <ArrowUpRight size={17}/>
+         </V2Link>
+       </aside>}
+       {matches.length ? <V2ProductGrid products={matches} home={home} onNavigate={onNavigate}/> :
         <V2Reveal className="relative overflow-hidden border border-[#dfd3c2] bg-[#f4ecdf] px-7 py-16 text-center md:py-24">
           <p className="mb-4 text-[10px] font-semibold uppercase tracking-[.22em] text-[#9b784e]">{siteText(home,'collection.emptyEyebrow')}</p>
           <h3 className="font-serif text-3xl text-[#29221c] md:text-5xl">{siteText(home,'collection.emptyTitle')}</h3>

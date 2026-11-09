@@ -41,7 +41,7 @@ export const DEPARTMENTS: Department[] = [
       { title: 'Sherwani', landingPath: '/men/sherwani', items: [
         { label: 'All Sherwanis', path: '/men/sherwani' },
         { label: 'Handwork Sherwani', path: '/men/sherwani/handwork' },
-        { label: 'Plain Suits', path: '/men/sherwani/plain' },
+        { label: 'Plain Sherwani', path: '/men/sherwani/plain' },
       ] },
       { title: 'Suits', landingPath: '/men/suits', items: [
         { label: 'All Suits', path: '/men/suits' },

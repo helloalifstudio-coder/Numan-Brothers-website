@@ -6,6 +6,7 @@ import {siteText} from './lib/siteContent';
 import { loadCataloguePage, loadProductById, type CataloguePage } from './lib/catalogQueries';
 import type { CatalogProduct } from './storefront/catalog';
 import { productPath, publicProducts } from './storefront/catalog';
+import { SAMPLE_SHERWANI } from './storefront/sampleProduct';
 import { getCollection } from './storefront/navigation';
 import { useStoreHistory } from './storefront/history';
 import V2Header from './components/V2Header';
@@ -74,7 +75,7 @@ export default function App() {
   },[path,searchQuery,page]);
   const activeRoutePage = routeResult?.key===routeKey ? routeResult.data : null;
   const matches = activeRoutePage?.products || [];
-  const product = selectedId && detail?.id===selectedId ? detail.product : undefined;
+  const product = selectedId===SAMPLE_SHERWANI.slug ? SAMPLE_SHERWANI : selectedId && detail?.id===selectedId ? detail.product : undefined;
   const policyLabels:Record<string,{key:'privacy'|'terms'|'returns';title:string}>={
     '/privacy-policy':{key:'privacy',title:'Privacy Policy'},
     '/terms-and-conditions':{key:'terms',title:'Terms & Conditions'},
@@ -91,6 +92,7 @@ export default function App() {
 
   return <div className="min-h-screen bg-[#fbf8f2]">
     <Helmet>
+      {selectedId===SAMPLE_SHERWANI.slug&&<meta name="robots" content="noindex, nofollow"/>}
       <title>{title} | {siteText(siteData.homepage,'seo.brand')}</title>
       <meta name="description" content={product?.description?.trim().slice(0,210)||siteText(siteData.homepage,'seo.description')} />
       {product&&<meta property="og:type" content="product"/>}
@@ -110,7 +112,7 @@ export default function App() {
          home={siteData.homepage} categories={siteData.categories} totalCount={activeRoutePage.count}
          page={page} pageSize={activeRoutePage.pageSize} onPageChange={setPage} onNavigate={navigate}/> :
          <p role="status" className="p-12 text-center text-stone-500">Loading collection…</p>) :
-       selectedId && !detail ? <p role="status" className="p-12 text-center text-stone-500">Loading product…</p> :
+       selectedId && !detail && selectedId!==SAMPLE_SHERWANI.slug ? <p role="status" className="p-12 text-center text-stone-500">Loading product…</p> :
        product ? <V2Product key={product.id} product={product} home={siteData.homepage}
          whatsappNumber={siteData.homepage.contactWhatsapp} contactPhone={siteData.homepage.contactPhone} onNavigate={navigate}/> :
        path === '/search' ? <section className="mx-auto min-h-[70vh] min-w-0 max-w-[1360px] px-4 py-16 min-[360px]:px-5 md:px-12">
