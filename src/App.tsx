@@ -11,6 +11,7 @@ import { useStoreHistory } from './storefront/history';
 import V2Header from './components/V2Header';
 import FloatingContactDock from './components/FloatingContactDock';
 import SocialLinks from './components/SocialLinks';
+import V2Reviews from './components/V2Reviews';
 import V2Home from './components/V2Home';
 
 import V2Footer from './components/V2Footer';
@@ -184,6 +185,7 @@ export default function App() {
          <V2Link href="/" onNavigate={navigate} className="mt-9 inline-flex min-h-12 items-center gap-3 bg-[#32271d] px-7 text-xs font-semibold uppercase tracking-[.12em] text-white">Return home <ArrowRight size={16}/></V2Link>
        </section>}
       </Suspense>
+      {path==='/'&&<V2Reviews/>}
     </main>
     <V2Footer home={siteData.homepage} categories={siteData.categories} onNavigate={navigate}/>
     <FloatingContactDock home={siteData.homepage} path={path} product={product}/>

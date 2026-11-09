@@ -11,9 +11,10 @@ import CmsImports from './studio/CmsImports';
 import CmsProducts from './studio/CmsProducts';
 import CmsHomepage from './studio/CmsHomepage';
 import CmsCategories from './studio/CmsCategories';
+import CmsReviews from './studio/CmsReviews';
 
 
-type Section = 'dashboard' | 'products' | 'collections' | 'media' | 'imports' | 'homepage';
+type Section = 'dashboard' | 'products' | 'collections' | 'media' | 'imports' | 'homepage' | 'reviews';
 type CmsUser = { id:string;email:string;role:'owner'|'admin'|'editor' };
 const sections: { id:Section;label:string;icon:React.ComponentType<{size?:number}> }[] = [
   {id:'dashboard',label:'Dashboard',icon:LayoutDashboard},
@@ -22,12 +23,13 @@ const sections: { id:Section;label:string;icon:React.ComponentType<{size?:number
   {id:'media',label:'Media library',icon:Image},
   {id:'imports',label:'Bulk imports',icon:FileUp},
   {id:'homepage',label:'Website CMS',icon:BookOpen},
+  {id:'reviews',label:'Customer reviews',icon:Image},
 ];
 const studioGroups: {name:string;sections:Section[]}[] = [
   {name:'Overview',sections:['dashboard']},
   {name:'Catalogue',sections:['products','collections']},
   {name:'Media & imports',sections:['media','imports']},
-  {name:'Website',sections:['homepage']},
+  {name:'Website',sections:['homepage','reviews']},
 ];
 
 export default function CmsStudio(){
@@ -265,6 +267,7 @@ export default function CmsStudio(){
             {section==='products'&&<CmsProducts client={client} userId={staff.id} canPublish={canPublish}/>}
             {section==='homepage'&&<CmsHomepage client={client} userId={staff.id} canPublish={canPublish}/>}
             {section==='collections'&&<CmsCategories client={client} canPublish={canPublish} userId={staff.id}/>}
+             {section==='reviews'&&<CmsReviews client={client} canPublish={canPublish}/>}
           </div>
         </main>
       </div>}
