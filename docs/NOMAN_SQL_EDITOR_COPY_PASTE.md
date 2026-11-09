@@ -18,9 +18,10 @@ If the client project already contains **all 15 Noman `nb_*` tables**, back it u
 ## Owner Auth role — the second, separate SQL paste
 
 1. In **Authentication → Users**, create the real owner account with their confirmed Gmail and strong password. Supabase Auth handles password hashing and email confirmation. Do **not** use SQL `INSERT INTO auth.users` or plaintext passwords.
-2. Open `supabase/sql-editor/NOMAN_BROTHERS_ASSIGN_OWNER_AFTER_AUTH.sql`. Replace its `owner_email` placeholder with the exact confirmed email and paste it into the **same** project's SQL Editor.
+2. Open `supabase/sql-editor/NOMAN_BROTHERS_ASSIGN_OWNER_AFTER_AUTH.sql`. It now defaults to `admin@gmail.com` for the **temporary owner**. If you truly created and confirmed that exact email in Authentication → Users, the SQL can run as-is; otherwise change the `owner_email` variable to the verified owner. Paste the script into the **same** project's SQL Editor.
 3. The script checks that the Auth user exists, has a confirmed email and that no other user currently holds a privileged CMS role. It assigns `raw_app_meta_data.nb_role='owner'` without overwriting other metadata. It refuses ambiguous or missing users. You can safely repeat it for the same verified account.
 4. Sign out of Studio, then sign back in. The role must appear in the renewed Supabase JWT and cannot be changed by the public site.
+5. Use **Studio → Account & security** to request owner email changes and password updates later. Supabase Auth emails a security code; changing email may require old/new inbox confirmations, and changing a password requires the current password. The owner role persists on the same Auth user ID. A browser without an authenticated owner session cannot use this panel. For recovery from lost email/password use the Supabase Dashboard or verified Auth recovery process.
 
 **Important:** Owner email/password are **not** credentials for the Supabase organization Dashboard. They are Supabase **Auth user credentials** for `/studio`; the Dashboard owner separately controls billing and infrastructure. Protect both.
 
