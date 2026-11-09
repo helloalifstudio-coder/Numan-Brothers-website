@@ -23,15 +23,18 @@ const mockProduct={
   price:12000,offer_price:9900,customizable:true,status:'published',sort_rank:1,
   created_at:'2026-10-01T00:00:00Z',updated_at:'2026-10-01T00:00:00Z'
 };
-async function mockCmsRoutes(page,{emptyContacts=false}={}){
+async function mockCmsRoutes(page,{emptyContacts=false,heroVideo=false}={}){
   if(process.env.NB_MOCK_CMS!=='1')return;
   await page.route('https://fixture.supabase.co/**',async route=>{
     const url=new URL(route.request().url());
     const path=url.pathname;
     const json=(body,extra={})=>route.fulfill({status:200,contentType:'application/json',
       headers:{'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'apikey,authorization,content-type,x-client-info,prefer,accept,accept-profile,content-profile','Access-Control-Allow-Methods':'GET,POST,OPTIONS,HEAD','content-range':'0-0/1',...extra},body:JSON.stringify(body)});
+    if(path.endsWith('/intro-film.mp4'))
+      return route.fulfill({status:404,contentType:'text/plain',body:'Fixture deliberately has no film bytes'});
     if(path.endsWith('/nb_home_public'))return json({content:emptyContacts?{}:{
-      contactWhatsapp:'919876543210',contactPhone:'919876543211'
+      contactWhatsapp:'919876543210',contactPhone:'919876543211',
+      sectionVideos:heroVideo?{hero:'https://fixture.supabase.co/intro-film.mp4'}:{},
     }});
     if(path.endsWith('/nb_categories'))return json([]);
     if(path.endsWith('/nb_products')){
@@ -219,6 +222,75 @@ async function inspectFloatingContactsAndProduct(){
 }
 
 
+async function inspectCinematicHeroIntro(){
+  if(live||process.env.NB_MOCK_CMS!=='1')return;
+  for(const [width,height,heroVideo] of [[320,650,false],[390,844,true],[1440,900,true]]){
+    const context=await browser.newContext({viewport:{width,height},reducedMotion:'no-preference'});
+    const page=await context.newPage();
+    await mockCmsRoutes(page,{heroVideo});
+    try{
+      await page.goto(base+'/',{waitUntil:'domcontentloaded',timeout:15000});
+      const intro=page.getByTestId('brand-intro');
+      await intro.waitFor({state:'visible',timeout:6000});
+      assert.equal(await intro.getAttribute('data-phase'),'playing');
+      assert.notEqual(await page.getByTestId('main-hero').getAttribute('inert'),null,
+        'main hero is inert while intro overlays it');
+      const overflow=await page.evaluate(()=>document.documentElement.scrollWidth);
+      assert.ok(overflow<=width+2,'cinematic video intro causes horizontal overflow at '+width+'px');
+      assert.equal(await page.getByRole('button',{name:'Skip brand introduction'}).count(),1);
+      if(width===320){
+        await page.getByRole('button',{name:'Skip brand introduction'}).click();
+        await intro.waitFor({state:'hidden',timeout:3500});
+      }else if(width===390){
+        // Intentionally broken fixture video: the animated poster and skip still work.
+        await page.getByRole('button',{name:'Skip brand introduction'}).click();
+        await intro.waitFor({state:'hidden',timeout:3500});
+        await page.getByRole('button',{name:'Replay brand film'}).click();
+        await intro.waitFor({state:'visible',timeout:3500});
+        await page.keyboard.press('Escape');
+        await intro.waitFor({state:'hidden',timeout:3500});
+      }else{
+        await page.waitForTimeout(4000);
+        assert.equal(await intro.getAttribute('data-phase'),'playing',
+          'intro must stay onscreen until five seconds');
+        await page.waitForTimeout(1150);
+        const phase=await intro.getAttribute('data-phase');
+        assert.ok(phase==='leaving'||phase==='finished','intro moves left around 5s');
+        await intro.waitFor({state:'hidden',timeout:3000});
+      }
+      assert.equal(await page.getByTestId('main-hero').getAttribute('inert'),null,
+        'main hero becomes interactive after the intro');
+      await page.screenshot({path:join(screenshots,'cinematic-hero-'+width+'.png'),
+        animations:'disabled'});
+      console.log('PASS_CINEMATIC_HERO',JSON.stringify({width,heroVideo,skip:width!==1440,
+        videoErrorFallback:width===390,fiveSecondExit:width===1440}));
+    }catch(error){
+      failures.push({route:'cinematic-hero',width,error:String(error?.stack||error)});
+      console.error('FAIL_CINEMATIC_HERO',width,String(error?.message||error));
+    }finally{await context.close();}
+  }
+  for(const reduce of [true,false]){
+    const context=await browser.newContext({viewport:{width:375,height:812},
+      reducedMotion:reduce?'reduce':'no-preference'});
+    const page=await context.newPage();
+    if(!reduce)await page.addInitScript(()=>{
+      Object.defineProperty(navigator,'connection',{configurable:true,value:{saveData:true}});
+    });
+    await mockCmsRoutes(page,{heroVideo:true});
+    try{
+      await page.goto(base+'/',{waitUntil:'domcontentloaded',timeout:15000});
+      await page.getByTestId('brand-intro').waitFor({state:'hidden',timeout:4500});
+      assert.equal(await page.getByTestId('main-hero').getAttribute('inert'),null,
+        'reduced motion / data saver skips animated intro');
+      console.log('PASS_CINEMATIC_ACCESSIBILITY',JSON.stringify({reducedMotion:reduce,
+        dataSaver:!reduce}));
+    }catch(error){
+      failures.push({route:'intro-accessibility',width:375,error:String(error?.stack||error)});
+      console.error('FAIL_CINEMATIC_ACCESSIBILITY',String(error?.message||error));
+    }finally{await context.close();}
+  }
+}
+
 async function inspectEditorialRoutes(){
   // PR workflow tests new features locally, not against the still-live main release.
   if(live||process.env.NB_MOCK_CMS!=='1')return;
@@ -233,8 +305,10 @@ async function inspectEditorialRoutes(){
   try {
     await page.goto(base+'/',{waitUntil:'domcontentloaded'});
     await page.getByRole('heading',{name:'What customers are saying.'}).waitFor({state:'visible',timeout:7000});
-    const film=page.getByLabel('Brand film and editorial showcase');
-    assert.equal(await film.count(),1,'brand film panel on homepage');
+    const film=page.getByTestId('brand-intro');
+    await film.waitFor({state:'visible',timeout:5000});
+    assert.equal(await page.getByLabel('Editorial collection artwork').count(),1,
+      'premium imagery is underneath the introduction');
     await page.getByRole('textbox',{name:'Display name'}).fill('QA Reviewer');
     await page.getByRole('textbox',{name:'Your review'}).fill('The review submission test is private and awaits admin approval.');
     await page.getByRole('button',{name:'Submit review'}).click();
@@ -290,6 +364,7 @@ try{
   if(!skipped)await inspectUnconfiguredContactFallback();
   if(!skipped)await inspectViewportMatrix();
   if(!skipped)await inspectEditorialRoutes();
+  if(!skipped)await inspectCinematicHeroIntro();
 }finally{await browser.close();}
 if(skipped)console.log('LIVE_CHECK_INCOMPLETE: external deployment is not publicly accessible from this runner.');
 console.log('BROWSER_SMOKE_SUMMARY',JSON.stringify({base,live,checks:results.length,failures:failures.length,skipped}));
