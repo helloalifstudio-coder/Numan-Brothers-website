@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { ArrowUpRight, Database, FolderOpen, Image, LayoutDashboard, LockKeyhole, LogOut, Package, FileUp, BookOpen } from 'lucide-react';
+import { ArrowUpRight, Database, FolderOpen, Image, LayoutDashboard, LockKeyhole, LogOut, Package, FileUp, BookOpen, Settings } from 'lucide-react';
 import type { SupabaseClient, User } from '@supabase/supabase-js';
 import { getCmsClient } from '../lib/supabaseClient';
 import { canPublishRole } from '../lib/cmsData';
@@ -12,9 +12,10 @@ import CmsProducts from './studio/CmsProducts';
 import CmsHomepage from './studio/CmsHomepage';
 import CmsCategories from './studio/CmsCategories';
 import CmsReviews from './studio/CmsReviews';
+import CmsAccount from './studio/CmsAccount';
 
 
-type Section = 'dashboard' | 'products' | 'collections' | 'media' | 'imports' | 'homepage' | 'reviews';
+type Section = 'dashboard' | 'products' | 'collections' | 'media' | 'imports' | 'homepage' | 'reviews' | 'account';
 type CmsUser = { id:string;email:string;role:'owner'|'admin'|'editor' };
 const sections: { id:Section;label:string;icon:React.ComponentType<{size?:number}> }[] = [
   {id:'dashboard',label:'Dashboard',icon:LayoutDashboard},
@@ -24,12 +25,14 @@ const sections: { id:Section;label:string;icon:React.ComponentType<{size?:number
   {id:'imports',label:'Bulk imports',icon:FileUp},
   {id:'homepage',label:'Website CMS',icon:BookOpen},
   {id:'reviews',label:'Customer reviews',icon:Image},
+  {id:'account',label:'Account & security',icon:Settings},
 ];
 const studioGroups: {name:string;sections:Section[]}[] = [
   {name:'Overview',sections:['dashboard']},
   {name:'Catalogue',sections:['products','collections']},
   {name:'Media & imports',sections:['media','imports']},
   {name:'Website',sections:['homepage','reviews']},
+  {name:'My account',sections:['account']},
 ];
 
 export default function CmsStudio(){
@@ -114,6 +117,7 @@ export default function CmsStudio(){
     setStats({published:published.count||0,drafts:drafts.count||0,assets:assets.count||0,images:images.count||0,videos:videos.count||0});
   };
   useEffect(()=>{if(staff&&client&&section==='dashboard')void refreshStats()},[staff?.id,client,section]);
+  useEffect(()=>{if(staff&&staff.role!=='owner'&&section==='account')setSection('dashboard')},[staff?.role,section]);
 
   const login=async(event:React.FormEvent)=>{
     event.preventDefault();if(!client)return;
@@ -137,6 +141,10 @@ export default function CmsStudio(){
     setAuthError(null);
     setPassword('');
     setSection('dashboard');
+  };
+  const logoutAfterPasswordChange=async()=>{
+    await logout();
+    setAuthError('Password updated. Sign in with your new password.');
   };
   const refreshPermissions=async()=>{
     if(!client)return;
@@ -187,7 +195,7 @@ export default function CmsStudio(){
           <nav className="mt-5 flex max-w-full gap-3 overflow-x-auto overscroll-x-contain scroll-px-4 pb-2 lg:mt-9 lg:flex-col lg:gap-5 lg:overflow-visible lg:pb-0" aria-label="Studio sections">
              {studioGroups.map(group=><div key={group.name} className="flex shrink-0 gap-2 lg:flex-col">
                <p className="hidden px-4 text-[10px] font-bold uppercase tracking-[.18em] text-[#c5a57b] lg:block">{group.name}</p>
-               {group.sections.map(id=>{
+               {group.sections.filter(id=>id!=='account'||staff.role==='owner').map(id=>{
                  const item=sections.find(entry=>entry.id===id)!;
                  const Icon=item.icon;
                  return <button type="button" key={item.id}
@@ -212,7 +220,7 @@ export default function CmsStudio(){
               <span className="shrink-0">Studio section</span>
               <select aria-label="Switch Studio section" value={section} onChange={e=>setSection(e.target.value as Section)}
                 className={inputClass+' min-w-0 flex-1'}>
-                {sections.map(item=><option key={item.id} value={item.id}>{item.label}</option>)}
+                {sections.filter(item=>item.id!=='account'||staff.role==='owner').map(item=><option key={item.id} value={item.id}>{item.label}</option>)}
               </select>
             </label>
           </div>
@@ -268,6 +276,7 @@ export default function CmsStudio(){
             {section==='homepage'&&<CmsHomepage client={client} userId={staff.id} canPublish={canPublish}/>}
             {section==='collections'&&<CmsCategories client={client} canPublish={canPublish} userId={staff.id}/>}
              {section==='reviews'&&<CmsReviews client={client} canPublish={canPublish}/>}
+             {section==='account'&&staff.role==='owner'&&<CmsAccount client={client} ownerEmail={staff.email} onPasswordChanged={logoutAfterPasswordChange}/>}
           </div>
         </main>
       </div>}
