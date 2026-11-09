@@ -21,7 +21,7 @@ test('mobile CMS navigation scrolls instead of filling the viewport', () => {
 
 test('homepage renders an approved menswear image and scales headings down', () => {
   const home = src('src/components/V2Home.tsx');
-  assert.match(home, /\{\(home\.menImage \|\| getImage\('\/men'\)\) && <img/);
+  assert.match(home, /home\.menImage \|\| getImage\('\/men'\) \|\| '\/editorial\/sherwani\.svg'/);
   assert.match(home, /break-words text-\[clamp\(2\.8rem,10vw,8\.1rem\)\]/);
 });
 
