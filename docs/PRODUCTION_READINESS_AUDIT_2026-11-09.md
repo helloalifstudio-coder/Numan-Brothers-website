@@ -12,6 +12,8 @@
 - Connected Supabase project status ACTIVE_HEALTHY, PostgreSQL 17, 15 Noman application tables, 41 app-table RLS policies, no app tables missing RLS, 3 configured media buckets and an ACTIVE JWT-verified `nb-media-approval` Edge Function.
 - Live counts at inspection: 0 products, 0 media assets, 0 import jobs, 0 saved product drafts, 1 homepage public record, 1 review and 1 staff account assigned `admin` metadata. Counts can change after inspection.
 - The currently published homepage did not contain a configured Instagram profile. Do not guess an Instagram handle.
+- Published homepage contact/WhatsApp details are configured, but the hero photo, intro video, three legal policy texts and Instagram profile are empty as of inspection.
+- The two Vercel projects have the public Supabase URL and an encrypted publishable key; neither had `SITE_CANONICAL_URL` configured at inspection, so do not claim the site is approved for search indexing. A real client-approved canonical domain and legal/content sign-off are prerequisites.
 
 ## Improvements introduced in this change
 1. Forward-only database migration `20261109190000_media_lifecycle_scale_indexes.sql`: protect archive, revocation and deletion when files are referenced from products, categories, approved pages or saved drafts, including homepage featured cards and section videos.
