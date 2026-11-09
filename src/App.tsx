@@ -175,7 +175,7 @@ export default function App() {
              {siteText(siteData.homepage,'contact.call')} <ArrowUpRight size={16}/></a>}
            <div className="mt-10 border-t border-[#786047] pt-6">
              <p className="text-xs font-semibold uppercase tracking-[.2em] text-[#e2bf8f]">Connect with us</p>
-             <SocialLinks home={siteData.homepage} variant="dark"/>
+             <SocialLinks home={siteData.homepage} variant="dark" showUnconfigured/>
            </div>
            <p className="mt-12 max-w-lg text-xs leading-6 text-[#af9e8a]">{siteText(siteData.homepage,'contact.disclaimer')}</p>
          </div>

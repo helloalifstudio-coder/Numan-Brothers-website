@@ -22,7 +22,7 @@ const kids = [
 export default function V2Footer({ onNavigate,home,categories=[] }: {onNavigate:(path:string)=>void;home?:CmsHome;categories?:CmsCategoryRow[]}) {
   const visible=(path:string)=>categories.length===0||categories.some(c=>c.path===path);
   const label=(path:string,fallback:string)=>categories.find(c=>c.path===path)?.label||fallback;
-  return <footer className="bg-[#1d1916] px-6 pt-20 text-[#eee4d5] md:px-12 md:pt-24 lg:px-20">
+  return <footer className="bg-[#1d1916] px-4 pt-16 text-[#eee4d5] min-[360px]:px-6 md:px-12 md:pt-24 lg:px-20">
     <div className="mx-auto max-w-[1330px]">
       <div className="nb-responsive-grid grid gap-10 border-b border-[#594738] pb-16 sm:grid-cols-2 md:gap-12 xl:grid-cols-[minmax(0,1.5fr)_repeat(3,minmax(0,1fr))] xl:pb-20">
         <div className="min-w-0 max-w-xs">
@@ -42,7 +42,10 @@ export default function V2Footer({ onNavigate,home,categories=[] }: {onNavigate:
           <h2 className="mb-6 text-[10px] font-bold uppercase tracking-[.22em] text-[#cfae81]">{siteText(home,'footer.find')}</h2>
           <p className="flex items-start gap-3 text-sm leading-7 text-[#cfc3b5]"><MapPin size={18} className="mt-1 shrink-0"/> {siteText(home,'footer.address')}</p>
           <V2Link href="/contact" onNavigate={onNavigate} className="mt-6 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[.12em] text-[#e6c69d]">{siteText(home,'footer.cta')} <ArrowUpRight size={16}/></V2Link>
-          <SocialLinks home={home}/>
+          <div className="mt-7 border-t border-[#594738] pt-5">
+            <h3 className="mb-4 text-[10px] font-bold uppercase tracking-[.2em] text-[#d8b586]">Connect on social</h3>
+            <SocialLinks home={home} showUnconfigured/>
+          </div>
         </div>
       </div>
       <nav aria-label="Store policies" className="flex flex-wrap gap-x-6 gap-y-3 border-b border-[#44382c] py-6 text-xs text-[#ddc9ad]">

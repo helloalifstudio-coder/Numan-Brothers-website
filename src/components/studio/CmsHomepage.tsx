@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import {type CmsHome,HOME_TEMPLATE,cleanHome,isSafeHttps,SOCIAL_KEYS,POLICY_KEYS} from '../../lib/cmsData';
+import {type CmsHome,HOME_TEMPLATE,cleanHome,isSafeHttps,isValidSocialProfile,SOCIAL_KEYS,POLICY_KEYS} from '../../lib/cmsData';
 import { SITE_PAGES,SITE_FIELDS,siteText,HOME_SECTIONS,FEATURED_CARDS,normalizeOrder,type SitePage } from '../../lib/siteContent';
 import {ErrorText,Field,inputClass,outlineClass,primaryClass} from './StudioShared';
 import AssetEditor from './AssetEditor';
@@ -123,8 +123,8 @@ export default function CmsHomepage({client,userId,canPublish}:Props) {
       if(form.contactWhatsapp && !/^[1-9][0-9]{9,14}$/.test(form.contactWhatsapp))throw new Error('WhatsApp must be a verified international number (10–15 digits, including country code).');
       if(form.contactPhone && !/^[1-9][0-9]{9,14}$/.test(form.contactPhone))
         throw new Error('Phone number must contain an international country code, digits only.');
-      if(Object.values(form.socialLinks).some(x=>x.trim()&&!isSafeHttps(x.trim())))
-        throw new Error('Social links must be complete HTTPS links.');
+      if(SOCIAL_KEYS.some(key=>form.socialLinks[key].trim()&&!isValidSocialProfile(key,form.socialLinks[key])))
+        throw new Error('Each social profile must be a valid HTTPS link to the matching platform account, not a general website or another service.');
       const content=cleanHome(form);
       const byteCount=new TextEncoder().encode(JSON.stringify(content)).length;
       if(byteCount>28000)throw new Error('Website content is too long ('+byteCount+' bytes). Shorten long paragraphs before saving.');
@@ -243,6 +243,11 @@ export default function CmsHomepage({client,userId,canPublish}:Props) {
         <h3 className="font-serif text-2xl">Social media links</h3>
         <p className="mt-2 text-xs leading-6 text-stone-600">Paste the real store's full HTTPS profile URLs. Leave blank to hide each icon. The agency attribution uses Alif Growth Media’s verified website and logo.</p>
         <div className="nb-responsive-grid mt-4 grid gap-4 md:grid-cols-3">
+          <p className="md:col-span-2 text-xs leading-6 text-stone-600">
+            All nine branded icons are displayed in the footer. Only verified HTTPS profile URLs become clickable;
+            unavailable accounts show clearly disabled icons. Add the official profile, save your draft,
+            then publish the website to activate its link.
+          </p>
           {SOCIAL_KEYS.map(key=><Field key={key} label={key[0].toUpperCase()+key.slice(1)+' profile URL'}>
             <input type="url" className={inputClass} placeholder="https://..." value={form.socialLinks[key]}
               onChange={e=>setForm(cur=>({...cur,socialLinks:{...cur.socialLinks,[key]:e.target.value}}))}/>
