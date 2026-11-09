@@ -48,6 +48,11 @@ export interface CmsCategoryRow {
   sort_order: number;
 }
 
+export const SOCIAL_KEYS = ['instagram','facebook','youtube','pinterest','threads','x','tiktok','snapchat','linkedin'] as const;
+export type SocialKey = typeof SOCIAL_KEYS[number];
+export const POLICY_KEYS = ['privacy','terms','returns'] as const;
+export type PolicyKey = typeof POLICY_KEYS[number];
+export type FeaturedImageKey = 'one'|'two'|'three';
 export interface CmsHome {
   heroTitle: string;
   heroEyebrow: string;
@@ -61,7 +66,9 @@ export interface CmsHome {
   contactWhatsapp: string;
   contactPhone:string;
   customizationImage:string;
-  socialLinks:Record<'instagram'|'facebook'|'youtube',string>;
+  socialLinks:Record<SocialKey,string>;
+  featuredImages:Record<FeaturedImageKey,string>;
+  legalPolicies:Record<PolicyKey,string>;
   sectionVideos:Record<string,string>;
   siteText: Record<string,string>;
   sectionOrder: string[];
@@ -81,7 +88,9 @@ export const HOME_TEMPLATE: CmsHome = {
   contactWhatsapp: '',
   contactPhone:'',
   customizationImage:'',
-  socialLinks:{instagram:'',facebook:'',youtube:''},
+  socialLinks:{instagram:'',facebook:'',youtube:'',pinterest:'',threads:'',x:'',tiktok:'',snapchat:'',linkedin:''},
+  featuredImages:{one:'',two:'',three:''},
+  legalPolicies:{privacy:'',terms:'',returns:''},
   sectionVideos:{},
   siteText: {},
   sectionOrder:HOME_SECTIONS.map(s=>s.id),
@@ -104,11 +113,21 @@ export const cleanHome = (value: unknown): CmsHome => {
     ?record.socialLinks as Record<string,unknown>:{};
   const videos=record.sectionVideos&&typeof record.sectionVideos==='object'&&!Array.isArray(record.sectionVideos)
     ?record.sectionVideos as Record<string,unknown>:{};
+  const featured=record.featuredImages&&typeof record.featuredImages==='object'&&!Array.isArray(record.featuredImages)
+    ?record.featuredImages as Record<string,unknown>:{};
+  const policies=record.legalPolicies&&typeof record.legalPolicies==='object'&&!Array.isArray(record.legalPolicies)
+    ?record.legalPolicies as Record<string,unknown>:{};
   return {...base,
-    socialLinks:Object.fromEntries((['instagram','facebook','youtube'] as const).map(key=>{
+    socialLinks:Object.fromEntries(SOCIAL_KEYS.map(key=>{
       const url=socials[key];
       return [key,typeof url==='string'&&isSafeHttps(url)?url.slice(0,500):''];
     })) as CmsHome['socialLinks'],
+    featuredImages:Object.fromEntries((['one','two','three'] as const).map(key=>[
+      key,typeof featured[key]==='string'&&isSafeHttps(featured[key] as string)?String(featured[key]).slice(0,900):'',
+    ])) as CmsHome['featuredImages'],
+    legalPolicies:Object.fromEntries(POLICY_KEYS.map(key=>[
+      key,typeof policies[key]==='string'?(policies[key] as string).slice(0,6000):'',
+    ])) as CmsHome['legalPolicies'],
     sectionVideos:Object.fromEntries(Object.entries(videos)
       .filter(([key,url])=>HOME_SECTIONS.some(s=>s.id===key)&&typeof url==='string'&&isSafeHttps(url))
       .map(([key,url])=>[key,(url as string).slice(0,900)])),
