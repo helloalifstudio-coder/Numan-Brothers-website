@@ -257,8 +257,11 @@ async function inspectConfiguredSocialIcons(){
       const footer=page.locator('footer').getByRole('navigation',{name:'Nomaan Brothers social media channels'});
       await footer.waitFor({state:'attached',timeout:8000});
       assert.equal(await footer.locator('img').count(),9,'all nine social icons visible');
-      assert.equal(await footer.locator('a').count(),1,'only official-domain accounts link');
       const instagram=footer.getByRole('link',{name:'Visit Nomaan Brothers on Instagram'});
+      // The footer renders the empty CMS template before the approved
+      // homepage fetch resolves. Wait for hydration instead of racing it.
+      await instagram.waitFor({state:'attached',timeout:7000});
+      assert.equal(await footer.locator('a').count(),1,'only official-domain accounts link');
       assert.equal(await instagram.getAttribute('href'),'https://www.instagram.com/nomaanbrothers/');
       assert.equal(await footer.getByRole('img',{name:'Facebook profile not connected yet'}).count(),1);
       const contact=page.locator('main').getByRole('navigation',{name:'Nomaan Brothers social media channels'});
