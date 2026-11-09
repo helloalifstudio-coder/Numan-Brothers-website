@@ -33,29 +33,25 @@ export default function V2Home({ products, home, categories=[], onNavigate }: Pr
 
   const edits = [
     { id:'one', eyebrow: siteText(home,'home.card1Eyebrow'), title:siteText(home,'home.card1Title'), description:siteText(home,'home.card1Text'), route: '/men/sherwani',
-      image: getImage('/men/sherwani', photo), tone: 'bg-[#2b2926]' },
+      image: home.featuredImages.one || getImage('/men/sherwani', photo) || '/editorial/sherwani.svg', tone: 'bg-[#2b2926]' },
     { id:'two', eyebrow:siteText(home,'home.card2Eyebrow'), title:siteText(home,'home.card2Title'), description:siteText(home,'home.card2Text'), route: '/men/kurta-pyjama',
-      image: getImage('/men/kurta-pyjama', photoTwo), tone: 'bg-[#44392d]' },
+      image: home.featuredImages.two || getImage('/men/kurta-pyjama', photoTwo) || '/editorial/kurta.svg', tone: 'bg-[#44392d]' },
     { id:'three', eyebrow:siteText(home,'home.card3Eyebrow'), title:siteText(home,'home.card3Title'), description:siteText(home,'home.card3Text'), route: '/men/jodhpuri',
-      image: getImage('/men/jodhpuri', ''), tone: 'bg-[#545045]' },
+      image: home.featuredImages.three || getImage('/men/jodhpuri', '') || '/editorial/jodhpuri.svg', tone: 'bg-[#545045]' },
   ];
 
   return <div className="flex flex-col overflow-hidden bg-[#fbf8f2]">
     {/* An immersive cover with a real heading and accessible normal scrolling. */}
     <section ref={hero} data-nb-contact-hero style={homeSectionStyle(home,'hero')} className="relative isolate min-h-[620px] overflow-hidden bg-[#211b17] text-[#fff8ed] md:min-h-[730px] lg:min-h-[min(860px,calc(100svh-106px))]" aria-labelledby="v2-home-title">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_28%_35%,#5d4939_0,transparent_56%)]" />
-      {home.sectionVideos.hero
-        ? <video aria-hidden="true" src={home.sectionVideos.hero} poster={photo || undefined}
-            autoPlay={!reduce} muted loop playsInline preload="none"
-            className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-60 md:opacity-80"/>
-        : <div className="absolute inset-y-0 right-0 w-[100%] md:w-[65%] lg:w-[57%]">
-            {photo && <motion.img src={photo} alt="" fetchPriority="high" loading="eager" decoding="async"
-              className="h-full w-full scale-[1.10] object-cover object-center opacity-[.60] md:opacity-90"
-              style={reduce ? undefined : { y: imageY }} />}
-          </div>}
+      <div className="absolute inset-y-0 right-0 w-[100%] md:w-[65%] lg:w-[57%]">
+           {photo && <motion.img src={photo} alt="" fetchPriority="high" loading="eager" decoding="async"
+             className="h-full w-full scale-[1.10] object-cover object-center opacity-[.60] md:opacity-90"
+             style={reduce ? undefined : { y: imageY }} />}
+         </div>
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#211b17] via-[#211b17]/90 to-[#211b17]/30 md:via-[#211b17]/75 md:to-transparent" />
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#211b17]/70 via-transparent to-[#211b17]/10" />
-      <div className="relative mx-auto flex min-h-[620px] min-w-0 max-w-[1440px] flex-col justify-center px-4 pb-28 pt-16 min-[360px]:px-5 sm:px-6 sm:pt-20 md:min-h-[730px] md:px-12 lg:min-h-[min(860px,calc(100svh-106px))] lg:px-20">
+      <div className="relative mx-auto grid min-h-[620px] max-w-[1440px] grid-cols-1 items-center gap-8 px-4 pb-28 pt-16 min-[360px]:px-5 sm:px-6 sm:pt-20 md:min-h-[730px] md:px-12 lg:min-h-[min(860px,calc(100svh-106px))] lg:grid-cols-[minmax(0,1.1fr)_minmax(0,.9fr)] lg:gap-8 lg:px-20 xl:gap-14">
         <motion.div style={reduce ? undefined : { y: textY }} className="relative z-10 min-w-0 max-w-[660px]">
           <motion.div initial={reduce ? false : { opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: .7, ease: [0.22,1,0.36,1] }}>
@@ -86,7 +82,26 @@ export default function V2Home({ products, home, categories=[], onNavigate }: Pr
             </div>
           </motion.div>
         </motion.div>
-        <motion.div className="absolute bottom-8 left-6 flex items-center gap-3 text-[10px] font-medium uppercase tracking-[.22em] text-white/75 md:left-12 lg:left-20"
+        <div className="relative z-10 w-full min-w-0 lg:justify-self-end" aria-label="Brand film and editorial showcase">
+           <div className="relative mx-auto aspect-[4/5] max-h-[580px] w-full max-w-[490px] overflow-hidden rounded-[1.75rem] border border-[#e4c497]/45 bg-[#31271e] shadow-[0_30px_80px_rgba(0,0,0,.38)] lg:mx-0">
+             {home.sectionVideos.hero
+               ? <video key={home.sectionVideos.hero} controls autoPlay={!reduce} muted loop playsInline
+                   preload="metadata" poster={photo||undefined} aria-label="Nomaan Brothers brand film"
+                   className="h-full w-full object-cover"/>
+               : <>
+                   {(photo||'/editorial/sherwani.svg')?<img src={photo||'/editorial/sherwani.svg'} alt="" className="absolute inset-0 h-full w-full object-cover opacity-75"/>:
+                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_18%,#c6a47c_0%,transparent_42%),linear-gradient(145deg,#856544,#241b16_80%)]"/>}
+                   <div className="absolute inset-0 bg-gradient-to-t from-[#17110d]/90 via-transparent to-[#17110d]/15"/>
+                   <div className="absolute inset-x-0 bottom-0 p-7 text-white sm:p-10">
+                     <p className="text-[10px] font-bold uppercase tracking-[.23em] text-[#e7c69c]">Behind the collection</p>
+                     <h2 className="mt-3 max-w-xs font-serif text-3xl leading-tight sm:text-4xl">Our brand film</h2>
+                     <p className="mt-3 max-w-sm text-sm leading-6 text-[#ebdbc8]">An editorial space for our story, craftsmanship and celebrations.</p>
+                   </div>
+                 </>}
+             <span className="pointer-events-none absolute left-5 top-5 rounded-full border border-white/50 bg-black/25 px-4 py-2 text-[10px] font-semibold uppercase tracking-[.18em] text-white backdrop-blur-md">Nomaan / Film</span>
+           </div>
+         </div>
+         <motion.div className="absolute bottom-8 left-6 flex items-center gap-3 text-[10px] font-medium uppercase tracking-[.22em] text-white/75 md:left-12 lg:left-20"
           style={reduce ? undefined : { opacity: scrollLine }}>
           <span className="flex h-8 w-8 items-center justify-center rounded-full border border-white/40"><MoveDownRight size={14}/></span> {siteText(home,'home.scroll')}
         </motion.div>
@@ -121,7 +136,7 @@ export default function V2Home({ products, home, categories=[], onNavigate }: Pr
       </V2Reveal>
       <div className="nb-responsive-grid grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
         <V2Reveal className="group relative min-h-[390px] overflow-hidden bg-[#332b24] text-white min-[360px]:min-h-[490px] md:min-h-[560px] xl:min-h-[620px]">
-          {(home.menImage || getImage('/men')) && <img src={home.menImage || getImage('/men')} loading="lazy" decoding="async" alt="Traditional menswear collection preview"
+          {(home.menImage || getImage('/men') || '/editorial/sherwani.svg') && <img src={home.menImage || getImage('/men') || '/editorial/sherwani.svg'} loading="lazy" decoding="async" alt="Traditional menswear collection preview"
             className="absolute inset-0 h-full w-full object-cover object-top opacity-75 transition-transform duration-700 group-hover:scale-[1.045]"/>}
           <div className="absolute inset-0 bg-gradient-to-t from-[#1b1815]/95 via-[#1b1815]/5 to-black/5"/>
           <div className="absolute inset-x-0 bottom-0 flex min-w-0 items-end justify-between gap-3 px-5 pb-7 min-[360px]:px-7 min-[360px]:pb-9 md:px-8 md:pb-10 xl:px-11 xl:pb-12">
@@ -135,7 +150,7 @@ export default function V2Home({ products, home, categories=[], onNavigate }: Pr
         </V2Reveal>
         <V2Reveal delay={0.1} className="group relative min-h-[390px] overflow-hidden bg-[#c7bba4] min-[360px]:min-h-[490px] md:min-h-[560px] xl:min-h-[620px]">
           {/* An illustrated placeholder avoids presenting adult product photographs as kidswear. */}
-          {home.kidsImage ? <img src={home.kidsImage} alt="Kidswear collection preview" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover object-top"/> : <>
+          {(home.kidsImage || '/editorial/kids.svg') ? <img src={home.kidsImage || '/editorial/kids.svg'} alt="Illustrative kidswear editorial artwork (not current stock)" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover object-top"/> : <>
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_70%_20%,#eee3cb_0,transparent_50%),linear-gradient(130deg,#c2ad8a,#f4e5cc_70%,#a58e6b)]"/>
             <div className="absolute left-[45%] top-[12%] h-[370px] w-[240px] rotate-[-16deg] rounded-[48%_48%_12%_12%] border-[22px] border-[#8e7250]/25 bg-[#d6c19b]/30 shadow-[30px_40px_90px_rgba(50,34,18,.2)] md:h-[460px] md:w-[290px]"/>
             <div className="absolute left-[30%] top-[17%] h-[330px] w-[170px] rotate-[15deg] rounded-[46%_46%_18%_18%] border-[12px] border-[#f8ead1]/45 bg-[#d9bf93]/15 md:h-[430px] md:w-[210px]"/>
@@ -201,7 +216,7 @@ export default function V2Home({ products, home, categories=[], onNavigate }: Pr
           <div className="absolute -right-5 -top-5 h-full w-full border border-[#a88e70]/50" aria-hidden="true"/>
           {home.sectionVideos.story?<video controls playsInline preload="metadata" src={home.sectionVideos.story}
               className="relative z-10 aspect-[4/5] w-full object-cover" aria-label="Brand story film"/>:
-           getImage('/men/kurta-pyjama', photoTwo) ? <img src={getImage('/men/kurta-pyjama', photoTwo)} alt="Traditional garment styling" loading="lazy" decoding="async" className="relative z-10 aspect-[4/5] w-full object-cover object-top"/> :
+           (getImage('/men/kurta-pyjama', photoTwo)||'/editorial/kurta.svg') ? <img src={getImage('/men/kurta-pyjama', photoTwo)||'/editorial/kurta.svg'} alt="Editorial garment illustration" loading="lazy" decoding="async" className="relative z-10 aspect-[4/5] w-full object-cover object-top"/> :
             <div aria-hidden="true" className="relative z-10 aspect-[4/5] w-full bg-[radial-gradient(circle_at_70%_30%,#7f674c,transparent_60%)]"/>}
         </V2Reveal>
       </div>

@@ -4,6 +4,8 @@ import { CatalogProduct, productImage, productPath, productsForCollection } from
 import { CollectionRoute, getDepartment, getRelatedCollectionLinks } from '../storefront/navigation';
 import V2Link from './V2Link';
 import V2Reveal from './V2Reveal';
+import {SAMPLE_SHERWANI} from '../storefront/sampleProduct';
+import ShareCatalogue from './ShareCatalogue';
 import type { CmsHome,CmsCategoryRow } from '../lib/cmsData';
 import {siteText} from '../lib/siteContent';
 
@@ -59,6 +61,10 @@ export default function V2Collection({ route, products, bannerImage, totalCount,
         <p className="mb-6 text-[10px] font-semibold uppercase tracking-[.28em] text-[#ddb98b]">{siteText(home,'collection.eyebrow')} / {department.title}</p>
         <h1 className="max-w-[850px] font-serif break-words text-[clamp(2.65rem,8vw,7.4rem)] leading-[1] tracking-[-.06em]">{route.title}</h1>
         <p className="mt-7 max-w-xl text-sm leading-8 text-[#e0d2c1]">{route.description}</p>
+         <div className="rounded-xl bg-[#fbf8f2] p-3 text-[#29221c] sm:inline-block">
+           <ShareCatalogue title={route.title} path={route.path} compact/>
+         </div>
+         <p className="mt-3 max-w-lg text-xs leading-6 text-[#e5d0b2]">Share this catalogue to browse all published garments and photographs, including later pages.</p>
       </div>
     </section>
     <div className="mx-auto max-w-[1440px] px-5 pt-12 md:px-12 lg:px-20">
@@ -82,7 +88,16 @@ export default function V2Collection({ route, products, bannerImage, totalCount,
         <h2 className="font-serif text-[31px] tracking-[-.035em] text-[#2a241e] md:text-4xl">{siteText(home,'collection.heading')}</h2>
         <p className="text-xs text-[#84766a]">{totalCount ?? matches.length} {(totalCount ?? matches.length) === 1 ? 'style' : 'styles'}</p>
       </div>
-      {matches.length ? <V2ProductGrid products={matches} home={home} onNavigate={onNavigate}/> :
+      {route.path==='/men/sherwani/plain'&&<aside className="mb-9 rounded-xl border border-[#bea178] bg-[#f5ead9] p-5">
+         <p className="text-[10px] font-bold uppercase tracking-[.18em] text-[#8f6637]">Interactive preview · Not inventory</p>
+         <h3 className="mt-2 font-serif text-2xl">Explore our test Plain Sherwani</h3>
+         <p className="mt-2 text-sm leading-6 text-[#66523e]">Review gallery, sizes and WhatsApp sharing before real stock photographs are approved.</p>
+         <V2Link href={'/products/'+SAMPLE_SHERWANI.slug} onNavigate={onNavigate}
+           className="mt-4 inline-flex min-h-12 items-center gap-2 border-b border-[#9e7547] text-sm font-semibold text-[#6b4a25]">
+           Open demo garment <ArrowUpRight size={17}/>
+         </V2Link>
+       </aside>}
+       {matches.length ? <V2ProductGrid products={matches} home={home} onNavigate={onNavigate}/> :
         <V2Reveal className="relative overflow-hidden border border-[#dfd3c2] bg-[#f4ecdf] px-7 py-16 text-center md:py-24">
           <p className="mb-4 text-[10px] font-semibold uppercase tracking-[.22em] text-[#9b784e]">{siteText(home,'collection.emptyEyebrow')}</p>
           <h3 className="font-serif text-3xl text-[#29221c] md:text-5xl">{siteText(home,'collection.emptyTitle')}</h3>

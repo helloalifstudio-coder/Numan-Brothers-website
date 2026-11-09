@@ -4,7 +4,7 @@ import {SITE_FIELDS,SITE_PAGES,siteText,cleanSiteText,HOME_SECTIONS,FEATURED_CAR
 
 describe('versioned website CMS',()=>{
   test('each page has controlled text slots, with no arbitrary HTML',()=>{
-    expect(SITE_PAGES.length).toBe(8);
+    expect(SITE_PAGES.length).toBe(9);
     expect(Object.values(SITE_FIELDS).flat().length).toBeGreaterThan(90);
     expect(cleanSiteText({'nav.brand':'Noman Bros','untrusted.script':'<script>alert(1)</script>'})).toEqual({'nav.brand':'Noman Bros'});
     expect(siteText(HOME_TEMPLATE,'footer.slogan')).toContain('Tradition');

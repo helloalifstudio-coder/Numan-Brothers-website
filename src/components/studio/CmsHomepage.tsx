@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import {type CmsHome,HOME_TEMPLATE,cleanHome,isSafeHttps} from '../../lib/cmsData';
+import {type CmsHome,HOME_TEMPLATE,cleanHome,isSafeHttps,SOCIAL_KEYS,POLICY_KEYS} from '../../lib/cmsData';
 import { SITE_PAGES,SITE_FIELDS,siteText,HOME_SECTIONS,FEATURED_CARDS,normalizeOrder,type SitePage } from '../../lib/siteContent';
 import {ErrorText,Field,inputClass,outlineClass,primaryClass} from './StudioShared';
 import AssetEditor from './AssetEditor';
@@ -70,7 +70,7 @@ export default function CmsHomepage({client,userId,canPublish}:Props) {
       const sectionVideos={...current.sectionVideos};
       if(source.sectionVideos[id])sectionVideos[id]=source.sectionVideos[id];
       else delete sectionVideos[id];
-      const updated={...current,siteText:text,sectionVideos};
+      const updated={...current,siteText:text,sectionVideos,featuredImages:id==='featured'?{...source.featuredImages}:current.featuredImages};
       for(const key of core[id]||[])Object.assign(updated,{[key]:source[key]});
       return updated;
     });
@@ -184,7 +184,14 @@ export default function CmsHomepage({client,userId,canPublish}:Props) {
         <Field label="Headline"><input className={inputClass} value={form.heroTitle} maxLength={180} onChange={e=>update('heroTitle',e.target.value)}/></Field>
         <Field label="Eyebrow label"><input className={inputClass} value={form.heroEyebrow} maxLength={100} onChange={e=>update('heroEyebrow',e.target.value)}/></Field>
         <div className="md:col-span-2"><Field label="Introduction"><textarea rows={3} className={inputClass} value={form.heroSubtitle} onChange={e=>update('heroSubtitle',e.target.value)}/></Field></div>
-        <div className="md:col-span-2">{assets('heroImage','Hero background photograph')}</div>
+        <div className="md:col-span-2">{assets('heroImage','Hero poster / background photograph')}</div>
+         <div className="md:col-span-2 rounded-lg border border-[#e3cfb3] bg-[#fff8eb] p-4">
+           <h3 className="mb-2 font-serif text-xl">Right-side hero brand film</h3>
+           <p className="mb-3 text-xs leading-6 text-stone-600">An approved film plays muted, loops and has viewer controls. Without video, a branded poster appears. You can also replace the film from the Hero card in the layout editor.</p>
+           <AssetEditor client={client} userId={userId} canPublish={canPublish} allowVideo label="Hero brand film"
+             selected={form.sectionVideos.hero?[form.sectionVideos.hero]:[]}
+             onChange={urls=>setForm(current=>({...current,sectionVideos:{...current.sectionVideos,hero:urls[0]||''}}))}/>
+         </div>
         <div className="md:col-span-2 border-t border-stone-200 pt-6"><h3 className="font-serif text-2xl">Department cover images</h3></div>
         <div>{assets('menImage',"Men's Wear photograph")}</div>
         <div>{assets('kidsImage',"Kids Wear photograph")}</div>
@@ -206,11 +213,32 @@ export default function CmsHomepage({client,userId,canPublish}:Props) {
             placeholder="Not published until saved and approved"/>
         </Field></div>
       </div>}
-      {page==='footer'&&<section className="rounded-lg border border-stone-200 bg-white p-5 md:p-7">
+      {page==='home'&&<section className="space-y-4 rounded-lg border border-stone-200 bg-white p-4 md:p-7">
+         <h3 className="font-serif text-2xl">Featured style photography</h3>
+         <p className="text-xs leading-6 text-stone-600">Choose approved photographs for each of the three homepage cards. Leave blank to use the first published garment photograph from that collection.</p>
+         <div className="grid gap-4 xl:grid-cols-3">
+           {(['one','two','three'] as const).map((key,index)=><AssetEditor key={key}
+             client={client} userId={userId} canPublish={canPublish}
+             label={['Sherwani card','Kurta card','Jodhpuri card'][index]}
+             selected={form.featuredImages[key]?[form.featuredImages[key]]:[]}
+             onChange={urls=>setForm(current=>({...current,featuredImages:{...current.featuredImages,[key]:urls[0]||''}}))}/>)}
+         </div>
+       </section>}
+       {page==='policies'&&<section className="space-y-6 rounded-lg border border-stone-200 bg-white p-4 md:p-7">
+         <h3 className="font-serif text-2xl">Owner-approved store policies</h3>
+         <p className="text-xs leading-6 text-stone-600">Do not publish invented return windows, refund promises or legal terms. Confirm the wording with the shop owner and legal adviser. An empty policy displays a clear contact message.</p>
+         {POLICY_KEYS.map(key=><Field key={key} label={key==='privacy'?'Privacy policy':key==='terms'?'Terms & conditions':'Returns & exchanges'}>
+           <textarea className={inputClass} rows={9} maxLength={6000}
+             placeholder="Awaiting owner-approved wording"
+             value={form.legalPolicies[key]}
+             onChange={e=>setForm(current=>({...current,legalPolicies:{...current.legalPolicies,[key]:e.target.value}}))}/>
+         </Field>)}
+       </section>}
+       {page==='footer'&&<section className="rounded-lg border border-stone-200 bg-white p-5 md:p-7">
         <h3 className="font-serif text-2xl">Social media links</h3>
         <p className="mt-2 text-xs leading-6 text-stone-600">Paste the real store's full HTTPS profile URLs. Leave blank to hide each icon. The agency attribution uses Alif Growth Media’s verified website and logo.</p>
         <div className="nb-responsive-grid mt-4 grid gap-4 md:grid-cols-3">
-          {(['instagram','facebook','youtube'] as const).map(key=><Field key={key} label={key[0].toUpperCase()+key.slice(1)+' profile URL'}>
+          {SOCIAL_KEYS.map(key=><Field key={key} label={key[0].toUpperCase()+key.slice(1)+' profile URL'}>
             <input type="url" className={inputClass} placeholder="https://..." value={form.socialLinks[key]}
               onChange={e=>setForm(cur=>({...cur,socialLinks:{...cur.socialLinks,[key]:e.target.value}}))}/>
           </Field>)}

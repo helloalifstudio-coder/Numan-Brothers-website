@@ -23,12 +23,14 @@ test('home quick-explore routes are preserved exactly',()=>{
   assert.match(home,/aria-label="Explore popular collections"/);
 });
 
-test('hero video uses one background at a time and respects reduced motion',()=>{
+test('hero film occupies its own right-side panel and respects reduced motion',()=>{
   const home=source('src/components/V2Home.tsx');
+  assert.match(home,/lg:grid-cols-\[minmax\(0,1\.1fr\)_minmax\(0,\.9fr\)\]/);
   assert.match(home,/home\.sectionVideos\.hero\s*\?/);
-  assert.match(home,/autoPlay=\{!reduce\} muted loop playsInline preload="none"/);
-  assert.match(home,/poster=\{photo \|\| undefined\}/);
-  assert.match(home,/\: <div className="absolute inset-y-0 right-0/);
+  assert.match(home,/autoPlay=\{!reduce\} muted loop playsInline/);
+  assert.match(home,/controls autoPlay=\{!reduce\} muted loop playsInline/);
+  assert.match(home,/poster=\{photo\|\|undefined\}/);
+  assert.match(home,/aria-label="Nomaan Brothers brand film"/);
 });
 
 test('secondary product and collection page modules are split by route',()=>{

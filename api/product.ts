@@ -14,6 +14,23 @@ export default {
   async fetch(request:Request):Promise<Response>{
     if(request.method!=='GET')return new Response('Method not allowed',{status:405});
     const handle=new URL(request.url).searchParams.get('id')||'';
+    // Read-only, explicitly marked demo route. Not a database row or sale item.
+    if(handle==='sample-plain-sherwani'){
+      try{
+        const origin=canonicalOrigin(process.env.SITE_CANONICAL_URL||'')||new URL(request.url).origin;
+        const html=renderProductHtml(template(),{
+          id:'11111111-1111-4111-8111-111111111112',slug:'sample-plain-sherwani',
+          sku:'NB-SHW-DEMO-001',title:'Sample Plain Sherwani — Demo Only',
+          department:'men',status:'published',fabric:'Illustrative garment concept',
+          description:'DEMO / NOT FOR SALE. Artwork is illustrative, not real showroom stock.',
+          image_urls:[origin+'/editorial/sherwani.svg'],price:null,offer_price:null,
+        },origin);
+        return new Response(html.replace('</head>','<meta name="robots" content="noindex, nofollow"/>\n</head>'),{
+          status:200,headers:{'Content-Type':'text/html; charset=utf-8',
+            'X-Content-Type-Options':'nosniff','Cache-Control':'public, s-maxage=90'},
+        });
+      }catch{return new Response('Demo temporarily unavailable',{status:503});}
+    }
     const isUuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(handle);
     const headers={
       'Content-Type':'text/html; charset=utf-8',

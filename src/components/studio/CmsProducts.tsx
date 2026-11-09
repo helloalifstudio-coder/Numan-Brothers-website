@@ -132,6 +132,27 @@ export default function CmsProducts({client,userId,canPublish}:Props){
   };
   const update=<K extends keyof Draft>(key:K,value:Draft[K])=>setForm((current)=>({...current,[key]:value}));
   const create=()=>{setId(crypto.randomUUID());setPublishedSlug(null);setIsNew(true);setSkuEdited(false);setForm({...blank});setRevisions([]);setError(null);setMessage(null)};
+  const prepareSherwaniDraft=async()=>{
+    const path='/men/sherwani/plain';
+    const nextId=crypto.randomUUID();
+    setId(nextId);setPublishedSlug(null);setIsNew(true);setSkuEdited(false);
+    setRevisions([]);setError(null);setMessage(null);
+    setSkuLoading(true);
+    const {data,error}=await client.rpc('nb_next_sku',{p_category_path:path});
+    setSkuLoading(false);
+    if(error||!data){
+      setError('Could not prepare sample SKU: '+(error?.message||'Please try again.'));
+      setForm({...blank,categoryPaths:[path]});
+      return;
+    }
+    const sku=String(data);
+    setForm({...blank,department:'men',categoryPaths:[path],sku,
+      slug:'plain-sherwani-sample-'+sku.toLowerCase(),
+      title:'Plain Sherwani — Example Garment',
+      description:'TEST DRAFT. Replace this content with the owner-approved garment description and photographs before publishing.',
+      sizes:['38','40','42','44'],fabric:'To be confirmed with the showroom',customizable:true});
+    setMessage('Sample prepared as a private editable draft. Upload real approved photographs and check every field before publishing.');
+  };
   const slugify=(value:string)=>value.normalize('NFKD').toLowerCase()
     .replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,110);
   const chooseCategory=async(path:string)=>{
@@ -206,7 +227,13 @@ export default function CmsProducts({client,userId,canPublish}:Props){
   return <section className="space-y-7">
     <div className="flex flex-wrap items-end justify-between gap-4">
       <div><h2 className="font-serif text-3xl">Products</h2><p className="mt-2 text-sm text-stone-600">Create and edit private drafts; approved owners publish changes atomically.</p></div>
-      <button type="button" className={primaryClass} onClick={create}><Plus size={16}/> New product</button>
+      <div className="flex flex-wrap gap-2">
+         <a href="/products/sample-plain-sherwani" target="_blank" rel="noopener noreferrer"
+           className={outlineClass}>Review sample Plain Sherwani <ArrowRight size={15}/></a>
+         <button type="button" className={outlineClass} onClick={()=>void prepareSherwaniDraft()}>
+           Prepare editable sherwani draft</button>
+         <button type="button" className={primaryClass} onClick={create}><Plus size={16}/> New product</button>
+       </div>
     </div>
     <div className="nb-responsive-grid grid gap-3 rounded-lg border border-stone-200 bg-white p-3 min-[360px]:p-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,auto)_minmax(0,auto)]">
       <input className={inputClass} type="search" aria-label="Search products by name or SKU"

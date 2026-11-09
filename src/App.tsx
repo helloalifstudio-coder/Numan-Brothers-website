@@ -6,10 +6,13 @@ import {siteText} from './lib/siteContent';
 import { loadCataloguePage, loadProductById, type CataloguePage } from './lib/catalogQueries';
 import type { CatalogProduct } from './storefront/catalog';
 import { productPath, publicProducts } from './storefront/catalog';
+import { SAMPLE_SHERWANI } from './storefront/sampleProduct';
 import { getCollection } from './storefront/navigation';
 import { useStoreHistory } from './storefront/history';
 import V2Header from './components/V2Header';
 import FloatingContactDock from './components/FloatingContactDock';
+import SocialLinks from './components/SocialLinks';
+import V2Reviews from './components/V2Reviews';
 import V2Home from './components/V2Home';
 
 import V2Footer from './components/V2Footer';
@@ -72,10 +75,16 @@ export default function App() {
   },[path,searchQuery,page]);
   const activeRoutePage = routeResult?.key===routeKey ? routeResult.data : null;
   const matches = activeRoutePage?.products || [];
-  const product = selectedId && detail?.id===selectedId ? detail.product : undefined;
+  const product = selectedId===SAMPLE_SHERWANI.slug ? SAMPLE_SHERWANI : selectedId && detail?.id===selectedId ? detail.product : undefined;
+  const policyLabels:Record<string,{key:'privacy'|'terms'|'returns';title:string}>={
+    '/privacy-policy':{key:'privacy',title:'Privacy Policy'},
+    '/terms-and-conditions':{key:'terms',title:'Terms & Conditions'},
+    '/returns-and-exchanges':{key:'returns',title:'Returns & Exchanges'},
+  };
+  const legalPage=policyLabels[path];
   const title = path === '/' ? 'Traditional Menswear & Kidswear in Warangal' :
     collection ? collection.title : product ? product.title :
-    path === '/search' ? 'Search Collections' : path === '/contact' ? 'Visit Our Showroom' : 'Page Not Found';
+    path === '/search' ? 'Search Collections' : path === '/contact' ? 'Visit Our Showroom' : legalPage?.title || 'Page Not Found';
 
   if (isStudioPath) {
     return <Suspense fallback={<p role="status" className="p-12">Loading private studio…</p>}><CmsStudio/></Suspense>;
@@ -83,6 +92,7 @@ export default function App() {
 
   return <div className="min-h-screen bg-[#fbf8f2]">
     <Helmet>
+      {selectedId===SAMPLE_SHERWANI.slug&&<meta name="robots" content="noindex, nofollow"/>}
       <title>{title} | {siteText(siteData.homepage,'seo.brand')}</title>
       <meta name="description" content={product?.description?.trim().slice(0,210)||siteText(siteData.homepage,'seo.description')} />
       {product&&<meta property="og:type" content="product"/>}
@@ -102,7 +112,7 @@ export default function App() {
          home={siteData.homepage} categories={siteData.categories} totalCount={activeRoutePage.count}
          page={page} pageSize={activeRoutePage.pageSize} onPageChange={setPage} onNavigate={navigate}/> :
          <p role="status" className="p-12 text-center text-stone-500">Loading collection…</p>) :
-       selectedId && !detail ? <p role="status" className="p-12 text-center text-stone-500">Loading product…</p> :
+       selectedId && !detail && selectedId!==SAMPLE_SHERWANI.slug ? <p role="status" className="p-12 text-center text-stone-500">Loading product…</p> :
        product ? <V2Product key={product.id} product={product} home={siteData.homepage}
          whatsappNumber={siteData.homepage.contactWhatsapp} contactPhone={siteData.homepage.contactPhone} onNavigate={navigate}/> :
        path === '/search' ? <section className="mx-auto min-h-[70vh] min-w-0 max-w-[1360px] px-4 py-16 min-[360px]:px-5 md:px-12">
@@ -126,6 +136,22 @@ export default function App() {
              onClick={()=>setPage(current=>current+1)}>Next</button>
          </nav>}
        </section> :
+       legalPage ? <section className="mx-auto min-h-[65vh] max-w-[1050px] px-5 py-16 sm:px-7 md:px-12 md:py-24" aria-labelledby="nb-legal-title">
+         <p className="text-[10px] font-bold uppercase tracking-[.25em] text-[#a17a4c]">{siteText(siteData.homepage,'policies.eyebrow')}</p>
+         <h1 id="nb-legal-title" className="mt-5 font-serif text-[clamp(2.5rem,6vw,5.5rem)] leading-tight">{legalPage.title}</h1>
+         {siteData.homepage.legalPolicies[legalPage.key].trim()
+           ? <div className="mt-9 space-y-6 text-sm leading-8 text-[#5b4d3c] sm:text-base">
+               {siteData.homepage.legalPolicies[legalPage.key].trim().split(/\n\s*\n/).map((paragraph,i)=>
+                 <p key={i} className="whitespace-pre-line break-words">{paragraph}</p>)}
+             </div>
+           : <div className="mt-10 max-w-2xl border-l-4 border-[#ab895e] bg-[#f1e8db] px-6 py-7">
+               <p className="text-sm leading-8">{siteText(siteData.homepage,'policies.pending')}</p>
+             </div>}
+         <V2Link href="/contact" onNavigate={navigate}
+           className="mt-10 inline-flex min-h-12 items-center gap-3 border border-[#b89c77] px-5 text-sm font-semibold text-[#6a4d2e]">
+           Contact the showroom <ArrowRight size={16}/>
+         </V2Link>
+       </section> :
        path === '/contact' ? <section data-nb-contact-hero className="relative min-h-[70vh] overflow-hidden bg-[#2b241e] px-6 py-20 text-[#f8eddd] md:px-12 md:py-32">
          <div className="pointer-events-none absolute -right-24 top-0 h-[600px] w-[600px] rounded-full bg-[radial-gradient(circle,#644f38,transparent_70%)]"/>
          <div className="relative mx-auto max-w-[1050px]">
@@ -147,6 +173,10 @@ export default function App() {
            {siteData.homepage.contactPhone&&<a href={'tel:+'+siteData.homepage.contactPhone}
              className="mt-6 inline-flex min-h-12 items-center gap-3 border border-[#e2c9a4] px-7 text-xs font-bold uppercase text-[#f8e9d0]">
              {siteText(siteData.homepage,'contact.call')} <ArrowUpRight size={16}/></a>}
+           <div className="mt-10 border-t border-[#786047] pt-6">
+             <p className="text-xs font-semibold uppercase tracking-[.2em] text-[#e2bf8f]">Connect with us</p>
+             <SocialLinks home={siteData.homepage} variant="dark"/>
+           </div>
            <p className="mt-12 max-w-lg text-xs leading-6 text-[#af9e8a]">{siteText(siteData.homepage,'contact.disclaimer')}</p>
          </div>
        </section> :
@@ -157,6 +187,7 @@ export default function App() {
          <V2Link href="/" onNavigate={navigate} className="mt-9 inline-flex min-h-12 items-center gap-3 bg-[#32271d] px-7 text-xs font-semibold uppercase tracking-[.12em] text-white">Return home <ArrowRight size={16}/></V2Link>
        </section>}
       </Suspense>
+      {path==='/'&&<V2Reviews/>}
     </main>
     <V2Footer home={siteData.homepage} categories={siteData.categories} onNavigate={navigate}/>
     <FloatingContactDock home={siteData.homepage} path={path} product={product}/>

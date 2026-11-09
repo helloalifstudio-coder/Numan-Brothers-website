@@ -4,6 +4,7 @@ import type { Product } from '../types';
 import { productImage, productPath, type CatalogProduct } from '../storefront/catalog';
 import {loadRelatedProducts} from '../lib/catalogQueries';
 import {callingContact,whatsappContact} from '../lib/contactLinks';
+import ShareCatalogue from './ShareCatalogue';
 import { getRelatedCollectionLinks } from '../storefront/navigation';
 import { productTheme } from '../storefront/productTheme';
 import V2Link from './V2Link';
@@ -21,14 +22,14 @@ interface Props {product:Product;whatsappNumber?:string;contactPhone?:string;hom
 export default function V2Product({ product, whatsappNumber, contactPhone, home, onNavigate }: Props) {
   const garment = product as CatalogProduct;
   const theme = productTheme(garment);
-  const images = (product.images || []).filter(image => /^https:\/\//i.test(image));
+  const images = (product.images || []).filter(image => /^https:\/\//i.test(image) || (garment.slug==='sample-plain-sherwani' && /^\/editorial\/(sherwani|kurta|jodhpuri)[.]svg$/.test(image)));
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedSize,setSelectedSize]=useState('');
   const [shareStatus,setShareStatus]=useState('');
   const [related,setRelated]=useState<CatalogProduct[]>([]);
   useEffect(()=>{
     let active=true;
-    void loadRelatedProducts(garment,4).then(rows=>{if(active)setRelated(rows)});
+    if(garment.slug!=='sample-plain-sherwani')void loadRelatedProducts(garment,4).then(rows=>{if(active)setRelated(rows)});
     return()=>{active=false};
   },[garment.id]);
   const visual = images[selectedImage] || productImage(product);
@@ -147,6 +148,10 @@ export default function V2Product({ product, whatsappNumber, contactPhone, home,
                 </button>
               </div>
               <p role="status" aria-live="polite" className="text-xs text-[#78624b]">{shareStatus}</p>
+              <div className="mt-3">
+                <ShareCatalogue title={product.title} path={productPath(garment)} photos={images} compact/>
+                <p className="mt-2 text-xs leading-5 text-[#816c52]">The WhatsApp link includes the garment gallery and up to four approved photo links. Photos are not automatically attached as files.</p>
+              </div>
               <div className="mt-7 h-px w-full bg-[#dfd3c3]"/>
               <p className="mt-7 text-sm leading-8 text-[#5c5147]">
                 {product.description?.trim() || 'Discover the details of this occasionwear design, thoughtfully selected for the collection.'}

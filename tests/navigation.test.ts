@@ -16,7 +16,7 @@ describe('approved website taxonomy', () => {
   });
   test('uses store-approved corrected garment names', () => {
     expect(getCollection('/men/sherwani/handwork')?.title).toBe('Handwork Sherwani');
-    expect(getCollection('/men/sherwani/plain')?.title).toBe('Plain Suits');
+    expect(getCollection('/men/sherwani/plain')?.title).toBe('Plain Sherwani');
     expect(getCollection('/men/suits/plain')?.title).toBe('Plain Suits');
     expect(getCollection('/men/marriage/sadi')?.title).toBe('Sadiri');
     expect(getCollection('/kids/sadi')?.title).toBe('Sadiri');

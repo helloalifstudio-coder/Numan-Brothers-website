@@ -1,5 +1,6 @@
 import React from 'react';
-import {ArrowUpRight,MapPin,Instagram,Facebook,Youtube} from 'lucide-react';
+import {ArrowUpRight,MapPin} from 'lucide-react';
+import SocialLinks from './SocialLinks';
 import V2Link from './V2Link';
 import type {CmsHome,CmsCategoryRow} from '../lib/cmsData';
 import {siteText} from '../lib/siteContent';
@@ -41,17 +42,15 @@ export default function V2Footer({ onNavigate,home,categories=[] }: {onNavigate:
           <h2 className="mb-6 text-[10px] font-bold uppercase tracking-[.22em] text-[#cfae81]">{siteText(home,'footer.find')}</h2>
           <p className="flex items-start gap-3 text-sm leading-7 text-[#cfc3b5]"><MapPin size={18} className="mt-1 shrink-0"/> {siteText(home,'footer.address')}</p>
           <V2Link href="/contact" onNavigate={onNavigate} className="mt-6 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[.12em] text-[#e6c69d]">{siteText(home,'footer.cta')} <ArrowUpRight size={16}/></V2Link>
-          <nav className="mt-6 flex items-center gap-3" aria-label="Social media profiles">
-            {([
-              ['instagram',Instagram,'Instagram'],['facebook',Facebook,'Facebook'],['youtube',Youtube,'YouTube'],
-            ] as const).map(([key,Icon,label])=>
-              home?.socialLinks[key]&&<a key={key} href={home.socialLinks[key]} target="_blank" rel="noopener noreferrer"
-                aria-label={'Open our '+label} className="flex h-11 w-11 items-center justify-center rounded-full border border-[#887258] hover:bg-white/15">
-                <Icon size={18}/></a>)}
-          </nav>
+          <SocialLinks home={home}/>
         </div>
       </div>
-      <div className="flex flex-wrap items-center justify-between gap-4 py-7 text-[10px] font-semibold uppercase tracking-[.15em] text-[#998b7c]">
+      <nav aria-label="Store policies" className="flex flex-wrap gap-x-6 gap-y-3 border-b border-[#44382c] py-6 text-xs text-[#ddc9ad]">
+         <V2Link href="/privacy-policy" onNavigate={onNavigate} className="min-h-11 content-center hover:text-white">Privacy Policy</V2Link>
+         <V2Link href="/terms-and-conditions" onNavigate={onNavigate} className="min-h-11 content-center hover:text-white">Terms &amp; Conditions</V2Link>
+         <V2Link href="/returns-and-exchanges" onNavigate={onNavigate} className="min-h-11 content-center hover:text-white">Returns &amp; Exchanges</V2Link>
+       </nav>
+       <div className="flex flex-wrap items-center justify-between gap-4 py-7 text-[10px] font-semibold uppercase tracking-[.15em] text-[#998b7c]">
         <span>© {new Date().getFullYear()} {siteText(home,'footer.brand')}. {siteText(home,'footer.copyright')}</span>
         <span>{siteText(home,'footer.slogan')}</span>
       </div>

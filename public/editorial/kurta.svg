@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 980" role="img" aria-label="Editorial illustration of kurta occasionwear, not an inventory photograph">
+<defs>
+  <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#6f5942"/><stop offset="1" stop-color="#2b3027"/></linearGradient>
+  <linearGradient id="silk" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f8edd6"/><stop offset=".48" stop-color="#c8c4a6"/><stop offset="1" stop-color="#7b6249"/></linearGradient>
+  <pattern id="grain" width="42" height="42" patternUnits="userSpaceOnUse"><path d="M0 0L42 42M42 0L0 42" stroke="#f8e8c7" stroke-opacity=".08" stroke-width="1"/></pattern>
+  <pattern id="brocade" width="44" height="44" patternUnits="userSpaceOnUse"><path d="M22 5c6 9 11 12 11 17s-5 8-11 17c-6-9-11-12-11-17s5-8 11-17z" fill="none" stroke="#d3ba90" stroke-opacity=".45" stroke-width="1.3"/><circle cx="22" cy="22" r="2.5" fill="#d3ba90" fill-opacity=".6"/></pattern>
+  <filter id="shadow"><feGaussianBlur stdDeviation="20"/></filter>
+</defs>
+<rect width="700" height="980" fill="url(#sky)"/>
+<path d="M-40 300Q350-20 740 300V-40H-40Z" fill="#f8dfb7" opacity=".07"/>
+<path d="M80 0V980M620 0V980M0 118H700" stroke="#e0c6a0" stroke-width="3" stroke-opacity=".24"/>
+<path d="M120 980V238Q350-32 580 238V980" fill="none" stroke="#eac9a5" stroke-opacity=".3" stroke-width="5"/>
+<ellipse cx="350" cy="834" rx="190" ry="42" fill="#130c09" opacity=".42" filter="url(#shadow)"/>
+<path d="M328 170v88m44-88v88" stroke="#70533b" stroke-width="14" stroke-linecap="round"/>
+<path d="M350 125c-23 0-42 15-42 36 0 18 20 28 42 28s42-10 42-28c0-21-19-36-42-36z" fill="#5f4633" stroke="#e8d7bd" stroke-width="4"/>
+<path d="M350 188v48" stroke="#5f4633" stroke-width="16"/>
+<path d="M350 214L287 247 214 273 164 347 110 638 177 666 233 511 225 823Q350 855 475 823L467 511 523 666 590 638 536 347 486 273 413 247z"
+ fill="url(#silk)" stroke="#b59a75" stroke-width="9" stroke-linejoin="round" transform=""/>
+<path d="M350 214L287 247 214 273 164 347 110 638 177 666 233 511 225 823Q350 855 475 823L467 511 523 666 590 638 536 347 486 273 413 247z"
+ fill="url(#brocade)" opacity=".67" transform=""/>
+<path d="M304 240L350 315 396 240M350 315V813" fill="none" stroke="#8b694b" stroke-width="8" transform=""/>
+<path d="M350 324v468" stroke="#d3ba90" stroke-width="3" stroke-dasharray="6 32" transform=""/>
+<rect x="0" y="0" width="700" height="980" fill="url(#grain)"/>
+<rect x="32" y="32" width="636" height="916" rx="18" fill="none" stroke="#f3dfbe" stroke-opacity=".48" stroke-width="2"/>
+<text x="64" y="82" font-family="Georgia,serif" font-size="21" letter-spacing="6" fill="#f6e0ba">HERITAGE / EDITORIAL</text>
+<text x="64" y="905" font-family="Arial,sans-serif" font-size="16" letter-spacing="3" fill="#f4e0c0">ILLUSTRATIVE CONCEPT • NOT SHOP INVENTORY</text>
+</svg>

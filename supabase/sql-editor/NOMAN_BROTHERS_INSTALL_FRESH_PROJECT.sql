@@ -5,14 +5,14 @@
 -- Expected URL:
 --   https://zazdxmukmcayblsteulk.supabase.co
 --
--- This single file faithfully concatenates the TWELVE reviewed versioned
+-- This single file faithfully concatenates the FOURTEEN reviewed versioned
 -- migrations from this repository, in exact order.
 --
 -- READ FIRST:
 -- 1. Use ONLY the brand-new Noman project, never the unrelated "gym" project.
 -- 2. This installer refuses any previously created NB tables/functions/buckets.
 -- 3. Paste the WHOLE file into a new Supabase Dashboard > SQL Editor query.
--- 4. All twelve migrations run in ONE PostgreSQL transaction. An SQL error
+-- 4. All fourteen migrations run in ONE PostgreSQL transaction. An SQL error
 --    prevents COMMIT; do not manually skip failing statements.
 -- 5. No product or client data are seeded. Only route taxonomy is inserted.
 -- 6. This SQL Editor method does NOT record entries in Supabase CLI migration
@@ -1614,7 +1614,127 @@ end;
 $function$;
 
 -- =============================================================================
--- Validate the installation BEFORE committing it. Failure rolls back all 12.
+-- 13 / 13: 20261109113800_site_reviews.sql
+-- Source: supabase/migrations/20261109113800_site_reviews.sql
+-- =============================================================================
+-- Only owner-approved, first-party reviews are displayed. No scraped testimonials.
+create table if not exists public.nb_reviews (
+  id uuid primary key default gen_random_uuid(),
+  display_name text not null check (char_length(btrim(display_name)) between 2 and 70),
+  rating smallint not null check (rating between 1 and 5),
+  comment text not null check (char_length(btrim(comment)) between 20 and 1200),
+  source text not null default 'website' check (source='website'),
+  status text not null default 'pending' check (status in ('pending','approved','rejected')),
+  created_at timestamptz not null default now(),
+  approved_at timestamptz
+);
+create index if not exists nb_reviews_public_index
+  on public.nb_reviews (status, approved_at desc, created_at desc);
+-- Identical repeat posts must not crowd the queue. This is not a substitute for
+-- edge CAPTCHA/IP abuse controls when submission volumes grow.
+create unique index if not exists nb_reviews_duplicate_guard
+  on public.nb_reviews (lower(btrim(display_name)),md5(lower(btrim(comment))))
+  where status in ('pending','approved');
+alter table public.nb_reviews enable row level security;
+revoke all on public.nb_reviews from public,anon,authenticated;
+grant select (id,display_name,rating,comment,source,status,created_at,approved_at)
+  on public.nb_reviews to anon;
+grant insert (display_name,rating,comment) on public.nb_reviews to anon,authenticated;
+grant select on public.nb_reviews to authenticated;
+grant update (status) on public.nb_reviews to authenticated;
+
+create policy nb_reviews_public_read on public.nb_reviews for select
+  to anon,authenticated using (status='approved');
+create policy nb_reviews_staff_read on public.nb_reviews for select
+  to authenticated using ((select public.nb_can_edit()));
+create policy nb_reviews_public_submit on public.nb_reviews for insert
+  to anon,authenticated with check (status='pending' and source='website' and approved_at is null);
+create policy nb_reviews_publisher_moderate on public.nb_reviews for update
+  to authenticated using ((select public.nb_can_publish()))
+  with check ((select public.nb_can_publish()));
+
+create or replace function public.nb_stamp_review_approval()
+returns trigger language plpgsql security invoker set search_path=''
+as $review_stamp$
+begin
+  if new.status='approved' and old.status is distinct from 'approved' then
+    new.approved_at:=now();
+  elsif new.status<>'approved' then
+    new.approved_at:=null;
+  end if;
+  return new;
+end;
+$review_stamp$;
+drop trigger if exists nb_review_approval_stamp on public.nb_reviews;
+create trigger nb_review_approval_stamp before update on public.nb_reviews
+  for each row execute function public.nb_stamp_review_approval();
+revoke all on function public.nb_stamp_review_approval() from public,anon,authenticated;
+
+-- =============================================================================
+-- 14 / 14: 20261109120000_featured_media_guard.sql
+-- Source: supabase/migrations/20261109120000_featured_media_guard.sql
+-- =============================================================================
+-- Additional CMS hero/card imagery must belong to an approved public asset.
+-- Never accept unreviewed remote photos in a published customer-facing card.
+create or replace function nb_internal.nb_require_approved_home_featured()
+returns trigger language plpgsql security invoker set search_path = ''
+as $function$
+begin
+  if jsonb_typeof(coalesce(new.content->'featuredImages','{}'::jsonb)) <> 'object' then
+    raise exception 'Featured images must be a keyed object' using errcode='23514';
+  end if;
+  if exists (
+    select 1 from jsonb_each_text(coalesce(new.content->'featuredImages','{}'::jsonb)) v(key,url)
+    where v.key not in ('one','two','three')
+       or (coalesce(v.url,'') <> '' and not exists (
+         select 1 from public.nb_media m
+         where m.approved and m.archived_at is null and m.mime_type like 'image/%'
+           and v.url=public.nb_media_public_url(m.storage_path)
+       ))
+  ) then
+    raise exception 'Featured card image must be an approved library photograph'
+      using errcode='23514';
+  end if;
+  return new;
+end;
+$function$;
+drop trigger if exists nb_guard_published_featured on public.nb_home_public;
+create trigger nb_guard_published_featured before insert or update on public.nb_home_public
+  for each row execute function nb_internal.nb_require_approved_home_featured();
+
+-- Do not archive, revoke or delete a published featured photo before replacing it.
+create or replace function nb_internal.nb_guard_featured_media_removal()
+returns trigger language plpgsql security invoker set search_path = ''
+as $function$
+declare
+  suffix text:='/nb-media-public/'||old.storage_path;
+begin
+  if tg_op='DELETE' or (old.approved and
+      (new.approved is false or new.archived_at is not null)) then
+    if exists(
+      select 1 from public.nb_home_public h
+        cross join lateral jsonb_each_text(coalesce(h.content->'featuredImages','{}'::jsonb)) v(key,url)
+      where right(coalesce(v.url,''),length(suffix))=suffix
+    ) then
+      raise exception 'Featured photo is published. Replace or remove it in Website CMS before archiving/deleting'
+        using errcode='23503';
+    end if;
+  end if;
+  if tg_op='DELETE' then return old;end if;
+  return new;
+end;
+$function$;
+drop trigger if exists nb_guard_featured_media_update on public.nb_media;
+create trigger nb_guard_featured_media_update before update on public.nb_media
+  for each row execute function nb_internal.nb_guard_featured_media_removal();
+drop trigger if exists nb_guard_featured_media_delete on public.nb_media;
+create trigger nb_guard_featured_media_delete before delete on public.nb_media
+  for each row execute function nb_internal.nb_guard_featured_media_removal();
+revoke all on function nb_internal.nb_require_approved_home_featured() from public,anon,authenticated;
+revoke all on function nb_internal.nb_guard_featured_media_removal() from public,anon,authenticated;
+
+-- =============================================================================
+-- Validate the installation BEFORE committing it. Failure rolls back all 14.
 -- =============================================================================
 DO $nb_install_assert$
 DECLARE
@@ -1624,7 +1744,7 @@ DECLARE
     'nb_product_drafts', 'nb_product_revisions',
     'nb_product_categories', 'nb_product_media',
     'nb_import_jobs', 'nb_import_rows', 'nb_audit_events',
-    'nb_sku_counters'
+    'nb_sku_counters', 'nb_reviews'
   ];
   t text;
   has_rls boolean;
@@ -1669,7 +1789,7 @@ BEGIN
   END IF;
 
   RAISE NOTICE
-    'Noman Brothers install OK: 14 application tables with RLS, %+ public policies, 3 buckets, publishing functions', policy_count;
+    'Noman Brothers install OK: 15 application tables with RLS, %+ public policies, 3 buckets, publishing functions', policy_count;
 END
 $nb_install_assert$;
 

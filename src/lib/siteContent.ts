@@ -1,5 +1,5 @@
 /** Text-only, allowlisted content slots. No custom scripts/HTML or unverified links. */
-export type SitePage = 'home'|'navigation'|'collections'|'product'|'search'|'contact'|'footer'|'seo';
+export type SitePage = 'home'|'navigation'|'collections'|'product'|'search'|'contact'|'footer'|'policies'|'seo';
 type FieldRow = [string,string,string,string?,boolean?];
 export interface SiteField {key:string;label:string;fallback:string;section:string;multiline:boolean;}
 const make=(rows:FieldRow[]):SiteField[]=>rows.map(([key,label,fallback,section='General',multiline=false])=>({key,label,fallback,section,multiline}));
@@ -10,7 +10,8 @@ export const SITE_PAGES: {id:SitePage;title:string;description:string}[]=[
  {id:'product',title:'Product pages',description:'Shared product labels and enquiry messages'},
  {id:'search',title:'Search page',description:'Search headings and empty results'},
  {id:'contact',title:'Visit & contact',description:'Showroom contact content'},
- {id:'footer',title:'Footer',description:'Business identity, location and footer columns'},
+ {id:'footer',title:'Footer',description:'Business identity, social profiles and footer columns'},
+  {id:'policies',title:'Store policies',description:'Owner-approved privacy, terms and return or exchange information'},
  {id:'seo',title:'Browser title & SEO',description:'Title suffix and public description'},
 ];
 export const SITE_FIELDS:Record<SitePage,SiteField[]>={
@@ -141,6 +142,10 @@ export const SITE_FIELDS:Record<SitePage,SiteField[]>={
   ['footer.copyright','Copyright suffix','All rights reserved.','Legal'],
   ['footer.slogan','Final slogan','Tradition in every occasion · Warangal','Legal'],
  ]),
+ policies:make([
+    ['policies.eyebrow','Policy page eyebrow','Customer information','Policy pages'],
+    ['policies.pending','Unpublished policy message','Policy details are being confirmed with the showroom. Please contact us before placing an order or relying on any return, exchange or privacy terms.','Policy pages',true],
+  ]),
  seo:make([
   ['seo.brand','Browser title suffix','Nomaan Brothers','Browser'],
   ['seo.description','Search description',"Explore men's and kids' traditional occasionwear at Nomaan Brothers, Mandi Bazar, Warangal. Browse collections and enquire about styles.",'Browser',true],
@@ -160,7 +165,7 @@ export function cleanSiteText(value:unknown):Record<string,string>{
     .map(([key,val])=>[key,(val as string).slice(0,FIELD_MAP.get(key)?.multiline?900:240)]));
 }
 export const HOME_SECTIONS=[
- {id:'hero',title:'Hero',description:'Cover photo and opening headline'},
+ {id:'hero',title:'Hero',description:'Cover photo, headline and right-side brand film'},
  {id:'quick',title:'Quick links',description:'Short collection menu strip'},
  {id:'departments',title:'Men’s & Kids’ cards',description:'Two collection tiles'},
  {id:'directory',title:'Collection directory',description:'All the category links'},

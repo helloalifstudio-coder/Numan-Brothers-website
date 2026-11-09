@@ -1,7 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { escapeHtml, canonicalOrigin, renderProductHtml, renderNotFoundHtml } from '../api/_seo.mjs';
-import { seoRoutes } from '../scripts/seo-routes.mjs';
+import { seoRoutes,legalRoutes } from '../scripts/seo-routes.mjs';
 
 const template='<!doctype html><html><head><title>Original</title><meta name="description" content="Original"/></head><body><div id="root"></div><script src="/assets/app.js"></script></body></html>';
 describe('SEO HTML safety and crawlability',()=>{
@@ -34,6 +34,11 @@ describe('SEO HTML safety and crawlability',()=>{
     assert.ok(seoRoutes.find(x=>x.path==='/kids/sherwani'));
     assert.equal(new Set(seoRoutes.map(x=>x.path)).size,seoRoutes.length);
     assert.ok(seoRoutes.every(x=>x.title&&x.description));
+    assert.equal(seoRoutes.find(x=>x.path==='/men/sherwani/plain')?.title,'Plain Sherwani');
+    assert.deepEqual(legalRoutes.map(x=>x.path),[
+      '/privacy-policy','/terms-and-conditions','/returns-and-exchanges',
+    ]);
+    assert.ok(legalRoutes.every(x=>x.noindex));
   });
 });
 
