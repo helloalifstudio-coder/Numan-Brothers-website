@@ -315,10 +315,14 @@ async function inspectEditorialRoutes(){
   await mockCmsRoutes(page);
   try {
     await page.goto(base+'/',{waitUntil:'domcontentloaded'});
+    await page.locator('#v2-home-title').waitFor({state:'visible',timeout:7000});
     const opening=page.getByTestId('brand-intro');
-    await opening.waitFor({state:'visible',timeout:5000});
-    await page.getByRole('button',{name:'Skip brand introduction'}).click();
-    await opening.waitFor({state:'hidden',timeout:4000});
+    // The independent intro tests assert the full 5-second lifecycle.
+    // The editorial test must work even if that transient overlay has finished.
+    if(await opening.isVisible()){
+      await page.getByRole('button',{name:'Skip brand introduction'}).click();
+      await opening.waitFor({state:'hidden',timeout:4000});
+    }
     await page.getByRole('heading',{name:'What customers are saying.'}).waitFor({state:'visible',timeout:7000});
     const film=page.getByTestId('brand-intro');
     await film.waitFor({state:'visible',timeout:5000});
