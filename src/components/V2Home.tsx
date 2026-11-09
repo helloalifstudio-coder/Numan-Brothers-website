@@ -123,10 +123,12 @@ export default function V2Home({ products, home, categories=[], onNavigate }: Pr
           Nomaan Brothers · Warangal
         </div>
       </div>
-      <HeroBrandIntro key={introCycle} url={home.sectionVideos.hero}
-        poster={photo||'/editorial/sherwani.svg'} reducedMotion={Boolean(reduce)}
-        replay={introCycle>0} onComplete={onIntroComplete}/>
     </section>
+    {/* Keep the fixed intro outside the isolated hero stacking context so it
+        truly covers the mobile navigation and the entire viewport. */}
+    <HeroBrandIntro key={introCycle} url={home.sectionVideos.hero}
+      poster={photo||'/editorial/sherwani.svg'} reducedMotion={Boolean(reduce)}
+      replay={introCycle>0} onComplete={onIntroComplete}/>
 
     <nav aria-label="Explore popular collections" style={homeSectionStyle(home,'quick')} className="border-b border-[#e0d4c2] bg-[#f2eadd] px-5 md:px-12 lg:px-20">
       <div className="mx-auto flex max-w-[1330px] items-center gap-5 overflow-x-auto overscroll-x-contain scroll-px-4 py-4 md:gap-8">
