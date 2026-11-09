@@ -2,7 +2,7 @@ import React,{useEffect,useState} from 'react';
 import {ArrowUpRight,Star} from 'lucide-react';
 import {getCmsClient} from '../lib/supabaseClient';
 type Review={id:string;display_name:string;rating:number;comment:string;created_at:string};
-const google='https://www.google.com/maps/search/?api=1&query=Nomaan+Brothers+Dresses+Mandi+Bazar+Warangal&query_place_id=ChIJZ-YMqB5FMzoR9BZZiNJi8lw';
+const reviewSource='https://www.justdial.com/Warangal/Nomans-Bros-Opp-Madrasi-Masjid-Mandi-Bazaar/9999PX870-X870-131215171002-P7L6_BZDET';
 export default function V2Reviews(){
  const client=getCmsClient();
  const [rows,setRows]=useState<Review[]>([]);
@@ -38,9 +38,9 @@ export default function V2Reviews(){
      <p className="text-[10px] font-bold uppercase tracking-[.25em] text-[#95714a]">Community voices</p>
      <h2 id="nb-reviews-title" className="mt-4 font-serif text-[clamp(2.7rem,5.5vw,5.6rem)] leading-tight">What customers are saying.</h2>
      <p className="mt-5 max-w-2xl text-sm leading-7 text-[#6c5b49]">Explore independent feedback or share your experience. Website reviews appear only after moderation; both positive and critical opinions are welcome.</p>
-     <a href={google} target="_blank" rel="noopener noreferrer"
+     <a href={reviewSource} target="_blank" rel="noopener noreferrer"
        className="mt-5 inline-flex min-h-12 items-center gap-2 border-b border-[#977147] text-xs font-semibold text-[#65492c]">
-       Read current reviews on Google <ArrowUpRight size={17}/>
+       View independent Justdial listing <ArrowUpRight size={17}/>
      </a>
      {rows.length?<div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
        {rows.map(item=><blockquote key={item.id} className="min-w-0 rounded-xl border border-[#e2d2bd] bg-white p-6">
