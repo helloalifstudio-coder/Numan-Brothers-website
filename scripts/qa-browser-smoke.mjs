@@ -63,6 +63,7 @@ let skipped=false;
 async function inspect(route,width=390,height=844,opts={}){
   const context=await browser.newContext({viewport:{width,height},reducedMotion:opts.reduce?'reduce':'no-preference'});
   const page=await context.newPage();
+  page.setDefaultTimeout(8000);
   const runtimeErrors=[];
   page.on('pageerror',error=>runtimeErrors.push(String(error.message)));
   await mockCmsRoutes(page);
@@ -162,6 +163,7 @@ async function inspectUnconfiguredContactFallback(){
   for(const width of [320,375,390,768,1440]){
     const context=await browser.newContext({viewport:{width,height:844}});
     const page=await context.newPage();
+  page.setDefaultTimeout(8000);
     await mockCmsRoutes(page,{emptyContacts:true});
     try{
       await page.goto(base+'/',{waitUntil:'domcontentloaded'});
@@ -191,6 +193,7 @@ async function inspectFloatingContactsAndProduct(){
   if(process.env.NB_MOCK_CMS!=='1')return;
   const context=await browser.newContext({viewport:{width:375,height:812}});
   const page=await context.newPage();
+  page.setDefaultTimeout(8000);
   await mockCmsRoutes(page);
   try{
     await page.goto(base+'/',{waitUntil:'domcontentloaded'});
@@ -232,6 +235,7 @@ async function inspectCinematicHeroIntro(){
   for(const [width,height,heroVideo] of [[320,650,false],[390,844,true],[1440,900,true]]){
     const context=await browser.newContext({viewport:{width,height},reducedMotion:'no-preference'});
     const page=await context.newPage();
+  page.setDefaultTimeout(8000);
     await mockCmsRoutes(page,{heroVideo});
     try{
       await page.goto(base+'/',{waitUntil:'domcontentloaded',timeout:15000});
@@ -278,6 +282,7 @@ async function inspectCinematicHeroIntro(){
     const context=await browser.newContext({viewport:{width:375,height:812},
       reducedMotion:reduce?'reduce':'no-preference'});
     const page=await context.newPage();
+  page.setDefaultTimeout(8000);
     if(!reduce)await page.addInitScript(()=>{
       Object.defineProperty(navigator,'connection',{configurable:true,value:{saveData:true}});
     });
@@ -306,6 +311,7 @@ async function inspectEditorialRoutes(){
   }
   const context=await browser.newContext({viewport:{width:390,height:844}});
   const page=await context.newPage();
+  page.setDefaultTimeout(8000);
   await mockCmsRoutes(page);
   try {
     await page.goto(base+'/',{waitUntil:'domcontentloaded'});
