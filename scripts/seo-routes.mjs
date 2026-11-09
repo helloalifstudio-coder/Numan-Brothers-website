@@ -11,7 +11,7 @@ const paths=[
 const overrides={
   '/':'Nomaan Brothers — Occasionwear in Warangal',
   '/men':"Men's Wear",'/kids':'Kids Wear',
-  '/men/sherwani/plain':'Plain Suits',
+  '/men/sherwani/plain':'Plain Sherwani',
   '/men/suits/plain':'Plain Suits',
   '/men/marriage/sadi':'Sadi',
 };
@@ -20,3 +20,11 @@ export const seoRoutes=paths.map(path=>{
   const title=overrides[path]||part.split('-').map(x=>x[0].toUpperCase()+x.slice(1)).join(' ');
   return {path,title,description:title+' at Nomaan Brothers, Mandi Bazar, Warangal.'};
 });
+
+/** Dedicated legal routes get meaningful social titles, without indexing
+ * owner-unapproved statements or misrepresenting pending policies. */
+export const legalRoutes=[
+  {path:'/privacy-policy',title:'Privacy Policy',description:'Store privacy information, subject to owner confirmation.',noindex:true},
+  {path:'/terms-and-conditions',title:'Terms & Conditions',description:'Terms for Nomaan Brothers, subject to owner confirmation.',noindex:true},
+  {path:'/returns-and-exchanges',title:'Returns & Exchanges',description:'Return and exchange information, subject to owner confirmation.',noindex:true},
+];

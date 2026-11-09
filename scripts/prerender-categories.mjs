@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
-import { seoRoutes } from './seo-routes.mjs';
+import { seoRoutes, legalRoutes } from './seo-routes.mjs';
 import { canonicalOrigin, escapeHtml } from '../api/_seo.mjs';
 
 const dist=resolve(process.cwd(),'dist');
@@ -12,11 +12,11 @@ writeFileSync(resolve(dist,'_shell.html'),template);
 const raw=process.env.SITE_CANONICAL_URL||'';
 const site=raw?canonicalOrigin(raw):null;
 if(raw&&!site)throw new Error('SITE_CANONICAL_URL must be a verified HTTPS origin');
-for(const item of seoRoutes){
+for(const item of [...seoRoutes,...legalRoutes]){
   const docTitle=escapeHtml(item.title+' | Nomaan Brothers');
   const description=escapeHtml(item.description);
   const head=[
-    ...(site?[]:['<meta name="robots" content="noindex, nofollow, noarchive"/>']),
+    ...((!site||item.noindex)?['<meta name="robots" content="noindex, nofollow, noarchive"/>']:[]),
     '<title>'+docTitle+'</title>',
     '<meta name="description" content="'+description+'"/>',
     '<meta property="og:title" content="'+docTitle+'"/>',
@@ -45,4 +45,4 @@ if(site){
   writeFileSync(resolve(dist,'robots.txt'),
     'User-agent: *\nDisallow: /\nDisallow: /studio\n');
 }
-console.log('Prerendered '+seoRoutes.length+' public category/home pages.');
+console.log('Prerendered '+(seoRoutes.length+legalRoutes.length)+' public and legal pages.');
