@@ -144,6 +144,8 @@ export default function CmsAccount({client,ownerEmail,onPasswordChanged}:Props){
           onChange={event=>setNonce(event.target.value.replace(/\D/g,''))}/></Field>
       </div>
     </div>
+    {message&&<p role="status" className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">{message}</p>}
+    <ErrorText message={error}/>
     <form onSubmit={(event)=>void changeEmail(event)} className="space-y-4 rounded-lg border border-stone-200 bg-white p-5 sm:p-7">
       <h3 className="font-serif text-xl">Change login email</h3>
       <p className="text-xs leading-6 text-stone-600">Use an email address you control. Supabase will send verification links; the login email does not change until its confirmation process completes.</p>
@@ -170,8 +172,6 @@ export default function CmsAccount({client,ownerEmail,onPasswordChanged}:Props){
         {busy?'Updating…':'Update password and sign out'}
       </button>
     </form>
-    {message&&<p role="status" className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">{message}</p>}
-    <ErrorText message={error}/>
     <p className="text-xs leading-6 text-stone-500">
       This panel cannot create owners, assign roles, show the existing password, or change
       Supabase organization settings. For a lost password or lost email access, use
