@@ -1,9 +1,8 @@
 -- =============================================================================
 -- NOMAN BROTHERS / SUPABASE / SQL EDITOR ONE-TIME FRESH PROJECT INSTALL
--- Project ref you must confirm in dashboard BEFORE executing:
---   zazdxmukmcayblsteulk
--- Expected URL:
---   https://zazdxmukmcayblsteulk.supabase.co
+-- BEFORE RUNNING: confirm the active project in your Supabase Dashboard.
+-- Reusable for any NEW, EMPTY, client-owned Supabase project.
+-- No project reference, service key, admin email or password is hardcoded.
 --
 -- This single file faithfully concatenates the FIFTEEN reviewed versioned
 -- migrations from this repository, in exact order.
