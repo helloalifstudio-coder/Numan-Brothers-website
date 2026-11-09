@@ -201,7 +201,7 @@ jobs:
               if name=='main':continue
               # Intentionally refuse unrecognized, unmerged, modified or
               # protected branches. Never force-delete a remote ref.
-              if not (name.startswith('agm/') or name=='sql-existing-tables-completion-20261109') or branch.get('protected'):
+              if not (name.startswith('agm/') or name=='sql-existing-tables-completion-20261109' or name=='vercel/install-vercel-web-analytics-c8r0zh') or branch.get('protected'):
                   skipped.append((name,'not an authorized unprotected working branch'))
                   continue
               eligible=[
