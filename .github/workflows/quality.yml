@@ -201,8 +201,8 @@ jobs:
               if name=='main':continue
               # Intentionally refuse unrecognized, unmerged, modified or
               # protected branches. Never force-delete a remote ref.
-              if not name.startswith('agm/') or branch.get('protected'):
-                  skipped.append((name,'not an unprotected AGM working branch'))
+              if not (name.startswith('agm/') or name=='sql-existing-tables-completion-20261109') or branch.get('protected'):
+                  skipped.append((name,'not an authorized unprotected working branch'))
                   continue
               eligible=[
                   pr for pr in prs
