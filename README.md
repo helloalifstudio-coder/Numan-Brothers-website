@@ -15,7 +15,7 @@ A mobile-first, browse-and-enquire catalogue for the traditional menswear and ki
 
 - Responsive Men’s Wear, Kids Wear and category routes; per-product pages with SKU, gallery and WhatsApp catalogue sharing.
 - Five-second cinematic hero opener, left-slide reveal, skip/replay and reduced-motion/data-saver alternatives.
-- Footer and contact pages with nine **locally bundled social brand SVGs**. Empty accounts appear as disabled icons; publishing an HTTPS official profile in Studio activates the link.
+- Footer and contact pages display a single **locally bundled Instagram icon**. Only an owner-supplied valid HTTPS Instagram profile published in Studio activates the link; otherwise the icon stays disabled.
 - Public legal-policy pages edited through Studio; empty policies clearly indicate pending owner approval.
 - First-party customer reviews held pending until an authorized staff member moderates them.
 - CMS for product drafts, category selection, generated SKUs, media approvals, bulk import, homepage sections, policy text, social URLs and revisions.
@@ -48,7 +48,7 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_YOUR_KEY
 
 1. In Supabase Auth, provision a verified staff email and assign a server-controlled `app_metadata.nb_role` of `owner`, `admin` or `editor` as appropriate; user metadata does not grant publisher access.
 2. Open **Studio → Website CMS**. Upload and approve media via the Media workflow, select imagery and a compressed brand film, and edit text, profiles or policies.
-3. For a social account, use its official HTTPS profile page (Instagram, Facebook, YouTube, Pinterest, Threads, X, TikTok, Snapchat or LinkedIn). Platform-host validation rejects unrelated destinations. **Save draft → Publish website changes**.
+3. For Instagram, enter the shop owner’s official HTTPS profile in Studio → Website CMS → Footer. Host validation rejects unrelated destinations. **Save draft → Publish website changes**.
 4. Products require the correct Men’s/Kids’ category and generated SKU. Publish only approved photos and verified descriptions; confirm mobile UI and WhatsApp sharing from the product page.
 5. Review incoming customer feedback under **Customer Reviews**. Public submissions stay pending; approve genuine reviews only.
 6. Review both Vercel deployments and the GitHub Actions quality gate before changing production traffic.

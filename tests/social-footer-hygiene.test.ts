@@ -4,29 +4,21 @@ import {SOCIAL_KEYS,cleanHome,isValidSocialProfile} from '../src/lib/cmsData';
 
 const src=(p:string)=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 
-describe('social footer release contracts',()=>{
-  test('all nine official brand icons exist locally and have no external icon CDN dependency',()=>{
-    expect(SOCIAL_KEYS).toEqual([
-      'instagram','facebook','youtube','pinterest','threads','x',
-      'tiktok','snapchat','linkedin',
-    ]);
-    for(const key of SOCIAL_KEYS){
-      const path='public/social/'+key+'.svg';
-      expect(existsSync(new URL('../'+path,import.meta.url))).toBe(true);
-      const xml=src(path);
-      expect(xml).toContain('<svg');
-      expect(xml).toContain('viewBox');
-      expect(xml).toContain('<path');
-      expect(xml).not.toMatch(/<script|<foreignObject|onload=|<image /i);
-    }
+describe('Instagram-only footer release contracts',()=>{
+  test('only Instagram is rendered using the local approved SVG',()=>{
+    expect(SOCIAL_KEYS).toContain('instagram'); // CMS schema remains backward-compatible
+    expect(existsSync(new URL('../public/social/instagram.svg',import.meta.url))).toBe(true);
+    const icon=src('public/social/instagram.svg');
+    expect(icon).toContain('<svg');
+    expect(icon).toContain('viewBox');
+    expect(icon).not.toMatch(/<script|<foreignObject|onload=|<image /i);
+    const ui=src('src/components/SocialLinks.tsx');
+    expect(ui).toContain('src="/social/instagram.svg"');
+    expect(ui).not.toContain('SOCIAL_KEYS.map');
+    expect(ui).not.toContain('/social/facebook.svg');
   });
-  test('links are restricted to HTTPS profiles at their own platform host',()=>{
-    expect(isValidSocialProfile('instagram','https://www.instagram.com/nomaanbrothers/')).toBe(true);
-    expect(isValidSocialProfile('facebook','https://www.facebook.com/profile.php?id=123')).toBe(true);
-    expect(isValidSocialProfile('youtube','https://www.youtube.com/@nomaanbrothers')).toBe(true);
-    expect(isValidSocialProfile('threads','https://www.threads.com/@nomaanbrothers')).toBe(true);
-    expect(isValidSocialProfile('x','https://x.com/nomaanbrothers')).toBe(true);
-    expect(isValidSocialProfile('linkedin','https://www.linkedin.com/company/nomaanbrothers')).toBe(true);
+  test('Instagram links require HTTPS, legitimate Instagram host and profile path',()=>{
+    expect(isValidSocialProfile('instagram','https://www.instagram.com/example_store/')).toBe(true);
     for(const bad of [
       'https://instagram.com.evil.example/profile',
       'https://evil.example/account',
@@ -35,38 +27,35 @@ describe('social footer release contracts',()=>{
       'https://user:pass@instagram.com/account',
       'https://instagram.com:8443/account',
       'javascript:alert(1)',
+      'https://facebook.com/nomaanbrothers',
     ])expect(isValidSocialProfile('instagram',bad)).toBe(false);
-    expect(isValidSocialProfile('instagram','https://facebook.com/nomaanbrothers')).toBe(false);
   });
-  test('unconfigured profiles remain visible, disabled and do not become guessed live links',()=>{
+  test('until the store owner publishes an actual account the Instagram icon is disabled',()=>{
     const social=src('src/components/SocialLinks.tsx');
     expect(social).toContain("showUnconfigured=false");
     expect(social).toContain('role="img"');
-    expect(social).toContain('profile not connected yet');
+    expect(social).toContain('Instagram profile not connected yet');
     expect(social).toContain('rel="noopener noreferrer"');
     expect(social).not.toContain('cdn.');
+    expect(social).not.toContain('https://www.instagram.com/nomaanbrothers/');
     const footer=src('src/components/V2Footer.tsx');
     expect(footer).toContain('<SocialLinks home={home} showUnconfigured/>');
-    expect(footer).toContain('Connect on social');
     const contact=src('src/App.tsx');
     expect(contact).toContain('variant="dark" showUnconfigured');
   });
-  test('CMS sanitizes mismatched domains without losing legitimate owner profile links',()=>{
-    const home=cleanHome({
-      socialLinks:{
-        instagram:'https://instagram.com/nomaanbrothers',
-        youtube:'https://evil.example/fake',
-        facebook:'https://facebook.com.evil.example/nomaanbrothers',
-      }
-    });
-    expect(home.socialLinks.instagram).toBe('https://instagram.com/nomaanbrothers');
-    expect(home.socialLinks.youtube).toBe('');
+  test('CMS preserves validated Instagram link without making other accounts visible',()=>{
+    const home=cleanHome({socialLinks:{
+      instagram:'https://www.instagram.com/example_store/',
+      facebook:'https://facebook.com.evil.example/fake',
+    }});
+    expect(home.socialLinks.instagram).toBe('https://www.instagram.com/example_store/');
     expect(home.socialLinks.facebook).toBe('');
     const studio=src('src/components/studio/CmsHomepage.tsx');
     expect(studio).toContain('isValidSocialProfile');
-    expect(studio).toContain('profile URLs become clickable');
+    expect(studio).toContain('Instagram profile URL');
+    expect(studio).not.toContain('All nine branded icons');
   });
-  test('branch cleanup never deletes unmerged or changed refs and executes after CI',()=>{
+  test('branch cleanup occurs only after successful main checks and unchanged merged PR head',()=>{
     const workflow=src('.github/workflows/quality.yml');
     expect(workflow).toContain('cleanup-merged-working-branches:');
     expect(workflow).toContain('needs: [typecheck-and-build, browser-ui-smoke]');
