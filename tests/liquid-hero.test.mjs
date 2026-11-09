@@ -23,14 +23,23 @@ test('home quick-explore routes are preserved exactly',()=>{
   assert.match(home,/aria-label="Explore popular collections"/);
 });
 
-test('hero film occupies its own right-side panel and respects reduced motion',()=>{
+test('five-second cinematic hero intro slides away and preserves a replayable editorial main hero',()=>{
   const home=source('src/components/V2Home.tsx');
+  const intro=source('src/components/HeroBrandIntro.tsx');
+  const css=source('src/index.css');
   assert.match(home,/lg:grid-cols-\[minmax\(0,1\.1fr\)_minmax\(0,\.9fr\)\]/);
-  assert.match(home,/home\.sectionVideos\.hero\s*\?/);
-  assert.match(home,/autoPlay=\{!reduce\} muted loop playsInline/);
-  assert.match(home,/controls autoPlay=\{!reduce\} muted loop playsInline/);
-  assert.match(home,/poster=\{photo\|\|undefined\}/);
-  assert.match(home,/aria-label="Nomaan Brothers brand film"/);
+  assert.match(home,/<HeroBrandIntro key=\{introCycle\}/);
+  assert.match(home,/replayFilm/);
+  assert.match(home,/data-testid="main-hero"/);
+  assert.match(intro,/INTRO_DURATION_MS=5000/);
+  assert.match(intro,/autoPlay muted loop playsInline preload="auto"/);
+  assert.match(intro,/onError=\{\(\)=>setVideoFailed\(true\)\}/);
+  assert.match(intro,/Skip brand introduction/);
+  assert.match(intro,/connection\?\.saveData/);
+  assert.match(intro,/reducedMotion/);
+  assert.match(css,/nb-brand-intro--leaving/);
+  assert.match(css,/-105%/);
+  assert.match(css,/@keyframes nb-intro-progress/);
 });
 
 test('secondary product and collection page modules are split by route',()=>{

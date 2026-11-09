@@ -186,9 +186,9 @@ export default function CmsHomepage({client,userId,canPublish}:Props) {
         <div className="md:col-span-2"><Field label="Introduction"><textarea rows={3} className={inputClass} value={form.heroSubtitle} onChange={e=>update('heroSubtitle',e.target.value)}/></Field></div>
         <div className="md:col-span-2">{assets('heroImage','Hero poster / background photograph')}</div>
          <div className="md:col-span-2 rounded-lg border border-[#e3cfb3] bg-[#fff8eb] p-4">
-           <h3 className="mb-2 font-serif text-xl">Right-side hero brand film</h3>
-           <p className="mb-3 text-xs leading-6 text-stone-600">An approved film plays muted, loops and has viewer controls. Without video, a branded poster appears. You can also replace the film from the Hero card in the layout editor.</p>
-           <AssetEditor client={client} userId={userId} canPublish={canPublish} allowVideo label="Hero brand film"
+           <h3 className="mb-2 font-serif text-xl">Five-second cinematic brand introduction</h3>
+           <p className="mb-3 text-xs leading-6 text-stone-600">Upload an approved MP4/WebM film. On opening the homepage it plays muted and inline for five seconds, slides left, and reveals the main hero. Visitors can skip; reduced-motion/data-saver visitors see the main hero immediately. Without a film, a branded animated poster runs the same introduction. The main hero poster and copy stay editable below.</p>
+           <AssetEditor client={client} userId={userId} canPublish={canPublish} allowVideo label="Hero opening film · MP4/WebM, portrait-safe crop"
              selected={form.sectionVideos.hero?[form.sectionVideos.hero]:[]}
              onChange={urls=>setForm(current=>({...current,sectionVideos:{...current.sectionVideos,hero:urls[0]||''}}))}/>
          </div>
