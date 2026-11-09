@@ -74,7 +74,10 @@ export default function HeroBrandIntro({url,poster,reducedMotion,replay=false,on
     videoRef.current?.pause();
     onComplete();
     if(wasSkipped.current||document.activeElement===skipRef.current){
-      document.getElementById('v2-home-title')?.focus({preventScroll:true});
+      // The parent removes inert on the next React commit; focus after it.
+      window.requestAnimationFrame(()=>{
+        document.getElementById('v2-home-title')?.focus({preventScroll:true});
+      });
     }
   },[phase,onComplete]);
 
