@@ -118,6 +118,11 @@ async function inspect(route,width=390,height=844,opts={}){
       });
       if(opts.reduce)assert.equal(effect.animation,'none','reduced motion must disable shimmer');
       else assert.match(effect.gradient,/gradient/,'water reflection has CSS gradient');
+      const opening=page.getByTestId('brand-intro');
+      if(await opening.count()){
+        await page.getByRole('button',{name:'Skip brand introduction'}).click();
+        await opening.waitFor({state:'hidden',timeout:4000});
+      }
       if(opts.matrix&&[280,375,820,1280].includes(width)){
         await page.getByRole('button',{name:'Search collections'}).click();
         await page.getByRole('dialog',{name:'Search clothing collections'}).waitFor({state:'visible',timeout:5000});
@@ -304,6 +309,10 @@ async function inspectEditorialRoutes(){
   await mockCmsRoutes(page);
   try {
     await page.goto(base+'/',{waitUntil:'domcontentloaded'});
+    const opening=page.getByTestId('brand-intro');
+    await opening.waitFor({state:'visible',timeout:5000});
+    await page.getByRole('button',{name:'Skip brand introduction'}).click();
+    await opening.waitFor({state:'hidden',timeout:4000});
     await page.getByRole('heading',{name:'What customers are saying.'}).waitFor({state:'visible',timeout:7000});
     const film=page.getByTestId('brand-intro');
     await film.waitFor({state:'visible',timeout:5000});

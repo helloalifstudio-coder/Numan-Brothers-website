@@ -64,7 +64,7 @@ export default function V2Home({ products, home, categories=[], onNavigate }: Pr
             <div className="mb-8 flex min-w-0 items-center gap-3 break-words text-[10px] font-semibold uppercase tracking-[.19em] text-[#e9c797] min-[360px]:gap-4 min-[360px]:tracking-[.26em]">
               <span className="h-px w-10 bg-[#cba777]"/> {home.heroEyebrow}
             </div>
-            <h1 id="v2-home-title" className="nb-liquid-hero max-w-[12ch] font-serif break-words text-[clamp(2.8rem,10vw,8.1rem)] font-normal leading-[.98] tracking-[-.065em] sm:leading-[.93]">
+            <h1 id="v2-home-title" tabIndex={-1} className="nb-liquid-hero max-w-[12ch] font-serif break-words text-[clamp(2.8rem,10vw,8.1rem)] font-normal leading-[.98] tracking-[-.065em] sm:leading-[.93]">
               {home.heroTitle}
             </h1>
             <p className="mt-8 max-w-[465px] text-sm leading-8 text-[#e0d6c7] md:text-base">

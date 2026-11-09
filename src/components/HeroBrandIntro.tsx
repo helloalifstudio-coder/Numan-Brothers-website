@@ -21,6 +21,7 @@ export default function HeroBrandIntro({url,poster,reducedMotion,replay=false,on
   const [videoReady,setVideoReady]=useState(false);
   const [videoFailed,setVideoFailed]=useState(false);
   const videoRef=useRef<HTMLVideoElement>(null);
+  const skipRef=useRef<HTMLButtonElement>(null);
   const wasSkipped=useRef(false);
   const beginExit=useCallback(()=>{
     setPhase(current=>current==='playing'?'leaving':current);
@@ -36,6 +37,11 @@ export default function HeroBrandIntro({url,poster,reducedMotion,replay=false,on
     const onEscape=(event:KeyboardEvent)=>{
       if(event.key==='Escape'){wasSkipped.current=true;beginExit();}
     };
+    const onTab=(event:KeyboardEvent)=>{
+      if(event.key==='Tab'){event.preventDefault();skipRef.current?.focus({preventScroll:true});}
+    };
+    skipRef.current?.focus({preventScroll:true});
+    window.addEventListener('keydown',onTab);
     window.addEventListener('scroll',onScroll,{passive:true});
     window.addEventListener('keydown',onEscape);
     // If a user arrives at a scrolled position, never conceal the hero.
@@ -43,6 +49,7 @@ export default function HeroBrandIntro({url,poster,reducedMotion,replay=false,on
     return()=>{
       window.clearTimeout(timer);
       window.removeEventListener('scroll',onScroll);
+      window.removeEventListener('keydown',onTab);
       window.removeEventListener('keydown',onEscape);
     };
   },[phase,reducedMotion,beginExit]);
@@ -66,7 +73,7 @@ export default function HeroBrandIntro({url,poster,reducedMotion,replay=false,on
     if(phase!=='finished')return;
     videoRef.current?.pause();
     onComplete();
-    if(wasSkipped.current){
+    if(wasSkipped.current||document.activeElement===skipRef.current){
       document.getElementById('v2-home-title')?.focus({preventScroll:true});
     }
   },[phase,onComplete]);
@@ -76,8 +83,9 @@ export default function HeroBrandIntro({url,poster,reducedMotion,replay=false,on
   return <div
     data-testid="brand-intro"
     data-phase={phase}
+    role="dialog" aria-modal="true"
     aria-label="Nomaan Brothers opening introduction"
-    className={'nb-brand-intro absolute inset-0 z-[35] overflow-hidden bg-[#16110e] text-[#f8ead5] '+
+    className={'nb-brand-intro fixed inset-0 z-[90] overflow-hidden bg-[#16110e] text-[#f8ead5] '+
       (phase==='leaving'?'nb-brand-intro--leaving':'')}
     onTransitionEnd={event=>{
       if(event.target===event.currentTarget&&phase==='leaving')setPhase('finished');
@@ -100,7 +108,7 @@ export default function HeroBrandIntro({url,poster,reducedMotion,replay=false,on
         <p className="text-[10px] font-semibold uppercase tracking-[.22em] text-[#f0d2a2] sm:tracking-[.35em]">Nomaan Brothers</p>
         <p className="mt-2 text-[9px] uppercase tracking-[.14em] text-[#ead8bc]/75">Mandi Bazar · Warangal</p>
       </div>
-      <button type="button" onClick={skip}
+      <button ref={skipRef} type="button" onClick={skip}
         aria-label="Skip brand introduction"
         className="inline-flex min-h-12 shrink-0 items-center gap-2 rounded-full border border-white/60 bg-black/35 px-4 text-[11px] font-bold uppercase tracking-[.12em] text-white backdrop-blur-md transition-colors hover:bg-[#f7e7cd] hover:text-[#21170f] focus-visible:outline-white">
         Skip intro <ArrowUpRight size={16} aria-hidden="true"/>
