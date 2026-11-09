@@ -42,5 +42,6 @@ test('one transactional install with fresh-project refusal and postflight RLS au
   assert.match(bundle,/has_schema_privilege/);
   assert.match(bundle,/nb-media-staging/);
   assert.doesNotMatch(bundle,/^\\(?:set|echo|i)\s/gm);
-  assert.match(bundle,/zazdxmukmcayblsteulk/);
+  assert.doesNotMatch(bundle,/zazdxmukmcayblsteulk/);
+  assert.match(bundle,/client-owned Supabase project/);
 });
