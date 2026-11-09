@@ -219,6 +219,48 @@ async function inspectFloatingContactsAndProduct(){
 }
 
 
+async function inspectEditorialRoutes(){
+  // PR workflow tests new features locally, not against the still-live main release.
+  if(live||process.env.NB_MOCK_CMS!=='1')return;
+  const routes=['/products/sample-plain-sherwani','/men/sherwani/plain',
+    '/privacy-policy','/terms-and-conditions','/returns-and-exchanges'];
+  for(const route of routes)for(const [width,height] of [[320,720],[390,844],[820,1180],[1440,900]]){
+    await inspect(route,width,height,{matrix:true});
+  }
+  const context=await browser.newContext({viewport:{width:390,height:844}});
+  const page=await context.newPage();
+  await mockCmsRoutes(page);
+  try {
+    await page.goto(base+'/',{waitUntil:'domcontentloaded'});
+    await page.getByRole('heading',{name:'What customers are saying.'}).waitFor({state:'visible',timeout:7000});
+    const film=page.getByLabel('Brand film and editorial showcase');
+    assert.equal(await film.count(),1,'brand film panel on homepage');
+    await page.getByRole('textbox',{name:'Display name'}).fill('QA Reviewer');
+    await page.getByRole('textbox',{name:'Your review'}).fill('The review submission test is private and awaits admin approval.');
+    await page.getByRole('button',{name:'Submit review'}).click();
+    await page.getByRole('status').filter({hasText:/Submitted for moderation/})
+      .first().waitFor({state:'visible',timeout:6000});
+    const external=page.getByRole('link',{name:'View independent Justdial listing'});
+    assert.match(await external.getAttribute('href'),/^https:\/\/www\.justdial\.com\/Warangal\//);
+    await page.screenshot({path:join(screenshots,'local-editorial-reviews-390.png'),animations:'disabled'});
+    await page.goto(base+'/products/sample-plain-sherwani',{waitUntil:'domcontentloaded'});
+    await page.getByRole('heading',{level:1,name:/Sample Plain Sherwani/}).waitFor({state:'visible',timeout:7000});
+    await page.getByRole('button',{name:'40',exact:true}).click();
+    const photo=page.getByRole('button',{name:/View photograph 2 of 3/});
+    await photo.click();
+    const share=page.getByRole('link',{name:/Share Sample Plain Sherwani.*catalogue on WhatsApp/});
+    assert.match(await share.getAttribute('href'),/^https:\/\/api\.whatsapp\.com\/send\?text=/);
+    await page.screenshot({path:join(screenshots,'local-plain-sherwani-demo-390.png'),animations:'disabled'});
+    await page.goto(base+'/men/sherwani/plain',{waitUntil:'domcontentloaded'});
+    await page.getByRole('link',{name:/Share Plain Sherwani catalogue on WhatsApp/}).waitFor({state:'visible',timeout:5000});
+    await page.getByRole('link',{name:/Open demo garment/}).waitFor({state:'visible',timeout:5000});
+    console.log('PASS_EDITORIAL_REVIEW_DEMO',JSON.stringify({width:390,reviewModerated:true,brandFilm:true,sampleGallery:true,catalogueShare:true}));
+  }catch(error){
+    failures.push({route:'editorial-review-demo',width:390,error:String(error?.stack||error)});
+    console.error('FAIL_EDITORIAL_REVIEW_DEMO',String(error?.message||error));
+  }finally{await context.close();}
+}
+
 /** Screenshot-worthy but bounded layout matrix. UI navigation stays a single
  * source of truth: no viewport-dependent duplicate route implementations. */
 async function inspectViewportMatrix(){
@@ -247,6 +289,7 @@ try{
   if(!skipped)await inspectFloatingContactsAndProduct();
   if(!skipped)await inspectUnconfiguredContactFallback();
   if(!skipped)await inspectViewportMatrix();
+  if(!skipped)await inspectEditorialRoutes();
 }finally{await browser.close();}
 if(skipped)console.log('LIVE_CHECK_INCOMPLETE: external deployment is not publicly accessible from this runner.');
 console.log('BROWSER_SMOKE_SUMMARY',JSON.stringify({base,live,checks:results.length,failures:failures.length,skipped}));
