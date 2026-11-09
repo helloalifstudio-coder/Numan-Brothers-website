@@ -31,3 +31,21 @@ begin
   if n<>1 then raise exception 'Approved review not visible to visitors';end if;
 end $$;
 reset role;
+-- The published media guard must reject unapproved featured image URLs,
+-- even from a valid owner using the sanctioned publishing procedure.
+select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',false);
+select set_config('request.jwt.claims','{"iss":"https://test.supabase.co/auth/v1","app_metadata":{"nb_role":"owner"}}',false);
+set role authenticated;
+do $$
+declare blocked boolean:=false;
+begin
+  update public.nb_home_drafts set content=jsonb_set(content,'{featuredImages}',
+    '{"one":"https://unapproved.example/fashion.jpg"}'::jsonb) where key='home';
+  begin
+    perform public.nb_publish_home();
+  exception when check_violation then blocked:=true;
+  end;
+  if not blocked then raise exception 'Unapproved featured-card photo was published'; end if;
+  update public.nb_home_drafts set content=content - 'featuredImages' where key='home';
+end $$;
+reset role;
