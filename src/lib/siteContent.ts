@@ -165,7 +165,7 @@ export function cleanSiteText(value:unknown):Record<string,string>{
     .map(([key,val])=>[key,(val as string).slice(0,FIELD_MAP.get(key)?.multiline?900:240)]));
 }
 export const HOME_SECTIONS=[
- {id:'hero',title:'Hero',description:'Cover photo, headline and right-side brand film'},
+ {id:'hero',title:'Hero',description:'Five-second cinematic video opener and editable main hero poster'},
  {id:'quick',title:'Quick links',description:'Short collection menu strip'},
  {id:'departments',title:'Men’s & Kids’ cards',description:'Two collection tiles'},
  {id:'directory',title:'Collection directory',description:'All the category links'},

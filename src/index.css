@@ -163,3 +163,48 @@ a { text-decoration: none; }
 @media (max-width: 359px) {
   #v2-home-title { font-size: clamp(2.15rem, 10vw, 2.8rem); }
 }
+
+/* Nomaan Brothers cinematic homepage intro: compositor-only slide with a
+   reliable still-image fallback. The real video comes from approved CMS media. */
+.nb-brand-intro {
+  transform: translate3d(0, 0, 0);
+  transition: transform 900ms cubic-bezier(.75, 0, .22, 1);
+  will-change: transform;
+  isolation: isolate;
+}
+.nb-brand-intro--leaving {
+  transform: translate3d(-105%, 0, 0);
+  pointer-events: none;
+}
+@keyframes nb-intro-ken-burns {
+  from { transform: scale(1.025) translate3d(0, 0, 0); }
+  to { transform: scale(1.115) translate3d(-1.5%, 0, 0); }
+}
+@keyframes nb-intro-progress {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+.nb-intro-poster {
+  animation: nb-intro-ken-burns 5s ease-out both;
+  transform-origin: 60% 40%;
+}
+.nb-brand-intro__progress {
+  animation: nb-intro-progress 5s linear both;
+  transform: scaleX(1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .nb-brand-intro { transition: none; will-change: auto; }
+  .nb-intro-poster,.nb-brand-intro__progress { animation: none; }
+}
+@media (max-width: 359px) {
+  .nb-brand-intro { font-kerning: normal; }
+}
+@media (hover: hover) and (pointer: fine) {
+  .nb-hero-editorial-frame {
+    transition: border-color 360ms ease, box-shadow 360ms ease;
+  }
+  .nb-hero-editorial-frame:hover {
+    border-color: rgba(248, 222, 173, .9);
+    box-shadow: 0 35px 100px -30px rgba(0,0,0,.85);
+  }
+}

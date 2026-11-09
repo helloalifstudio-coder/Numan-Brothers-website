@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import {ArrowDownRight,ArrowRight,ArrowUpRight,MapPin,MoveDownRight,MessageCircle,Phone,Scissors,Ruler} from 'lucide-react';
 import { motion, useReducedMotion, useScroll, useTransform } from 'motion/react';
 import { Product } from '../types';
@@ -8,6 +8,7 @@ import { productsForCollection, productImage } from '../storefront/catalog';
 import V2Link from './V2Link';
 import V2Reveal from './V2Reveal';
 import V2HomeDiscovery from './V2HomeDiscovery';
+import HeroBrandIntro from './HeroBrandIntro';
 
 interface Props {products: Product[]; home: CmsHome; categories?:CmsCategoryRow[]; onNavigate:(path:string)=>void;}
 
@@ -24,6 +25,10 @@ export default function V2Home({ products, home, categories=[], onNavigate }: Pr
   const photoTwo = home.storyImage || home.menImage;
   const hero = useRef<HTMLElement>(null);
   const reduce = useReducedMotion();
+  const [introCycle,setIntroCycle]=useState(0);
+  const [introActive,setIntroActive]=useState(true);
+  const onIntroComplete=useCallback(()=>setIntroActive(false),[]);
+  const replayFilm=()=>{setIntroActive(true);setIntroCycle(n=>n+1);};
   const { scrollYProgress } = useScroll({ target: hero, offset: ['start start', 'end start'] });
   const imageY = useTransform(scrollYProgress, [0, 1], [0, 72]);
   const textY = useTransform(scrollYProgress, [0, 1], [0, -35]);
@@ -51,14 +56,15 @@ export default function V2Home({ products, home, categories=[], onNavigate }: Pr
          </div>
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#211b17] via-[#211b17]/90 to-[#211b17]/30 md:via-[#211b17]/75 md:to-transparent" />
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#211b17]/70 via-transparent to-[#211b17]/10" />
-      <div className="relative mx-auto grid min-h-[620px] max-w-[1440px] grid-cols-1 items-center gap-8 px-4 pb-28 pt-16 min-[360px]:px-5 sm:px-6 sm:pt-20 md:min-h-[730px] md:px-12 lg:min-h-[min(860px,calc(100svh-106px))] lg:grid-cols-[minmax(0,1.1fr)_minmax(0,.9fr)] lg:gap-8 lg:px-20 xl:gap-14">
+      <div data-testid="main-hero" inert={introActive&&!reduce}
+        className="relative mx-auto grid min-h-[620px] max-w-[1440px] grid-cols-1 items-center gap-8 px-4 pb-24 pt-16 min-[360px]:px-5 sm:px-6 sm:pt-20 md:min-h-[730px] md:px-12 lg:min-h-[min(860px,calc(100svh-106px))] lg:grid-cols-[minmax(0,1.1fr)_minmax(0,.9fr)] lg:gap-8 lg:px-20 xl:gap-14">
         <motion.div style={reduce ? undefined : { y: textY }} className="relative z-10 min-w-0 max-w-[660px]">
           <motion.div initial={reduce ? false : { opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: .7, ease: [0.22,1,0.36,1] }}>
             <div className="mb-8 flex min-w-0 items-center gap-3 break-words text-[10px] font-semibold uppercase tracking-[.19em] text-[#e9c797] min-[360px]:gap-4 min-[360px]:tracking-[.26em]">
               <span className="h-px w-10 bg-[#cba777]"/> {home.heroEyebrow}
             </div>
-            <h1 id="v2-home-title" className="nb-liquid-hero max-w-[12ch] font-serif break-words text-[clamp(2.8rem,10vw,8.1rem)] font-normal leading-[.98] tracking-[-.065em] sm:leading-[.93]">
+            <h1 id="v2-home-title" tabIndex={-1} className="nb-liquid-hero max-w-[12ch] font-serif break-words text-[clamp(2.8rem,10vw,8.1rem)] font-normal leading-[.98] tracking-[-.065em] sm:leading-[.93]">
               {home.heroTitle}
             </h1>
             <p className="mt-8 max-w-[465px] text-sm leading-8 text-[#e0d6c7] md:text-base">
@@ -79,28 +85,36 @@ export default function V2Home({ products, home, categories=[], onNavigate }: Pr
                 <MessageCircle size={16}/>{siteText(home,'home.heroWhatsapp')}</a>}
               {call&&<a href={call} className="inline-flex min-h-12 items-center gap-2 border border-white/40 px-5 text-[11px] font-semibold uppercase text-white">
                 <Phone size={16}/>{siteText(home,'home.heroPhone')}</a>}
+              {home.sectionVideos.hero&&<button type="button" onClick={replayFilm}
+                className="inline-flex min-h-12 items-center gap-2 border-b border-[#e9d2ad] px-3 text-[11px] font-semibold uppercase tracking-[.1em] text-[#f9e0b8] transition-colors hover:text-white">
+                Replay brand film <ArrowUpRight size={16}/>
+              </button>}
             </div>
           </motion.div>
         </motion.div>
-        <div className="relative z-10 w-full min-w-0 lg:justify-self-end" aria-label="Brand film and editorial showcase">
-           <div className="relative mx-auto aspect-[4/5] max-h-[580px] w-full max-w-[490px] overflow-hidden rounded-[1.75rem] border border-[#e4c497]/45 bg-[#31271e] shadow-[0_30px_80px_rgba(0,0,0,.38)] lg:mx-0">
-             {home.sectionVideos.hero
-               ? <video key={home.sectionVideos.hero} controls autoPlay={!reduce} muted loop playsInline
-                   preload="metadata" poster={photo||undefined} aria-label="Nomaan Brothers brand film"
-                   className="h-full w-full object-cover"/>
-               : <>
-                   {(photo||'/editorial/sherwani.svg')?<img src={photo||'/editorial/sherwani.svg'} alt="" className="absolute inset-0 h-full w-full object-cover opacity-75"/>:
-                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_18%,#c6a47c_0%,transparent_42%),linear-gradient(145deg,#856544,#241b16_80%)]"/>}
-                   <div className="absolute inset-0 bg-gradient-to-t from-[#17110d]/90 via-transparent to-[#17110d]/15"/>
-                   <div className="absolute inset-x-0 bottom-0 p-7 text-white sm:p-10">
-                     <p className="text-[10px] font-bold uppercase tracking-[.23em] text-[#e7c69c]">Behind the collection</p>
-                     <h2 className="mt-3 max-w-xs font-serif text-3xl leading-tight sm:text-4xl">Our brand film</h2>
-                     <p className="mt-3 max-w-sm text-sm leading-6 text-[#ebdbc8]">An editorial space for our story, craftsmanship and celebrations.</p>
-                   </div>
-                 </>}
-             <span className="pointer-events-none absolute left-5 top-5 rounded-full border border-white/50 bg-black/25 px-4 py-2 text-[10px] font-semibold uppercase tracking-[.18em] text-white backdrop-blur-md">Nomaan / Film</span>
-           </div>
-         </div>
+        <div className="relative z-10 w-full min-w-0 lg:justify-self-end" aria-label="Editorial collection artwork">
+          <div className="group nb-hero-editorial-frame relative mx-auto aspect-[16/10] max-h-[330px] w-full max-w-[530px] overflow-hidden rounded-[1.55rem] border border-[#e5c69d]/50 bg-[#31271e] shadow-[0_28px_90px_-30px_rgba(0,0,0,.72)] sm:aspect-[5/4] lg:mx-0 lg:aspect-[4/5] lg:max-h-[570px]">
+            <img src={photo||'/editorial/sherwani.svg'}
+              alt={photo?'Nomaan Brothers showroom editorial photograph':'Illustrative garment concept, not actual showroom inventory'}
+              loading="eager" decoding="async"
+              className="h-full w-full object-cover object-[50%_30%] opacity-[.93] transition-transform duration-[1500ms] ease-out motion-safe:group-hover:scale-[1.045]"/>
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#130e0b]/80 via-transparent to-[#130e0b]/20"/>
+            <div className="pointer-events-none absolute inset-4 rounded-[1rem] border border-white/25 sm:inset-6" aria-hidden="true"/>
+            <span className="absolute left-7 top-7 text-[10px] font-semibold uppercase tracking-[.22em] text-[#f8e7c9] sm:left-10 sm:top-10">The occasion edit</span>
+            <div className="absolute inset-x-0 bottom-0 flex min-w-0 items-end justify-between gap-4 p-7 text-white sm:p-10">
+              <div className="min-w-0">
+                <p className="text-[10px] font-semibold uppercase tracking-[.2em] text-[#f0cca0]">Nomaan Brothers / Warangal</p>
+                <p className="mt-2 max-w-[14ch] font-serif text-[clamp(1.55rem,4vw,2.5rem)] leading-tight">Discover your signature look.</p>
+                {!photo&&<p className="mt-2 text-[10px] leading-5 text-[#ecd9bd]">Illustrative concept</p>}
+              </div>
+              <V2Link href="/men/sherwani" onNavigate={onNavigate}
+                aria-label="Explore the sherwani collection"
+                className="inline-flex min-h-12 min-w-12 shrink-0 items-center justify-center rounded-full border border-white/70 bg-white/10 text-white backdrop-blur-sm transition-colors hover:bg-white hover:text-[#281d14]">
+                <ArrowUpRight size={19}/>
+              </V2Link>
+            </div>
+          </div>
+        </div>
          <motion.div className="absolute bottom-8 left-6 flex items-center gap-3 text-[10px] font-medium uppercase tracking-[.22em] text-white/75 md:left-12 lg:left-20"
           style={reduce ? undefined : { opacity: scrollLine }}>
           <span className="flex h-8 w-8 items-center justify-center rounded-full border border-white/40"><MoveDownRight size={14}/></span> {siteText(home,'home.scroll')}
@@ -110,6 +124,11 @@ export default function V2Home({ products, home, categories=[], onNavigate }: Pr
         </div>
       </div>
     </section>
+    {/* Keep the fixed intro outside the isolated hero stacking context so it
+        truly covers the mobile navigation and the entire viewport. */}
+    <HeroBrandIntro key={introCycle} url={home.sectionVideos.hero}
+      poster={photo||'/editorial/sherwani.svg'} reducedMotion={Boolean(reduce)}
+      replay={introCycle>0} onComplete={onIntroComplete}/>
 
     <nav aria-label="Explore popular collections" style={homeSectionStyle(home,'quick')} className="border-b border-[#e0d4c2] bg-[#f2eadd] px-5 md:px-12 lg:px-20">
       <div className="mx-auto flex max-w-[1330px] items-center gap-5 overflow-x-auto overscroll-x-contain scroll-px-4 py-4 md:gap-8">

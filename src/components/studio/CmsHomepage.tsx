@@ -186,11 +186,16 @@ export default function CmsHomepage({client,userId,canPublish}:Props) {
         <div className="md:col-span-2"><Field label="Introduction"><textarea rows={3} className={inputClass} value={form.heroSubtitle} onChange={e=>update('heroSubtitle',e.target.value)}/></Field></div>
         <div className="md:col-span-2">{assets('heroImage','Hero poster / background photograph')}</div>
          <div className="md:col-span-2 rounded-lg border border-[#e3cfb3] bg-[#fff8eb] p-4">
-           <h3 className="mb-2 font-serif text-xl">Right-side hero brand film</h3>
-           <p className="mb-3 text-xs leading-6 text-stone-600">An approved film plays muted, loops and has viewer controls. Without video, a branded poster appears. You can also replace the film from the Hero card in the layout editor.</p>
-           <AssetEditor client={client} userId={userId} canPublish={canPublish} allowVideo label="Hero brand film"
+           <h3 className="mb-2 font-serif text-xl">Five-second cinematic brand introduction</h3>
+           <p className="mb-3 text-xs leading-6 text-stone-600">Upload an approved MP4/WebM film. On opening the homepage it plays muted and inline for five seconds, slides left, and reveals the main hero. Visitors can skip; reduced-motion/data-saver visitors see the main hero immediately. Without a film, a branded animated poster runs the same introduction. The main hero poster and copy stay editable below.</p>
+           <AssetEditor client={client} userId={userId} canPublish={canPublish} allowVideo label="Hero opening film · MP4/WebM, portrait-safe crop"
              selected={form.sectionVideos.hero?[form.sectionVideos.hero]:[]}
              onChange={urls=>setForm(current=>({...current,sectionVideos:{...current.sectionVideos,hero:urls[0]||''}}))}/>
+           <p className="mt-3 text-xs leading-6 text-stone-600">For fast mobile playback use a compressed H.264 MP4, 5–8 seconds, ideally under 5 MB. Keep the subject centered because phone and desktop crops differ. The video starts muted. Upload via Media, save your draft, then publish before reviewing.</p>
+           <a href="/" target="_blank" rel="noopener noreferrer"
+             className="mt-4 inline-flex min-h-11 items-center border-b border-[#99744a] text-xs font-semibold text-[#674b2d] hover:text-[#2e2115]">
+             Preview published cinematic introduction ↗
+           </a>
          </div>
         <div className="md:col-span-2 border-t border-stone-200 pt-6"><h3 className="font-serif text-2xl">Department cover images</h3></div>
         <div>{assets('menImage',"Men's Wear photograph")}</div>
