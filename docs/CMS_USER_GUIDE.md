@@ -8,6 +8,7 @@
 2. Sign in with the staff email and password provisioned by the owner via Supabase Auth.
 3. Roles: **editor** prepares product/homepage drafts and uploads pending media; **admin/owner** reviews media and publishes approved content. The owner creates or revokes staff access.
 4. If access is denied, ask the owner to verify the staff role; never share passwords or use the old demo PIN.
+5. As **owner**, open **Account & security** to change the sign-in email or password from the CMS. Send a one-time code to the current email and enter it before requesting changes. Email updates require verification of the mailbox or both mailboxes as Supabase config requires. Password updates also require the current password and a strong new password, followed by fresh login. This is not anonymous account management; only an authenticated owner can perform it.
 
 ## Add a product (few products at a time)
 

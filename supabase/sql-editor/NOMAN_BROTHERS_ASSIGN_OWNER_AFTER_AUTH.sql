@@ -4,13 +4,18 @@
 -- Step 1: Supabase Dashboard > Authentication > Users > Add user.
 --         Create the client's actual Gmail and a strong password *there*;
 --         verify/confirm the email with the owner.
--- Step 2: Change ONLY the owner_email value below to that verified Gmail.
+-- Step 2: The starter owner_email below is admin@gmail.com. Only proceed if
+--         THAT EXACT email belongs to the verified, confirmed intended owner.
+--         Change it to the actual owner address before a real client launch.
 -- Step 3: Run this file in the SQL Editor of the SAME project as Vercel.
 -- Step 4: Sign out of /studio and sign back in to refresh JWT role claims.
 --
 -- NEVER put a plaintext password, service_role key or client Gmail password
 -- into this script, GitHub, Vercel VITE_* variables, or frontend source code.
 -- This script does not create Auth users; Auth must create credentials safely.
+-- It does not set passwords. Choose a strong, unique password in Auth Users.
+-- After signing into Studio, the owner can change email and password securely
+-- in Account & security. Neither change grants new roles.
 -- It refuses to override any different existing privileged staff account.
 -- =============================================================================
 
@@ -18,13 +23,12 @@ begin;
 
 do $nb_assign_owner$
 declare
-  owner_email text := 'REPLACE_WITH_VERIFIED_CLIENT_EMAIL@example.com';
+  owner_email text := 'admin@gmail.com';
   owner_id uuid;
   conflicting_staff integer;
 begin
-  if owner_email = 'REPLACE_WITH_VERIFIED_CLIENT_EMAIL@example.com'
-     or owner_email !~* '^[^[:space:]@]+@[^[:space:]@]+[.][^[:space:]@]+$' then
-    raise exception 'First replace owner_email with the verified owner Gmail from Authentication > Users';
+  if owner_email !~* '^[^[:space:]@]+@[^[:space:]@]+[.][^[:space:]@]+$' then
+    raise exception 'Configure owner_email with the actual verified owner email from Authentication > Users';
   end if;
 
   select id into owner_id

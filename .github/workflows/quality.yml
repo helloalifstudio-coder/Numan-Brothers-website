@@ -36,7 +36,7 @@ jobs:
       - name: TypeScript checks
         run: bun run lint
       - name: Navigation and catalogue tests
-        run: bun test tests/navigation.test.ts tests/cms-security.test.ts tests/cms-data.test.ts tests/metadata.test.ts tests/catalog-queries.test.ts tests/bulk-csv.test.ts tests/seo-routes.test.ts tests/catalog-load.test.ts tests/import-recovery.test.ts tests/premium-storefront.test.ts tests/architecture-cms.test.ts tests/cms-auth-flow.test.ts tests/site-content.test.ts tests/editorial-catalogue-reviews.test.ts tests/social-footer-hygiene.test.ts tests/client-sku-handoff.test.ts
+        run: bun test tests/navigation.test.ts tests/cms-security.test.ts tests/cms-data.test.ts tests/metadata.test.ts tests/catalog-queries.test.ts tests/bulk-csv.test.ts tests/seo-routes.test.ts tests/catalog-load.test.ts tests/import-recovery.test.ts tests/premium-storefront.test.ts tests/architecture-cms.test.ts tests/cms-auth-flow.test.ts tests/site-content.test.ts tests/editorial-catalogue-reviews.test.ts tests/social-footer-hygiene.test.ts tests/client-sku-handoff.test.ts tests/owner-account-security.test.ts
       - name: Mobile/tablet layout regression contracts
         run: node --test tests/responsive-layout.test.mjs
       - name: Studio organization and media-scale regression contracts
@@ -82,6 +82,8 @@ jobs:
           psql -v ON_ERROR_STOP=1 -f tests/sql/assert_reviews.sql
           psql -v ON_ERROR_STOP=1 -f tests/sql/assert_media_lifecycle_scale.sql
           psql -v ON_ERROR_STOP=1 -f tests/sql/assert_client_sku.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/sql-editor/NOMAN_BROTHERS_ASSIGN_OWNER_AFTER_AUTH.sql
+          psql -v ON_ERROR_STOP=1 -f tests/sql/assert_owner_bootstrap.sql
       - name: Reject production deployments without client CMS credentials
         run: |
           if env VERCEL_ENV=production VITE_SUPABASE_URL= VITE_SUPABASE_PUBLISHABLE_KEY= VITE_SUPABASE_ANON_KEY= bun run build; then

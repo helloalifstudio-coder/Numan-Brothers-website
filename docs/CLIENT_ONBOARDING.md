@@ -43,9 +43,11 @@ Then run the read-only script `supabase/sql-editor/NOMAN_BROTHERS_VERIFY_READ_ON
 ## 3. Create **one** owner login
 
 1. In the **same project**, go to Supabase **Authentication → Users → Add user**. Create the real client/agency-authorized CMS editor email with a strong unique password. Confirm the email using the owner's approved channel. Do not put the password in SQL, GitHub or Vercel. Disable public signups for this staff-only CMS, configure Auth email/rate limits and enable MFA/leaked-password protection where the account plan allows.
-2. Open `supabase/sql-editor/NOMAN_BROTHERS_ASSIGN_OWNER_AFTER_AUTH.sql`, edit its **single owner_email placeholder** to the real verified Gmail, then run it in the SQL Editor of the **same** project. It refuses a missing/unconfirmed user and existing conflicting staff roles. It only sets `auth.users.raw_app_meta_data.nb_role = "owner"` and preserves other Auth metadata.
+2. Open `supabase/sql-editor/NOMAN_BROTHERS_ASSIGN_OWNER_AFTER_AUTH.sql`. Its **temporary commissioning email** is `admin@gmail.com`; run it only if that exact address is a confirmed Auth user that you control, otherwise change `owner_email` to the verified owner's address. It refuses missing/unconfirmed users and conflicting staff roles. It only sets `auth.users.raw_app_meta_data.nb_role = "owner"` and preserves other Auth metadata.
 3. Sign out and back in at `https://YOUR-VERCEL-SITE/studio` to refresh JWT claims. An owner can create drafts, approve/revoke media, publish/edit/archive products, change categories and edit/publish website content.
-4. The CMS supports `editor` and `admin` internally, but you need only **one** `owner` account. Do not create extra staff users unless required; `user_metadata` is not an authorization source. Never assign `nb_role` from frontend JavaScript or a public RPC.
+   Before using self-service changes, in the client Supabase Dashboard configure **Authentication → Sign In / Providers → Email**: require email confirmation, keep Secure Email Change enabled, enable Secure Password Change / current-password verification where available, and set the correct site URL and redirect allowlist. Configure a reliable custom SMTP sender for production Auth messages; default mail delivery is rate-limited and not suitable for critical owner recovery. These are one-time project settings, not tasks the owner repeats in CMS.
+4. Once logged in, **Studio → Account & security** lets the owner request an email change or set a new password without returning to the Supabase dashboard. Request the email verification code, enter it, and follow any confirmation links sent to the old/new inboxes. A password change also asks for the current password and signs out on success. This does not work without a signed-in, verified owner. Never share a starter password or store one in SQL/GitHub/Vercel.
+5. The CMS supports `editor` and `admin` internally, but you need only **one** `owner` account. Do not create extra staff users unless required; `user_metadata` is not an authorization source. Never assign `nb_role` from frontend JavaScript or a public RPC.
 
 ## 4. Deploy the **required** privileged media Edge Function
 
@@ -94,7 +96,7 @@ Supported product/media scale depends on Supabase plan, image sizes and observed
 
 ## 8. Acceptance / only then remove unused accounts
 
-Test owner sign-in and sign-out, refresh, public visitor cannot read private drafts, create/publish/edit/archive/republish, correct SKU/photo mapping, approve/revoke/delete unused files, media protection on in-use files, import retries, mobile screens, SEO and WhatsApp enquiry. Run the repository CI and use:
+Test owner sign-in and sign-out, confirmed-email changes, security-code reauthentication, current-password verification, password change and re-login, public visitor cannot read private drafts, create/publish/edit/archive/republish, correct SKU/photo mapping, approve/revoke/delete unused files, media protection on in-use files, import retries, mobile screens, SEO and WhatsApp enquiry. Run the repository CI and use:
 
 ```bash
 EXPECTED_SUPABASE_PROJECT_REF=YOUR_CLIENT_PROJECT_REF node scripts/check-client-cms.mjs

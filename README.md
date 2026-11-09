@@ -19,6 +19,7 @@ A mobile-first, browse-and-enquire catalogue for the traditional menswear and ki
 - Public legal-policy pages edited through Studio; empty policies clearly indicate pending owner approval.
 - First-party customer reviews held pending until an authorized staff member moderates them.
 - CMS for editable published garments, permanent server-generated SKU identities, Men/Kids category media, photo auto-labeling, bulk CSV import with optional SKU, owner approval, homepage text, social URL and revision history.
+- Owner-only **Account & security** screen to request verified login-email changes and securely change a password without visiting the Supabase Dashboard. No admin password, service key or account-creation bypass is compiled into the site.
 - Read-only storefront access to published records; restricted Supabase row-level and Storage policies.
 - GitHub Actions typecheck, tests, PostgreSQL permission checks, production build and 18-breakpoint Chromium smoke checks, including live deployments.
 
@@ -46,7 +47,7 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_YOUR_KEY
 
 ## Operating the live CMS
 
-1. In Supabase Auth, provision a verified staff email and assign a server-controlled `app_metadata.nb_role` of `owner`, `admin` or `editor` as appropriate; user metadata does not grant publisher access.
+1. In Supabase Auth, provision a verified staff email and assign a server-controlled `app_metadata.nb_role` of `owner`, `admin` or `editor` as appropriate; user metadata does not grant publisher access. The separate owner-role SQL defaults to the verified `admin@gmail.com` account for temporary commissioning; replace that email with the actual verified client owner for production, and never put passwords into SQL.
 2. Open **Studio → Website CMS**. Upload and approve media via the Media workflow, select imagery and a compressed brand film, and edit text, profiles or policies.
 3. For Instagram, enter the shop owner’s official HTTPS profile in Studio → Website CMS → Footer. Host validation rejects unrelated destinations. **Save draft → Publish website changes**.
 4. Products: choose Men’s/Kids’ category first to reserve NB-SH-00001-style permanent SKU, attach approved photographs, save private draft and publish. Search any live product by SKU, edit details/photos and select **Update published product**. Bulk CSV may leave SKU blank; export generated SKU mapping, assign camera photo batches to a single SKU, approve and match images before publishing.
